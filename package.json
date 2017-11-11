@@ -1,0 +1,37 @@
+{
+  "name": "tools",
+  "version": "0.1.0",
+  "description": "Client tools",
+  "author": "Jon Whitehead",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "prettier": "prettier --single-quote --trailing-comma all --write \"src/**/*.ts\"",
+    "clean": "rimraf lib/*",
+    "build": "yarn run clean && tsc",
+    "prepare": "yarn run build"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.85",
+    "@types/react": "^16.0.22",
+    "@types/recompose": "^0.24.2",
+    "prettier": "^1.8.2",
+    "react": "^16.1.0",
+    "react-dom": "^16.1.0",
+    "rimraf": "^2.6.2",
+    "typescript": "2.5.3"
+  },
+  "peerDependencies": {
+    "react": "^16.0.0"
+  },
+  "dependencies": {
+    "common": "https://github.com/kalambo/common",
+    "keys-to-object": "^0.1.0",
+    "lodash": "^4.17.4",
+    "mishmash": "^0.4.4",
+    "most": "^1.7.2",
+    "recompose": "^0.26.0",
+    "rgo": "^0.2.0"
+  }
+}
