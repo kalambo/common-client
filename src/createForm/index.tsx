@@ -133,7 +133,7 @@ export default function createForm<T = {}>(
       let fields;
       props$.observe(() => {}).then(() => {
         window.rgo.set(
-          fields
+          ...fields
             .filter(f => f.key.store === 'rgo')
             .map(f => ({ key: f.key.key })),
         );
