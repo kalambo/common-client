@@ -11,7 +11,7 @@ import {
   withProps,
   withState,
 } from 'recompose';
-import { Comp, mapPropsStream, memoizeProps, Obj, omitProps } from 'mishmash';
+import { Comp, mapPropsStream, memoizeProps, omitProps } from 'mishmash';
 import * as most from 'most';
 import * as _ from 'lodash';
 import keysToObject from 'keys-to-object';
@@ -103,7 +103,9 @@ export default function createForm<T = {}>(
                 ),
             );
           },
-          set: window.rgo.set,
+          set(values: { key: [string, string, string]; value: any }[]) {
+            window.rgo.set(...values);
+          },
         },
         local: {
           get(keys: string[], emit: (value: any[]) => void) {
@@ -258,7 +260,7 @@ export default function createForm<T = {}>(
                     );
                   }
                   const result = await window.rgo.commit(
-                    rgoKeys.map(key => key.key),
+                    ...rgoKeys.map(key => key.key),
                   );
                   if (result) {
                     if (result.values) {

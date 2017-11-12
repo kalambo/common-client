@@ -16,7 +16,7 @@
   version "4.14.85"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.85.tgz#a16fbf942422f6eca5622b6910492c496c35069b"
 
-"@types/react@*", "@types/react@^16.0.13", "@types/react@^16.0.22":
+"@types/react@*", "@types/react@^16.0.22":
   version "16.0.22"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-16.0.22.tgz#19ad106e124aceebd2b4d430a278d55413ee8759"
 
@@ -33,6 +33,12 @@ asap@~2.0.3:
 balanced-match@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.0.tgz#89b4d199ab2bee49de164ea02b89ce462d71b767"
+
+base-x@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/base-x/-/base-x-3.0.2.tgz#bf873861b7514279b7969f340929eab87c11d130"
+  dependencies:
+    safe-buffer "^5.0.1"
 
 brace-expansion@^1.1.7:
   version "1.1.8"
@@ -51,9 +57,10 @@ clone@^2.1.1:
 
 "common@https://github.com/kalambo/common":
   version "0.1.0"
-  resolved "https://github.com/kalambo/common#3f83957e6c221fa518b085404aab9c0403b07e72"
+  resolved "https://github.com/kalambo/common#a2a0727b8b72d747dcc6ed6f2f3d0b782357ba67"
   dependencies:
-    rgo "^0.2.0"
+    base-x "^3.0.2"
+    rgo "^0.2.1"
 
 concat-map@0.0.1:
   version "0.0.1"
@@ -197,15 +204,16 @@ minimatch@^3.0.4:
   dependencies:
     brace-expansion "^1.1.7"
 
-mishmash@^0.4.4:
-  version "0.4.4"
-  resolved "https://registry.yarnpkg.com/mishmash/-/mishmash-0.4.4.tgz#e005537a6f54bbd55dd7c8d5d7fdd99b144aa55b"
+mishmash@^0.4.5:
+  version "0.4.5"
+  resolved "https://registry.yarnpkg.com/mishmash/-/mishmash-0.4.5.tgz#64a00f5474784a6158c9aea1b8457aa213f2ed04"
   dependencies:
-    "@types/react" "^16.0.13"
+    "@types/react" "^16.0.22"
     "@types/recompose" "^0.24.2"
+    keys-to-object "^0.1.0"
     most "^1.7.2"
     recompose "^0.26.0"
-    style-transform "^0.1.5"
+    style-transform "^0.1.6"
 
 most@^1.7.2:
   version "1.7.2"
@@ -297,9 +305,9 @@ rgba-regex@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/rgba-regex/-/rgba-regex-1.0.0.tgz#43374e2e2ca0968b0ef1523460b7d730ff22eeb3"
 
-rgo@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/rgo/-/rgo-0.2.0.tgz#9b0b60fa775412f5309123e610c7cf1683ef551e"
+rgo@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/rgo/-/rgo-0.2.1.tgz#af84d25747c58135c71b12b091e0a9e013f87bfb"
   dependencies:
     clone "^2.1.1"
     deep-equal "^1.0.1"
@@ -312,13 +320,17 @@ rimraf@^2.6.2:
   dependencies:
     glob "^7.0.5"
 
+safe-buffer@^5.0.1:
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.1.1.tgz#893312af69b2123def71f57889001671eeb2c853"
+
 setimmediate@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/setimmediate/-/setimmediate-1.0.5.tgz#290cbb232e306942d7d7ea9b83732ab7856f8285"
 
-style-transform@^0.1.5:
-  version "0.1.5"
-  resolved "https://registry.yarnpkg.com/style-transform/-/style-transform-0.1.5.tgz#6257c25ae7d91441dc10a55914adf1d66bfbd721"
+style-transform@^0.1.6:
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/style-transform/-/style-transform-0.1.6.tgz#ffcf3bbf5c0039ab5ddc5ec79fbcb13d2fb9c79b"
   dependencies:
     css-shorthand-expand "^1.1.0"
     object-path-immutable "^0.5.2"

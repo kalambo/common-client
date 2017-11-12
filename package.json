@@ -7,7 +7,8 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "prettier": "prettier --single-quote --trailing-comma all --write \"src/**/*.ts\"",
+    "prettier":
+      "prettier --single-quote --trailing-comma all --write \"src/**/*.ts\"",
     "clean": "rimraf lib/*",
     "build": "yarn run clean && tsc",
     "prepare": "yarn run build"
@@ -29,9 +30,9 @@
     "common": "https://github.com/kalambo/common",
     "keys-to-object": "^0.1.0",
     "lodash": "^4.17.4",
-    "mishmash": "^0.4.4",
+    "mishmash": "^0.4.5",
     "most": "^1.7.2",
     "recompose": "^0.26.0",
-    "rgo": "^0.2.0"
+    "rgo": "^0.2.1"
   }
 }

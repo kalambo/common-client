@@ -1,4 +1,3 @@
-import { Obj } from 'mishmash';
 import * as _ from 'lodash';
 
 const mapArray = (v: any, map: (x: any) => any) =>
