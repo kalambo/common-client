@@ -16,13 +16,13 @@
   version "4.14.85"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.85.tgz#a16fbf942422f6eca5622b6910492c496c35069b"
 
-"@types/react@*", "@types/react@^16.0.22":
-  version "16.0.22"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-16.0.22.tgz#19ad106e124aceebd2b4d430a278d55413ee8759"
+"@types/react@*", "@types/react@^16.0.22", "@types/react@^16.0.24":
+  version "16.0.24"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-16.0.24.tgz#a6fd8015892fe8ae3c17453615f7ebdd2301d818"
 
-"@types/recompose@^0.24.2":
-  version "0.24.2"
-  resolved "https://registry.yarnpkg.com/@types/recompose/-/recompose-0.24.2.tgz#642c136c3d421b315d48b5c39d66e4e93174c600"
+"@types/recompose@^0.24.2", "@types/recompose@^0.24.3":
+  version "0.24.3"
+  resolved "https://registry.yarnpkg.com/@types/recompose/-/recompose-0.24.3.tgz#c2c1063bcea9d670052b886f47b5ce42faba0cf2"
   dependencies:
     "@types/react" "*"
 
@@ -180,6 +180,10 @@ keys-to-object@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/keys-to-object/-/keys-to-object-0.1.0.tgz#db6ec8be31d03d2d07a822410803261ea94912df"
 
+keys-to-object@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/keys-to-object/-/keys-to-object-0.2.0.tgz#eecec37d7ad110bafb517376e14c5a717f285dcf"
+
 lodash.throttle@^4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/lodash.throttle/-/lodash.throttle-4.1.1.tgz#c23e91b710242ac70c37f1e1cda9274cc39bf2f4"
@@ -266,18 +270,18 @@ prop-types@^15.6.0:
     loose-envify "^1.3.1"
     object-assign "^4.1.1"
 
-react-dom@^16.1.0:
-  version "16.1.0"
-  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.1.0.tgz#ab6fd2a285096f388aeba51919a573d06c9bdde4"
+react-dom@^16.1.1:
+  version "16.1.1"
+  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.1.1.tgz#b2e331b6d752faf1a2d31399969399a41d8d45f8"
   dependencies:
     fbjs "^0.8.16"
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
     prop-types "^15.6.0"
 
-react@^16.1.0:
-  version "16.1.0"
-  resolved "https://registry.yarnpkg.com/react/-/react-16.1.0.tgz#1c2bdac3c17fe7ee9282fa35aca6cc36387903e1"
+react@^16.1.1:
+  version "16.1.1"
+  resolved "https://registry.yarnpkg.com/react/-/react-16.1.1.tgz#d5c4ef795507e3012282dd51261ff9c0e824fe1f"
   dependencies:
     fbjs "^0.8.16"
     loose-envify "^1.1.0"
@@ -305,9 +309,9 @@ rgba-regex@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/rgba-regex/-/rgba-regex-1.0.0.tgz#43374e2e2ca0968b0ef1523460b7d730ff22eeb3"
 
-rgo@^0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/rgo/-/rgo-0.2.1.tgz#af84d25747c58135c71b12b091e0a9e013f87bfb"
+rgo@^0.2.1, rgo@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/rgo/-/rgo-0.2.2.tgz#643d367d6253c231c4af9d30bba382fd43a02803"
   dependencies:
     clone "^2.1.1"
     deep-equal "^1.0.1"
