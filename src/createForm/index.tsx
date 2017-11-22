@@ -57,6 +57,7 @@ export default function createForm<T = {}>(
               { key: key.key, value: transformValue(value, f.transform) },
             ]),
           ...f,
+          field: key,
         })),
       })),
     ),
