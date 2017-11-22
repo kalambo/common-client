@@ -1,7 +1,7 @@
 {
-  "name": "tools",
+  "name": "common-client",
   "version": "0.1.0",
-  "description": "Client tools",
+  "description": "Common client utilities",
   "author": "Jon Whitehead",
   "license": "MIT",
   "main": "lib/index.js",
