@@ -1,6 +1,7 @@
 /// <reference types="react" />
 import * as React from 'react';
 import { Comp } from 'mishmash';
+import { Obj } from 'common';
 export interface FormProps {
     objects?: Obj<{
         type: string;

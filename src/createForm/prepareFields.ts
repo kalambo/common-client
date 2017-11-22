@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import { Obj } from 'common';
 
 const mapArray = (v: any, map: (x: any) => any) =>
   Array.isArray(v) ? v.map(map) : map(v);

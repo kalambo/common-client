@@ -15,7 +15,7 @@ import { Comp, mapPropsStream, memoizeProps, omitProps } from 'mishmash';
 import * as most from 'most';
 import * as _ from 'lodash';
 import keysToObject from 'keys-to-object';
-import { noUndef, transformValue } from 'common';
+import { noUndef, Obj, transformValue } from 'common';
 
 import getState from './getState';
 import prepareFields from './prepareFields';
