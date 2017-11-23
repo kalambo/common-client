@@ -3,16 +3,16 @@ import { HOC, mapPropsStream } from 'mishmash';
 import * as most from 'most';
 import { Query } from 'rgo';
 
-export default function getQuery(...queries: Query[]): HOC;
-export default function getQuery(propName: string, ...queries: Query[]): HOC;
-export default function getQuery(
+export default function getData(...queries: Query[]): HOC;
+export default function getData(propName: string, ...queries: Query[]): HOC;
+export default function getData(
   mapPropsToQuery: (props: any) => Query | Query[],
 ): HOC;
-export default function getQuery(
+export default function getData(
   propName: string,
   mapPropsToQuery: (props: any) => Query | Query[],
 ): HOC;
-export default function getQuery(...args) {
+export default function getData(...args) {
   const propName = typeof args[0] === 'string' ? (args[0] as string) : 'data';
   const queries = typeof args[0] === 'string' ? args.slice(1) : args;
   return mapPropsStream(props$ => {

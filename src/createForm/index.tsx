@@ -15,6 +15,7 @@ import { Comp, mapPropsStream, memoizeProps, omitProps } from 'mishmash';
 import * as most from 'most';
 import * as _ from 'lodash';
 import keysToObject from 'keys-to-object';
+import { getId } from 'rgo';
 import { noUndef, Obj, transformValue } from 'common';
 
 import getState from './getState';
@@ -260,27 +261,19 @@ export default function createForm<T = {}>(
                         .map(({ key }) => key),
                     );
                   }
-                  const result = await window.rgo.commit(
-                    ...rgoKeys.map(key => key.key),
-                  );
-                  if (result) {
-                    if (result.values) {
-                      rgoKeys.forEach((key, i) => {
-                        _.set(values, key.name, result.values![i]);
-                      });
+                  let changes: any;
+                  try {
+                    const newIds = await window.rgo.commit(
+                      ...rgoKeys.map(key => key.key),
+                    );
+                    for (const obj of Object.keys(objects)) {
+                      const { type, id } = objects[obj];
+                      values[obj].id = getId(id, newIds[type]);
                     }
-                    if (result.newIds) {
-                      for (const obj of Object.keys(objects)) {
-                        const { type, id } = objects[obj];
-                        values[obj].id =
-                          (result.newIds![type] && result.newIds![type][id]) ||
-                          id;
-                      }
-                    }
+                    changes = onSubmit && (await onSubmit(values));
+                  } catch {
+                    changes = onError && (await onError(values));
                   }
-                  const changes = result
-                    ? onSubmit && (await onSubmit(values))
-                    : onError && (await onError(values));
                   stores.rgo.set(
                     Object.keys(changes || {})
                       .filter(k => objects[k])
