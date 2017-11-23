@@ -4,6 +4,8 @@ import * as most from 'most';
 import keysToObject from 'keys-to-object';
 import { isValid } from 'common';
 
+import runFilter from '../runFilter';
+
 export default mapPropsStream(props$ => {
   const states = ['rgo', 'local'].map(_ => createEventHandler<any, any>());
   let unsubscribes: (() => void)[] = [];
@@ -42,14 +44,7 @@ export default mapPropsStream(props$ => {
             rgoState &&
             props.fields.map(f => {
               const value = values[f.key.name];
-              const hidden =
-                f.showIf &&
-                !Object.keys(f.showIf).every(
-                  k =>
-                    Array.isArray(f.showIf[k])
-                      ? f.showIf[k].includes(values[k])
-                      : values[k] === f.showIf[k],
-                );
+              const hidden = !runFilter(f.showIf, values);
               return {
                 value,
                 invalid: !isValid(f, value, values),

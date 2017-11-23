@@ -330,15 +330,19 @@ export default function createForm<T = {}>(
         }),
       ),
     ),
-    mapProps(({ fields, state, ...props }) => ({
+    mapProps(({ state, ...props }) => ({
       invalid: state.some(s => !s.hidden && s.invalid),
-      hidden: JSON.stringify(
-        keysToObject(fields, (_, i) => state[i].hidden, f => f.key.name),
-      ),
+      hidden: JSON.stringify(state.map(s => s.hidden)),
       ...props,
     })),
     pure,
-    withProps<any, any>(props => ({ hidden: JSON.parse(props.hidden) })),
+    withProps<any, any>(({ fields, hidden }) => ({
+      hidden: keysToObject(
+        JSON.parse(hidden),
+        h => h,
+        (_, i) => fields[i].key.name,
+      ),
+    })),
   )(
     ({
       blocks,
@@ -354,24 +358,23 @@ export default function createForm<T = {}>(
       React.createElement(container as any, {
         blocks: blocks
           .map((blockSet, i) =>
-            blockSet
-              .filter(
-                ({ fields }) =>
-                  fields.length === 0 || fields.some(f => !hidden[f.key.name]),
-              )
-              .map((block, j) => (
-                <Block
-                  {...block}
-                  stores={stores}
-                  fields={
-                    block.fields.length === 0
-                      ? null
-                      : block.fields.filter(f => !hidden[f.key.name])
-                  }
-                  attempted={processing !== null}
-                  key={`${i}_${j}`}
-                />
-              )),
+            blockSet.map(
+              (block, j) =>
+                block.fields.length === 0 ||
+                (block.fields.some(f => !hidden[f.key.name]) && (
+                  <Block
+                    {...block}
+                    stores={stores}
+                    fields={
+                      block.fields.length === 0
+                        ? null
+                        : block.fields.filter(f => !hidden[f.key.name])
+                    }
+                    attempted={processing !== null}
+                    key={`${i}_${j}`}
+                  />
+                )),
+            ),
           )
           .filter(blockSet => blockSet.length > 0),
         HeightWrap,
