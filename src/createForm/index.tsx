@@ -360,8 +360,8 @@ export default function createForm<T = {}>(
           .map((blockSet, i) =>
             blockSet.map(
               (block, j) =>
-                block.fields.length === 0 ||
-                (block.fields.some(f => !hidden[f.key.name]) && (
+                (block.fields.length === 0 ||
+                  block.fields.some(f => !hidden[f.key.name])) && (
                   <Block
                     {...block}
                     stores={stores}
@@ -373,7 +373,7 @@ export default function createForm<T = {}>(
                     attempted={processing !== null}
                     key={`${i}_${j}`}
                   />
-                )),
+                ),
             ),
           )
           .filter(blockSet => blockSet.length > 0),
