@@ -376,7 +376,7 @@ export default function createForm<T = {}>(
                 ),
             ),
           )
-          .filter(blockSet => blockSet.length > 0),
+          .filter(blockComps => blockComps.some(c => c)),
         HeightWrap,
         attempted: processing !== null,
         submit,

@@ -51,10 +51,6 @@ change-emitter@^0.1.2:
   version "0.1.6"
   resolved "https://registry.yarnpkg.com/change-emitter/-/change-emitter-0.1.6.tgz#e8b2fe3d7f1ab7d69a32199aff91ea6931409515"
 
-clone@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/clone/-/clone-2.1.1.tgz#d217d1e961118e3ac9a4b8bba3285553bf647cdb"
-
 "common@https://github.com/kalambo/common":
   version "0.1.0"
   resolved "https://github.com/kalambo/common#227325f1414cc8151adc0e1972a025bfff987425"
@@ -314,11 +310,10 @@ rgba-regex@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/rgba-regex/-/rgba-regex-1.0.0.tgz#43374e2e2ca0968b0ef1523460b7d730ff22eeb3"
 
-rgo@^0.3.2, rgo@^0.3.3:
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/rgo/-/rgo-0.3.3.tgz#d4487d9f6797f61e179a5e793294ab722555623c"
+rgo@^0.3.2, rgo@^0.3.5:
+  version "0.3.5"
+  resolved "https://registry.yarnpkg.com/rgo/-/rgo-0.3.5.tgz#d7aa2b90f2d17b479706bba288fbb1278e80388d"
   dependencies:
-    clone "^2.1.1"
     deep-equal "^1.0.1"
     keys-to-object "^0.2.0"
     lodash.throttle "^4.1.1"

@@ -1,5 +1,8 @@
 import * as _ from 'lodash';
 import { Obj } from 'common';
+import keysToObject from 'keys-to-object';
+
+import merge from '../merge';
 
 const mapArray = (v: any, map: (x: any) => any) =>
   Array.isArray(v) ? v.map(map) : map(v);
@@ -9,23 +12,24 @@ export const getFieldKey = (objects: Obj, key: string) => {
   return [objects[obj].type, objects[obj].id, f] as [string, string, string];
 };
 
-export default async (blockProps, objects = {}, blocks, stores) => {
-  const objectKeys = Object.keys(objects);
+export default async (blockProps, configObjects = {}, blocks, stores) => {
+  const objectKeys = Object.keys(configObjects);
   const response = await window.rgo.query(
-    ...objectKeys.filter(obj => objects[obj].filter).map(obj => ({
-      name: objects[obj].type,
+    ...objectKeys.filter(obj => configObjects[obj].filter).map(obj => ({
+      name: configObjects[obj].type,
       alias: obj,
-      filter: objects[obj].filter,
+      filter: configObjects[obj].filter,
       end: 1,
       fields: ['id'],
     })),
   );
-  objectKeys.forEach(obj => {
-    objects[obj].id =
-      objects[obj].id ||
+  const objects = keysToObject(objectKeys, obj => ({
+    ...configObjects[obj],
+    id:
+      configObjects[obj].id ||
       (response[obj] && response[obj][0] && response[obj][0].id) ||
-      window.rgo.create(objects[obj].type);
-  });
+      window.rgo.create(configObjects[obj].type),
+  }));
   const getInitialValue = ([type, _, f]: string[], value: any) =>
     (window.rgo.schema[type][f] as any).type
       ? mapArray(value, v => (objects[v] ? objects[v].id : v))
@@ -38,7 +42,7 @@ export default async (blockProps, objects = {}, blocks, stores) => {
         field: _.omit(block, blockProps) as Obj,
       };
       const blockFields = (fields
-        ? fields.map(f => ({ ...f, ...config.field }))
+        ? fields.map(f => merge([f, config.field]))
         : config.field.field || config.field.name ? [config.field] : []
       ).reduce((res, { field, name, initial, ...other }) => {
         const key = field && getFieldKey(objects, field);

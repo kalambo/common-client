@@ -44,7 +44,10 @@ export default mapPropsStream(props$ => {
             rgoState &&
             props.fields.map(f => {
               const value = values[f.key.name];
-              const hidden = !runFilter(f.showIf, values);
+              const hidden =
+                typeof f.showIf === 'function'
+                  ? !f.showIf(values)
+                  : !runFilter(f.showIf, values);
               return {
                 value,
                 invalid: !isValid(f, value, values),
