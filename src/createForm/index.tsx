@@ -48,8 +48,8 @@ export default function createForm<T = {}>(
     ({ fields }) => fields,
     compose(
       getState,
-      branch(({ state }) => !state, renderNothing),
-      mapProps(({ stores, fields, state, ...props }) => ({
+      branch(({ state }: any) => !state, renderNothing),
+      mapProps(({ stores, fields, state, ...props }: any) => ({
         ...props,
         fields: fields.map(({ key, initial: _, ...f }, i) => ({
           ...state[i],
@@ -149,7 +149,7 @@ export default function createForm<T = {}>(
             onCommit,
             onError,
             onSubmit,
-            ...props,
+            ...props
           }) =>
             most
               .fromPromise<any>(
@@ -175,13 +175,13 @@ export default function createForm<T = {}>(
     }),
     withState('elem', 'setElem', null),
     withHandlers({
-      HeightWrap: ({ setElem }) => ({ children }) => (
+      HeightWrap: ({ setElem }: any) => ({ children }) => (
         <div ref={setElem}>{children}</div>
       ),
     }),
     withState('height', 'setHeight', null),
     branch(
-      ({ fields }) => fields,
+      ({ fields }: any) => fields,
       compose(
         mapPropsStream(props$ => {
           const {
@@ -199,7 +199,7 @@ export default function createForm<T = {}>(
         }),
         getState,
         branch(
-          ({ state }) => state,
+          ({ state }: any) => state,
           compose(
             withHandlers<any, any>({
               submit: ({
@@ -229,7 +229,7 @@ export default function createForm<T = {}>(
                     .map(f => f.key);
                   if (onCommit) {
                     const extra = (await onCommit(values)) || {};
-                    const extraValues = Object.keys(extra).reduce(
+                    const extraValues = Object.keys(extra).reduce<any[]>(
                       (res, obj) => [
                         ...res,
                         ...Object.keys(extra[obj] || {}).map(field => ({
@@ -277,7 +277,7 @@ export default function createForm<T = {}>(
                   stores.rgo.set(
                     Object.keys(changes || {})
                       .filter(k => objects[k])
-                      .reduce(
+                      .reduce<any[]>(
                         (res, k) => [
                           ...res,
                           ...Object.keys(changes[k]).map(field => ({
@@ -291,7 +291,7 @@ export default function createForm<T = {}>(
                   stores.local.set(
                     Object.keys(changes || {})
                       .filter(k => !objects[k])
-                      .reduce(
+                      .reduce<any[]>(
                         (res, k) => [...res, { key: k, value: changes[k] }],
                         [],
                       ),
@@ -303,7 +303,7 @@ export default function createForm<T = {}>(
               },
             }),
             withHandlers({
-              onKeyDown: ({ submit }) => event => {
+              onKeyDown: ({ submit }: any) => event => {
                 if (event.which === 13) submit();
               },
             }),
@@ -312,7 +312,7 @@ export default function createForm<T = {}>(
       ),
     ),
     branch(
-      ({ fields, processing, state }) => !fields || processing || !state,
+      ({ fields, processing, state }: any) => !fields || processing || !state,
       renderComponent<any>(({ props, height }) =>
         React.createElement(container as any, {
           HeightWrap: ({ style, children }) => (
@@ -330,7 +330,7 @@ export default function createForm<T = {}>(
         }),
       ),
     ),
-    mapProps(({ state, ...props }) => ({
+    mapProps(({ state, ...props }: any) => ({
       invalid: state.some(s => !s.hidden && s.invalid),
       hidden: JSON.stringify(state.map(s => s.hidden)),
       ...props,

@@ -1,3 +1,3 @@
-/// <reference types="react" />
-declare const _default: (InnerComponent: React.ComponentType<any>) => React.ComponentType<any>;
+import { HOC } from 'mishmash';
+declare const _default: HOC<any, any>;
 export default _default;

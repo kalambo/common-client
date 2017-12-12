@@ -1,5 +1,5 @@
 import { createEventHandler } from 'recompose';
-import { mapPropsStream } from 'mishmash';
+import { HOC, mapPropsStream } from 'mishmash';
 import * as most from 'most';
 import keysToObject from 'keys-to-object';
 import { isValid } from 'common';
@@ -60,4 +60,4 @@ export default mapPropsStream(props$ => {
       most.from(states[0].stream),
       most.from(states[1].stream),
     );
-});
+}) as HOC;
