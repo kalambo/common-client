@@ -7,16 +7,15 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "prettier":
-      "prettier --single-quote --trailing-comma all --write \"src/**/*.{ts,tsx}\"",
+    "prettier": "prettier --single-quote --trailing-comma all --write \"src/**/*.{ts,tsx}\"",
     "clean": "rimraf lib/*",
     "build": "yarn run clean && tsc",
     "prepare": "yarn run build"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.88",
-    "@types/react": "^16.0.29",
-    "@types/recompose": "^0.24.3",
+    "@types/lodash": "^4.14.92",
+    "@types/react": "^16.0.34",
+    "@types/recompose": "^0.24.4",
     "prettier": "^1.9.2",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
@@ -31,7 +30,7 @@
     "deep-equal": "^1.0.1",
     "keys-to-object": "^0.2.0",
     "lodash": "^4.17.4",
-    "mishmash": "^0.4.6",
+    "mishmash": "^0.4.7",
     "most": "^1.7.2",
     "recompose": "^0.26.0",
     "rgo": "^0.3.5"
