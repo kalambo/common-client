@@ -7,7 +7,8 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "prettier": "prettier --single-quote --trailing-comma all --write \"src/**/*.{ts,tsx}\"",
+    "prettier":
+      "prettier --single-quote --trailing-comma all --write \"src/**/*.{ts,tsx}\"",
     "clean": "rimraf lib/*",
     "build": "yarn run clean && tsc",
     "prepare": "yarn run build"

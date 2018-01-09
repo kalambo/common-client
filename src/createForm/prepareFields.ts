@@ -92,6 +92,7 @@ export default async (blockProps, configObjects = {}, blocks, stores) => {
         allFields.push({
           key: { store: 'rgo', key, name: `${obj}.${k}` },
           initial: getInitialValue(key, objects[obj].initial[k]),
+          optional: true,
         });
       }
     });
