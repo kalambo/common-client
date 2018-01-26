@@ -16,7 +16,7 @@ import * as most from 'most';
 import * as _ from 'lodash';
 import keysToObject from 'keys-to-object';
 import { getId } from 'rgo';
-import { noUndef, Obj, transformValue } from 'common';
+import { noUndef, Obj, root, transformValue } from 'common';
 
 import getState from './getState';
 import prepareFields from './prepareFields';
@@ -87,7 +87,7 @@ export default function createForm<T = {}>(
               queries[key][field] = true;
             });
             const queryKeys = Object.keys(queries);
-            return window.rgo.query(
+            return root.rgo.query(
               ...queryKeys.map((key, i) => ({
                 name: key.split('.')[0],
                 alias: `obj${i}`,
@@ -106,7 +106,7 @@ export default function createForm<T = {}>(
             );
           },
           set(values: { key: [string, string, string]; value: any }[]) {
-            window.rgo.set(...values);
+            root.rgo.set(...values);
           },
         },
         local: {
@@ -134,7 +134,7 @@ export default function createForm<T = {}>(
     mapPropsStream(props$ => {
       let fields;
       props$.observe(() => {}).then(() => {
-        window.rgo.set(
+        root.rgo.set(
           ...fields
             .filter(f => f.key.store === 'rgo')
             .map(f => ({ key: f.key.key })),
@@ -247,7 +247,7 @@ export default function createForm<T = {}>(
                       ],
                       [],
                     );
-                    window.rgo.set(
+                    root.rgo.set(
                       ...extraValues.map(({ key, value }) => ({
                         key: key.key,
                         value,
@@ -263,7 +263,7 @@ export default function createForm<T = {}>(
                   }
                   let changes: any;
                   try {
-                    const newIds = await window.rgo.commit(
+                    const newIds = await root.rgo.commit(
                       ...rgoKeys.map(key => key.key),
                     );
                     for (const obj of Object.keys(objects)) {

@@ -1,104 +1,106 @@
 import * as React from 'react';
 
-const div = document.createElement('div');
-div.innerHTML = `&shy;<style>
+if (typeof document !== 'undefined') {
+  const div = document.createElement('div');
+  div.innerHTML = `&shy;<style>
 
-@keyframes spin1 {
-  0% {
-    top: -24px;
-    left: 0;
-    transform: scale(1);
+  @keyframes spin1 {
+    0% {
+      top: -24px;
+      left: 0;
+      transform: scale(1);
+    }
+    17% {
+      transform: scale(0.5);
+    }
+    33% {
+      top: 12px;
+      left: 20.8px;
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(0.5);
+    }
+    66% {
+      top: 12px;
+      left: -20.8px;
+      transform: scale(1);
+    }
+    83% {
+      transform: scale(0.5);
+    }
+    100% {
+      top: -24px;
+      left: 0;
+      transform: scale(1);
+    }
   }
-  17% {
-    transform: scale(0.5);
+  @keyframes spin2 {
+    0% {
+      top: 12px;
+      left: 20.8px;
+      transform: scale(1);
+    }
+    17% {
+      transform: scale(0.5);
+    }
+    33% {
+      top: 12px;
+      left: -20.8px;
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(0.5);
+    }
+    66% {
+      top: -24px;
+      left: 0;
+      transform: scale(1);
+    }
+    83% {
+      transform: scale(0.5);
+    }
+    100% {
+      top: 12px;
+      left: 20.8px;
+      transform: scale(1);
+    }
   }
-  33% {
-    top: 12px;
-    left: 20.8px;
-    transform: scale(1);
+  @keyframes spin3 {
+    0% {
+      top: 12px;
+      left: -20.8px;
+      transform: scale(1);
+    }
+    17% {
+      transform: scale(0.5);
+    }
+    33% {
+      top: -24px;
+      left: 0;
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(0.5);
+    }
+    66% {
+      top: 12px;
+      left: 20.8px;
+      transform: scale(1);
+    }
+    83% {
+      transform: scale(0.5);
+    }
+    100% {
+      top: 12px;
+      left: -20.8px;
+      transform: scale(1);
+    }
   }
-  50% {
-    transform: scale(0.5);
-  }
-  66% {
-    top: 12px;
-    left: -20.8px;
-    transform: scale(1);
-  }
-  83% {
-    transform: scale(0.5);
-  }
-  100% {
-    top: -24px;
-    left: 0;
-    transform: scale(1);
-  }
-}
-@keyframes spin2 {
-  0% {
-    top: 12px;
-    left: 20.8px;
-    transform: scale(1);
-  }
-  17% {
-    transform: scale(0.5);
-  }
-  33% {
-    top: 12px;
-    left: -20.8px;
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(0.5);
-  }
-  66% {
-    top: -24px;
-    left: 0;
-    transform: scale(1);
-  }
-  83% {
-    transform: scale(0.5);
-  }
-  100% {
-    top: 12px;
-    left: 20.8px;
-    transform: scale(1);
-  }
-}
-@keyframes spin3 {
-  0% {
-    top: 12px;
-    left: -20.8px;
-    transform: scale(1);
-  }
-  17% {
-    transform: scale(0.5);
-  }
-  33% {
-    top: -24px;
-    left: 0;
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(0.5);
-  }
-  66% {
-    top: 12px;
-    left: 20.8px;
-    transform: scale(1);
-  }
-  83% {
-    transform: scale(0.5);
-  }
-  100% {
-    top: 12px;
-    left: -20.8px;
-    transform: scale(1);
-  }
-}
 
-</style>`;
-document.body.appendChild(div.childNodes[1]);
+  </style>`;
+  document.body.appendChild(div.childNodes[1]);
+}
 
 export interface SpinnerProps {
   style?: React.CSSProperties;

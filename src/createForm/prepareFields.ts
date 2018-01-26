@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { Obj } from 'common';
+import { Obj, root } from 'common';
 import keysToObject from 'keys-to-object';
 
 import merge from '../merge';
@@ -14,7 +14,7 @@ export const getFieldKey = (objects: Obj, key: string) => {
 
 export default async (blockProps, configObjects = {}, blocks, stores) => {
   const objectKeys = Object.keys(configObjects);
-  const response = await window.rgo.query(
+  const response = await root.rgo.query(
     ...objectKeys.filter(obj => configObjects[obj].filter).map(obj => ({
       name: configObjects[obj].type,
       alias: obj,
@@ -28,10 +28,10 @@ export default async (blockProps, configObjects = {}, blocks, stores) => {
     id:
       configObjects[obj].id ||
       (response[obj] && response[obj][0] && response[obj][0].id) ||
-      window.rgo.create(configObjects[obj].type),
+      root.rgo.create(configObjects[obj].type),
   }));
   const getInitialValue = ([type, _, f]: string[], value: any) =>
-    (window.rgo.schema[type][f] as any).type
+    (root.rgo.schema[type][f] as any).type
       ? mapArray(value, v => (objects[v] ? objects[v].id : v))
       : value;
   const allFields: any[] = [];
@@ -47,7 +47,7 @@ export default async (blockProps, configObjects = {}, blocks, stores) => {
       ).reduce((res, { field, name, initial, ...other }) => {
         const key = field && getFieldKey(objects, field);
         const { meta = {}, ...schema } = field
-          ? window.rgo.schema[key[0]][key[2]]
+          ? root.rgo.schema[key[0]][key[2]]
           : {};
         if (field) {
           ['gt', 'lt'].filter(k => other[k]).forEach(k => {
@@ -63,7 +63,7 @@ export default async (blockProps, configObjects = {}, blocks, stores) => {
               name: field ? field : name,
             },
             initial: field ? getInitialValue(key, initial) : initial,
-            ...field ? { ...schema, ...meta } : {},
+            ...(field ? { ...schema, ...meta } : {}),
             ...other,
           },
           ...['gt', 'lt'].filter(k => other[k]).map(k => ({

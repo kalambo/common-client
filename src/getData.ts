@@ -2,6 +2,7 @@ import { createEventHandler } from 'recompose';
 import { HOC, mapPropsStream } from 'mishmash';
 import * as most from 'most';
 import { Query } from 'rgo';
+import { root } from 'common';
 
 export default function getData(...queries: Query[]): HOC;
 export default function getData(propName: string, ...queries: Query[]): HOC;
@@ -33,7 +34,7 @@ export default function getData(...args) {
         const nextJSON = JSON.stringify(q);
         if (nextJSON !== prevJSON) {
           if (unsubscribe) unsubscribe();
-          unsubscribe = window.rgo.query(...q, setState);
+          unsubscribe = root.rgo.query(...q, setState);
         }
         prevJSON = nextJSON;
       }),

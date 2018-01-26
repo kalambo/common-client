@@ -51,7 +51,7 @@ export default mapPropsStream(props$ => {
               return {
                 value,
                 invalid: !isValid(f, value, values),
-                ...hidden ? { hidden: true } : {},
+                ...(hidden ? { hidden: true } : {}),
               };
             }),
           ...props,
