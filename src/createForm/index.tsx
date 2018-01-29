@@ -119,10 +119,14 @@ export default function createForm<T = {}>(
       ({ fields }: any) => fields,
       compose(
         combineState(
-          ({ setState }) => (props, { processing }) => [
-            { ...props, processing },
-            { setProcessing: p => setState({ processing: p }) },
-          ],
+          ({ setState, onUnmount }) => {
+            let mounted = true;
+            onUnmount(() => (mounted = false));
+            return (props, { processing }) => [
+              { ...props, processing },
+              { setProcessing: p => mounted && setState({ processing: p }) },
+            ];
+          },
           { processing: null },
         ),
         getState,

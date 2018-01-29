@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"@types/lodash@^4.14.97":
-  version "4.14.97"
-  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.97.tgz#7262d6d5fc5e87cdb3f68eb33accd4024f2b211e"
+"@types/lodash@^4.14.98":
+  version "4.14.98"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.98.tgz#aaf012ae443e657e7885e605a4c1b340db160609"
 
 "@types/node@^9.3.0":
   version "9.4.0"
@@ -206,9 +206,9 @@ minimatch@^3.0.4:
   dependencies:
     brace-expansion "^1.1.7"
 
-mishmash@^0.5.1:
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/mishmash/-/mishmash-0.5.1.tgz#b013970c610700c455cac22492d68dea965cea29"
+mishmash@^0.5.2:
+  version "0.5.2"
+  resolved "https://registry.yarnpkg.com/mishmash/-/mishmash-0.5.2.tgz#03afe4b1b99ef52ff81caf8c7fb848c8f762ab96"
   dependencies:
     "@types/react" "^16.0.35"
     "@types/recompose" "^0.24.4"
