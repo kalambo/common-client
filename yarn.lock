@@ -2,25 +2,15 @@
 # yarn lockfile v1
 
 
-"@most/multicast@^1.2.5":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@most/multicast/-/multicast-1.3.0.tgz#e01574840df634478ac3fabd164c6e830fb3b966"
-  dependencies:
-    "@most/prelude" "^1.4.0"
-
-"@most/prelude@^1.4.0":
-  version "1.7.0"
-  resolved "https://registry.yarnpkg.com/@most/prelude/-/prelude-1.7.0.tgz#0956ed464ad03e7fc95143eac0c6dd028498d975"
-
-"@types/lodash@^4.14.96":
-  version "4.14.96"
-  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.96.tgz#49a402bb6984af7dd9a48cea3781744a3774bff1"
+"@types/lodash@^4.14.97":
+  version "4.14.97"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.97.tgz#7262d6d5fc5e87cdb3f68eb33accd4024f2b211e"
 
 "@types/node@^9.3.0":
-  version "9.3.0"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-9.3.0.tgz#3a129cda7c4e5df2409702626892cb4b96546dd5"
+  version "9.4.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-9.4.0.tgz#b85a0bcf1e1cc84eb4901b7e96966aedc6f078d1"
 
-"@types/react@*", "@types/react@^16.0.34", "@types/react@^16.0.35":
+"@types/react@*", "@types/react@^16.0.35":
   version "16.0.35"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-16.0.35.tgz#7ce8a83cad9690fd965551fc513217a74fc9e079"
 
@@ -216,30 +206,21 @@ minimatch@^3.0.4:
   dependencies:
     brace-expansion "^1.1.7"
 
-mishmash@^0.4.10:
-  version "0.4.10"
-  resolved "https://registry.yarnpkg.com/mishmash/-/mishmash-0.4.10.tgz#5ac42ffaccde5465d9dcba459024c81a53be3021"
+mishmash@^0.5.1:
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/mishmash/-/mishmash-0.5.1.tgz#b013970c610700c455cac22492d68dea965cea29"
   dependencies:
-    "@types/react" "^16.0.34"
+    "@types/react" "^16.0.35"
     "@types/recompose" "^0.24.4"
     deep-equal "^1.0.1"
     element-resize-detector "^1.1.13"
     keys-to-object "^0.2.0"
-    most "^1.7.2"
     recompose "^0.26.0"
     style-transform "^0.1.9"
 
 moment@^2.20.1:
   version "2.20.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.20.1.tgz#d6eb1a46cbcc14a2b2f9434112c1ff8907f313fd"
-
-most@^1.7.2:
-  version "1.7.2"
-  resolved "https://registry.yarnpkg.com/most/-/most-1.7.2.tgz#3f8b8bf0e4410ad8490b3599ea3777fca964a1c4"
-  dependencies:
-    "@most/multicast" "^1.2.5"
-    "@most/prelude" "^1.4.0"
-    symbol-observable "^1.0.2"
 
 node-fetch@^1.0.1:
   version "1.7.3"
@@ -352,9 +333,9 @@ style-transform@^0.1.9:
     css-shorthand-expand "^1.1.0"
     object-path-immutable "^0.5.2"
 
-symbol-observable@^1.0.2, symbol-observable@^1.0.4:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.1.0.tgz#5c68fd8d54115d9dfb72a84720549222e8db9b32"
+symbol-observable@^1.0.4:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.2.0.tgz#c22688aed4eab3cdc2dfeacbb561660560a00804"
 
 typescript@^2.6.2:
   version "2.6.2"

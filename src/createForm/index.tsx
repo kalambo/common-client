@@ -2,7 +2,6 @@ import * as React from 'react';
 import {
   branch,
   compose,
-  createEventHandler,
   mapProps,
   pure,
   renderComponent,
@@ -11,13 +10,13 @@ import {
   withProps,
   withState,
 } from 'recompose';
-import { Comp, mapPropsStream, memoizeProps, omitProps } from 'mishmash';
-import * as most from 'most';
+import { combineState, Comp, memoizeProps, omitProps } from 'mishmash';
 import * as _ from 'lodash';
 import keysToObject from 'keys-to-object';
 import { getId } from 'rgo';
-import { noUndef, Obj, root, transformValue } from 'common';
+import { Obj, root, transformValue } from 'common';
 
+import createStores from './createStores';
 import getState from './getState';
 import prepareFields from './prepareFields';
 
@@ -68,111 +67,47 @@ export default function createForm<T = {}>(
   return compose<any, FormProps & T>(
     memoizeProps('objects', 'blocks'),
     pure,
-    mapPropsStream(props$ => {
-      const state = {};
-      const listeners: {
-        keys: string[];
-        emit: (value: any[]) => void;
-      }[] = [];
-      const stores = {
-        rgo: {
-          get(
-            keys: [string, string, string],
-            emit: (value: any[] | null) => void,
-          ) {
-            const queries: Obj<Obj<true>> = {};
-            keys.forEach(([type, id, field]) => {
-              const key = `${type}.${id}`;
-              queries[key] = queries[key] || {};
-              queries[key][field] = true;
-            });
-            const queryKeys = Object.keys(queries);
-            return root.rgo.query(
-              ...queryKeys.map((key, i) => ({
-                name: key.split('.')[0],
-                alias: `obj${i}`,
-                filter: key.split('.')[1],
-                fields: Object.keys(queries[key]),
-              })),
-              data =>
-                emit(
-                  data &&
-                    keys.map(([type, id, field]) => {
-                      const record =
-                        data[`obj${queryKeys.indexOf(`${type}.${id}`)}`][0];
-                      return noUndef(record && record[field]);
-                    }),
-                ),
-            );
-          },
-          set(values: { key: [string, string, string]; value: any }[]) {
-            root.rgo.set(...values);
-          },
-        },
-        local: {
-          get(keys: string[], emit: (value: any[]) => void) {
-            emit(keys.map(key => noUndef(state[key])));
-            if (keys.length > 0) {
-              const listener = { keys, emit };
-              listeners.push(listener);
-              return () => listeners.splice(listeners.indexOf(listener), 1);
-            }
-            return () => {};
-          },
-          set(values: { key: string; value: any }[]) {
-            values.forEach(({ key, value }) => (state[key] = value));
-            listeners.forEach(l => {
-              if (values.some(({ key }) => l.keys.includes(key))) {
-                l.emit(l.keys.map(key => noUndef(state[key])));
-              }
-            });
-          },
-        },
-      };
-      return props$.map(props => ({ stores, ...props }));
-    }),
-    mapPropsStream(props$ => {
-      let fields;
-      props$.observe(() => {}).then(() => {
-        root.rgo.set(
-          ...fields
-            .filter(f => f.key.store === 'rgo')
-            .map(f => ({ key: f.key.key })),
-        );
-      });
-      return props$
-        .map(
-          ({
+    combineState(
+      ({ initialProps, onNextProps, setState, onUnmount }) => {
+        const stores = createStores();
+
+        let prepared;
+        let count = 0;
+        const prepare = async ({ objects, blocks }: Obj) => {
+          const index = ++count;
+          const newPrepared = await prepareFields(
+            Array.isArray(block) ? block[0] : [],
             objects,
             blocks,
             stores,
-            onCommit,
-            onError,
-            onSubmit,
-            ...props
-          }) =>
-            most
-              .fromPromise<any>(
-                prepareFields(
-                  Array.isArray(block) ? block[0] : [],
-                  objects,
-                  blocks,
-                  stores,
-                ),
-              )
-              .tap(newProps => (fields = newProps.fields))
-              .startWith({})
-              .map(newProps => ({
-                stores,
-                onCommit,
-                onError,
-                onSubmit,
-                props,
-                ...newProps,
-              })),
-        )
-        .switchLatest();
-    }),
+          );
+          if (index === count) {
+            prepared = newPrepared;
+            setState({});
+          }
+        };
+        setTimeout(() => prepare(initialProps));
+        onNextProps(prepare);
+        onUnmount(() => {
+          root.rgo.set(
+            ...(prepared.fields || [])
+              .filter(f => f.key.store === 'rgo')
+              .map(f => ({ key: f.key.key })),
+          );
+        });
+
+        return ({
+          objects: _a,
+          blocks: _b,
+          onCommit,
+          onError,
+          onSubmit,
+          ...props
+        }) => ({ onCommit, onError, onSubmit, props, stores, ...prepared });
+      },
+      {},
+      () => false,
+    ),
     withState('elem', 'setElem', null),
     withHandlers({
       HeightWrap: ({ setElem }: any) => ({ children }) => (
@@ -183,20 +118,13 @@ export default function createForm<T = {}>(
     branch(
       ({ fields }: any) => fields,
       compose(
-        mapPropsStream(props$ => {
-          const {
-            stream: processing$,
-            handler: setProcessing,
-          } = createEventHandler<any, any>();
-          return props$.combine(
-            (props, processing) => ({
-              ...props,
-              processing,
-              setProcessing,
-            }),
-            most.from<any>(processing$).startWith(null),
-          );
-        }),
+        combineState(
+          ({ setState }) => (props, { processing }) => [
+            { ...props, processing },
+            { setProcessing: p => setState({ processing: p }) },
+          ],
+          { processing: null },
+        ),
         getState,
         branch(
           ({ state }: any) => state,

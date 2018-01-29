@@ -1,6 +1,4 @@
-import { createEventHandler } from 'recompose';
-import { HOC, mapPropsStream } from 'mishmash';
-import * as most from 'most';
+import { combineState, HOC } from 'mishmash';
 import { Query } from 'rgo';
 import { root } from 'common';
 
@@ -16,28 +14,31 @@ export default function getData(
 export default function getData(...args) {
   const propName = typeof args[0] === 'string' ? (args[0] as string) : 'data';
   const queries = typeof args[0] === 'string' ? args.slice(1) : args;
-  return mapPropsStream(props$ => {
-    const { handler: setState, stream } = createEventHandler<any, any>();
-    let unsubscribe;
-    let prevJSON;
-    props$.observe(() => {}).then(() => unsubscribe());
-    return most.from(stream).combine(
-      (state, props) => ({
-        ...props,
-        [propName
-          ? typeof propName === 'string' ? propName : propName(props)
-          : 'data']: state,
-      }),
-      props$.tap(props => {
-        const q: Query[] =
-          typeof queries[0] === 'function' ? queries[0](props) : queries;
-        const nextJSON = JSON.stringify(q);
-        if (nextJSON !== prevJSON) {
-          if (unsubscribe) unsubscribe();
-          unsubscribe = root.rgo.query(...q, setState);
-        }
-        prevJSON = nextJSON;
-      }),
-    );
-  });
+  return combineState(
+    ({ initialProps, onNextProps, setState, onUnmount }) => {
+      let unsubscribe;
+      if (typeof queries[0] !== 'function') {
+        unsubscribe = root.rgo.query(...queries, data => setState({ data }));
+      } else {
+        let prevJSON;
+        const update = props => {
+          const q = queries[0](props);
+          const nextJSON = JSON.stringify(q);
+          if (nextJSON !== prevJSON) {
+            if (unsubscribe) {
+              unsubscribe();
+              setState({ data: null });
+            }
+            unsubscribe = root.rgo.query(...q, data => setState({ data }));
+          }
+          prevJSON = nextJSON;
+        };
+        update(initialProps);
+        onNextProps(update);
+      }
+      onUnmount(() => unsubscribe());
+      return (props, { data }) => ({ ...props, [propName]: data });
+    },
+    { data: null },
+  );
 }
