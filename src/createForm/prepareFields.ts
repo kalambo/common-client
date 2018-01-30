@@ -1,4 +1,5 @@
-import * as _ from 'lodash';
+import * as omit from 'lodash.omit';
+import * as pick from 'lodash.pick';
 import { Obj, root } from 'common';
 import keysToObject from 'keys-to-object';
 
@@ -38,8 +39,8 @@ export default async (blockProps, configObjects = {}, blocks, stores) => {
   const mappedBlocks = blocks.map(blockSet =>
     blockSet.map(({ fields, ...block }) => {
       const config = {
-        block: _.pick(block, blockProps) as Obj,
-        field: _.omit(block, blockProps) as Obj,
+        block: pick(block, blockProps) as Obj,
+        field: omit(block, blockProps) as Obj,
       };
       const blockFields = (fields
         ? fields.map(f => merge([f, config.field]))

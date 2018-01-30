@@ -1,106 +1,5 @@
 import * as React from 'react';
-
-if (typeof document !== 'undefined') {
-  const div = document.createElement('div');
-  div.innerHTML = `&shy;<style>
-
-  @keyframes spin1 {
-    0% {
-      top: -24px;
-      left: 0;
-      transform: scale(1);
-    }
-    17% {
-      transform: scale(0.5);
-    }
-    33% {
-      top: 12px;
-      left: 20.8px;
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(0.5);
-    }
-    66% {
-      top: 12px;
-      left: -20.8px;
-      transform: scale(1);
-    }
-    83% {
-      transform: scale(0.5);
-    }
-    100% {
-      top: -24px;
-      left: 0;
-      transform: scale(1);
-    }
-  }
-  @keyframes spin2 {
-    0% {
-      top: 12px;
-      left: 20.8px;
-      transform: scale(1);
-    }
-    17% {
-      transform: scale(0.5);
-    }
-    33% {
-      top: 12px;
-      left: -20.8px;
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(0.5);
-    }
-    66% {
-      top: -24px;
-      left: 0;
-      transform: scale(1);
-    }
-    83% {
-      transform: scale(0.5);
-    }
-    100% {
-      top: 12px;
-      left: 20.8px;
-      transform: scale(1);
-    }
-  }
-  @keyframes spin3 {
-    0% {
-      top: 12px;
-      left: -20.8px;
-      transform: scale(1);
-    }
-    17% {
-      transform: scale(0.5);
-    }
-    33% {
-      top: -24px;
-      left: 0;
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(0.5);
-    }
-    66% {
-      top: 12px;
-      left: 20.8px;
-      transform: scale(1);
-    }
-    83% {
-      transform: scale(0.5);
-    }
-    100% {
-      top: 12px;
-      left: -20.8px;
-      transform: scale(1);
-    }
-  }
-
-  </style>`;
-  document.body.appendChild(div.childNodes[1]);
-}
+import Helmet from 'react-helmet';
 
 export interface SpinnerProps {
   style?: React.CSSProperties;
@@ -148,12 +47,113 @@ export default function Spinner({ style }: SpinnerProps) {
   };
 
   return (
-    <div style={{ position: 'relative', height: 60, ...style }}>
-      <div style={spinnerStyle}>
-        <i style={circle1Style} />
-        <i style={circle2Style} />
-        <i style={circle3Style} />
+    <>
+      <Helmet>
+        <style type="text/css">
+          {`
+          @keyframes spin1 {
+            0% {
+              top: -24px;
+              left: 0;
+              transform: scale(1);
+            }
+            17% {
+              transform: scale(0.5);
+            }
+            33% {
+              top: 12px;
+              left: 20.8px;
+              transform: scale(1);
+            }
+            50% {
+              transform: scale(0.5);
+            }
+            66% {
+              top: 12px;
+              left: -20.8px;
+              transform: scale(1);
+            }
+            83% {
+              transform: scale(0.5);
+            }
+            100% {
+              top: -24px;
+              left: 0;
+              transform: scale(1);
+            }
+          }
+          @keyframes spin2 {
+            0% {
+              top: 12px;
+              left: 20.8px;
+              transform: scale(1);
+            }
+            17% {
+              transform: scale(0.5);
+            }
+            33% {
+              top: 12px;
+              left: -20.8px;
+              transform: scale(1);
+            }
+            50% {
+              transform: scale(0.5);
+            }
+            66% {
+              top: -24px;
+              left: 0;
+              transform: scale(1);
+            }
+            83% {
+              transform: scale(0.5);
+            }
+            100% {
+              top: 12px;
+              left: 20.8px;
+              transform: scale(1);
+            }
+          }
+          @keyframes spin3 {
+            0% {
+              top: 12px;
+              left: -20.8px;
+              transform: scale(1);
+            }
+            17% {
+              transform: scale(0.5);
+            }
+            33% {
+              top: -24px;
+              left: 0;
+              transform: scale(1);
+            }
+            50% {
+              transform: scale(0.5);
+            }
+            66% {
+              top: 12px;
+              left: 20.8px;
+              transform: scale(1);
+            }
+            83% {
+              transform: scale(0.5);
+            }
+            100% {
+              top: 12px;
+              left: -20.8px;
+              transform: scale(1);
+            }
+          }
+          `}
+        </style>
+      </Helmet>
+      <div style={{ position: 'relative', height: 60, ...style }}>
+        <div style={spinnerStyle}>
+          <i style={circle1Style} />
+          <i style={circle2Style} />
+          <i style={circle3Style} />
+        </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -11,7 +11,7 @@ import {
   withState,
 } from 'recompose';
 import { combineState, Comp, memoizeProps, omitProps } from 'mishmash';
-import * as _ from 'lodash';
+import * as set from 'lodash.set';
 import keysToObject from 'keys-to-object';
 import { getId } from 'rgo';
 import { Obj, root, transformValue } from 'common';
@@ -153,7 +153,7 @@ export default function createForm<T = {}>(
                     (_, i) => !state[i].hidden,
                   );
                   const values = visibleFields.reduce(
-                    (res, f, i) => _.set(res, f.key.name, state[i].value),
+                    (res, f, i) => set(res, f.key.name, state[i].value),
                     {},
                   );
                   const rgoKeys = visibleFields
