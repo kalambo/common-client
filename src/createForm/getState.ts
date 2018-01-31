@@ -2,7 +2,7 @@ import { combineState, HOC } from 'mishmash';
 import keysToObject from 'keys-to-object';
 import { isValid } from 'common';
 
-import runFilter from '../runFilter';
+import runFilter from './runFilter';
 
 export default combineState(
   ({ initialProps, onNextProps, setState, onUnmount }) => {

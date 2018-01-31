@@ -1,6 +1,8 @@
 declare const _default: () => {
     rgo: {
-        get(keys: [string, string, string], emit: (value: any[] | null) => void): Promise<void>;
+        get(keys: [string, string, string], emit: (value: any[] | null) => void): Promise<{
+            [key: string]: any;
+        }>;
         set(values: {
             key: [string, string, string];
             value: any;

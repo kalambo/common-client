@@ -39,6 +39,6 @@ export default function getData(...args) {
       onUnmount(() => unsubscribe());
       return (props, { data }) => ({ ...props, [propName]: data });
     },
-    { data: null },
+    { data: null as any },
   );
 }
