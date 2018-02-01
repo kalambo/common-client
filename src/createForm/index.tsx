@@ -71,42 +71,37 @@ export default function createForm<T = {}>(
       ({ initialProps, onNextProps, setState, onUnmount }) => {
         const stores = createStores();
 
-        let prepared;
+        let fields;
         let count = 0;
         const prepare = async ({ objects, blocks }: Obj) => {
           const index = ++count;
-          const newPrepared = await prepareFields(
+          const info = await prepareFields(
             Array.isArray(block) ? block[0] : [],
             objects,
             blocks,
             stores,
           );
           if (index === count) {
-            prepared = newPrepared;
-            setState({});
+            fields = info.fields;
+            setState({ info });
           }
         };
         setTimeout(() => prepare(initialProps));
         onNextProps(prepare);
         onUnmount(() => {
           root.rgo.set(
-            ...(prepared.fields || [])
+            ...(fields || [])
               .filter(f => f.key.store === 'rgo')
               .map(f => ({ key: f.key.key })),
           );
         });
 
-        return ({
-          objects: _a,
-          blocks: _b,
-          onCommit,
-          onError,
-          onSubmit,
-          ...props
-        }) => ({ onCommit, onError, onSubmit, props, stores, ...prepared });
+        return (
+          { objects: _a, blocks: _b, onCommit, onError, onSubmit, ...props },
+          { info },
+        ) => ({ onCommit, onError, onSubmit, props, stores, ...info });
       },
-      {},
-      () => false,
+      { info: {} },
     ),
     withState('elem', 'setElem', null),
     withHandlers({
@@ -122,10 +117,13 @@ export default function createForm<T = {}>(
           ({ setState, onUnmount }) => {
             let mounted = true;
             onUnmount(() => (mounted = false));
-            return (props, { processing }) => [
-              { ...props, processing },
-              { setProcessing: p => mounted && setState({ processing: p }) },
-            ];
+            const setProcessing = processing =>
+              mounted && setState({ processing });
+            return (props, { processing }) => ({
+              ...props,
+              processing,
+              setProcessing,
+            });
           },
           { processing: null },
         ),
