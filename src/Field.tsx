@@ -32,7 +32,7 @@ const FileButton = compose<any, any>(
 
 export default compose<any, any>(
   branch(
-    ({ type, showFile }: any) => type === 'file' && showFile,
+    ({ type, admin }: any) => type === 'file' && admin,
     renderLayer(({ value, style, children }) => (
       <div style={{ width: '100%' }}>
         <Div style={{ spacing: 40, layout: 'bar', width: '100%' }}>
@@ -45,8 +45,8 @@ export default compose<any, any>(
     )),
   ),
   branch(
-    ({ type, options, addNull }: any) =>
-      addNull && !type.endsWith('list') && Array.isArray(options),
+    ({ type, options, admin }: any) =>
+      admin && !type.endsWith('list') && Array.isArray(options),
     withProps(({ options, labels }: any) => ({
       options:
         options && (!options.includes(null) ? [...options, null] : options),

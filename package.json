@@ -14,7 +14,7 @@
     "prepare": "yarn run build"
   },
   "devDependencies": {
-    "@types/react": "^16.0.35",
+    "@types/react": "^16.0.36",
     "@types/react-router-dom": "^4.2.3",
     "@types/recompose": "^0.24.4",
     "prettier": "^1.10.2",
@@ -35,6 +35,7 @@
     "lodash.set": "^4.3.2",
     "mishmash": "^0.5.3",
     "pegjs": "^0.10.0",
+    "prop-types": "^15.6.0",
     "react-helmet": "^5.2.0",
     "react-router-dom": "^4.2.2",
     "recompose": "^0.26.0",

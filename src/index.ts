@@ -1,3 +1,4 @@
+export { default as createBlock } from './createBlock';
 export { default as createForm } from './createForm';
 export { default as download } from './download';
 export { default as getData } from './getData';
