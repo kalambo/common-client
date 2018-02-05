@@ -221,19 +221,26 @@ export default compose(
       spellCheck={false}
       invalid={text && !filter}
     />
-    <Wrap hoc={withHover}>
-      {({ isHovered: hover, hoverProps }) => (
-        <Txt
-          onClick={toggleOpen}
-          {...hoverProps}
-          style={st(
-            { ...style.helpLabel, cursor: 'pointer', textAlign: 'right' },
-            [['mergeKeys', { hover }]],
-          )}
-        >
-          Open help
-        </Txt>
-      )}
-    </Wrap>
+    <div style={{ width: style.helpLabel.width }}>
+      <Wrap hoc={withHover}>
+        {({ isHovered: hover, hoverProps }) => (
+          <Txt
+            onClick={toggleOpen}
+            {...hoverProps}
+            style={st(
+              {
+                ...style.helpLabel,
+                cursor: 'pointer',
+                textAlign: 'right',
+                width: 'auto',
+              },
+              [['mergeKeys', { hover }]],
+            )}
+          >
+            Open help
+          </Txt>
+        )}
+      </Wrap>
+    </div>
   </Div>
 ));
