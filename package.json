@@ -16,7 +16,6 @@
   "devDependencies": {
     "@types/react": "^16.0.36",
     "@types/react-router-dom": "^4.2.3",
-    "@types/recompose": "^0.24.4",
     "prettier": "^1.10.2",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
@@ -29,16 +28,16 @@
   "dependencies": {
     "common": "https://github.com/kalambo/common",
     "deep-equal": "^1.0.1",
-    "elmnt": "^0.4.3",
+    "elmnt": "^0.5.0",
+    "gatsby-link": "^1.6.36",
     "keys-to-object": "^0.2.0",
     "lodash.debounce": "^4.0.8",
     "lodash.set": "^4.3.2",
-    "mishmash": "^0.5.4",
+    "mishmash": "^0.6.0",
     "pegjs": "^0.10.0",
-    "prop-types": "^15.6.0",
     "react-helmet": "^5.2.0",
     "react-router-dom": "^4.2.2",
-    "recompose": "^0.26.0",
-    "rgo": "^0.3.7"
+    "rgo": "^0.3.7",
+    "style-transform": "^0.1.9"
   }
 }

@@ -1,31 +1,34 @@
-import { combineState, HOC } from 'mishmash';
+import { enclose, HOC } from 'mishmash';
 import keysToObject from 'keys-to-object';
 import { isValid } from 'common';
 
 import runFilter from './runFilter';
 
-export default combineState(
-  ({ initialProps, onNextProps, setState, onUnmount }) => {
+export default enclose(
+  ({ initialProps, onProps, setState }) => {
     let unsubscribes: (() => void)[] = [];
     let prevJSON;
     const update = props => {
-      const nextJSON = JSON.stringify(props.fields);
-      if (nextJSON !== prevJSON) {
+      if (props) {
+        const nextJSON = JSON.stringify(props.fields);
+        if (nextJSON !== prevJSON) {
+          unsubscribes.forEach(u => u());
+          const storeFields = ['rgo', 'local'].map(store =>
+            props.fields.filter(f => f.key.store === store),
+          );
+          unsubscribes = ['rgo', 'local'].map((store, i) =>
+            props.stores[store].get(storeFields[i].map(f => f.key.key), value =>
+              setState({ [store]: value }),
+            ),
+          );
+        }
+        prevJSON = nextJSON;
+      } else {
         unsubscribes.forEach(u => u());
-        const storeFields = ['rgo', 'local'].map(store =>
-          props.fields.filter(f => f.key.store === store),
-        );
-        unsubscribes = ['rgo', 'local'].map((store, i) =>
-          props.stores[store].get(storeFields[i].map(f => f.key.key), value =>
-            setState({ [store]: value }),
-          ),
-        );
       }
-      prevJSON = nextJSON;
     };
     update(initialProps);
-    onNextProps(update);
-    onUnmount(() => unsubscribes.forEach(u => u()));
+    onProps(update);
 
     return (props, state) => {
       const indices = { rgo: 0, local: 0 };

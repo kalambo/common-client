@@ -1,53 +1,59 @@
 import * as React from 'react';
+import { css, Div, Input, Txt } from 'elmnt';
 import {
   branch,
   compose,
-  renderComponent,
-  renderNothing,
-  withProps,
-} from 'recompose';
-import { Div, Input, Txt } from 'elmnt';
-import { cssGroups, Hover, mapStyle, renderLayer } from 'mishmash';
+  map,
+  render,
+  restyle,
+  withHover,
+  Wrap,
+} from 'mishmash';
 import { getValueString } from 'common';
+import st from 'style-transform';
 
-const FileButton = compose<any, any>(
-  branch(({ value }: any) => !value, renderNothing),
-  mapStyle([['mergeKeys', 'button'], ['merge', { width: '100%' }]]),
+const FileButton = compose(
+  branch(({ value }) => !value, render()),
+  map(restyle([['mergeKeys', 'button'], ['merge', { width: '100%' }]])),
 )(({ value, style }) => (
   <a
     href={`${process.env.DATA_URL!}/storage/file/${value.split(':')[0]}`}
     target="_blank"
   >
-    <Hover
-      style={{
-        ...style,
-        fontSize: 15,
-        padding: 8,
-      }}
-    >
-      <Txt>View file</Txt>
-    </Hover>
+    <Wrap hoc={withHover}>
+      {({ isHovered: hover, hoverProps }) => (
+        <Txt
+          {...hoverProps}
+          style={st({ ...style, fontSize: 15, padding: 8 }, [
+            ['mergeKeys', { hover }],
+          ])}
+        >
+          View file
+        </Txt>
+      )}
+    </Wrap>
   </a>
 ));
 
-export default compose<any, any>(
+export default compose(
   branch(
-    ({ type, admin }: any) => type === 'file' && admin,
-    renderLayer(({ value, style, children }) => (
+    ({ type, admin }) => type === 'file' && admin,
+    render(({ value, style, next }) => (
       <div style={{ width: '100%' }}>
         <Div style={{ spacing: 40, layout: 'bar', width: '100%' }}>
           <div style={{ width: 150 }}>
             <FileButton value={value} style={style} />
           </div>
-          {children}
+          {next()}
         </Div>
       </div>
     )),
   ),
   branch(
-    ({ type, options, admin }: any) =>
+    ({ type, options, admin }) =>
       admin && !type.endsWith('list') && Array.isArray(options),
-    withProps(({ options, labels }: any) => ({
+    map(({ options, labels, ...props }) => ({
+      ...props,
       options:
         options && (!options.includes(null) ? [...options, null] : options),
       labels:
@@ -56,10 +62,10 @@ export default compose<any, any>(
     })),
   ),
   branch(
-    ({ view }: any) => view,
+    ({ view }) => view,
     compose(
-      mapStyle([['filter', ...cssGroups.text]]),
-      renderComponent(({ type, value, style }: any) => (
+      map(restyle([['filter', ...css.groups.text]])),
+      render(({ type, value, style }) => (
         <Txt style={style}>{getValueString(value, type)}</Txt>
       )),
     ),

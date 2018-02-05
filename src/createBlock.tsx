@@ -1,22 +1,19 @@
 import * as React from 'react';
-import { branch, compose, mapProps, renderComponent } from 'recompose';
-import { Div, Txt } from 'elmnt';
-import { Comp, cssGroups, mapStyle, omitProps, renderLayer } from 'mishmash';
+import { css, Div, Txt } from 'elmnt';
+import { branch, Comp, compose, map, omit, render, restyle } from 'mishmash';
 
 import FieldBase from './Field';
 
-const Question = mapStyle([
-  ['mergeKeys', 'question'],
-  ['filter', ...cssGroups.text],
-])(Txt);
+const Question = map(
+  restyle([['mergeKeys', 'question'], ['filter', ...css.groups.text]]),
+)(Txt);
 
-const Prompt = mapStyle([
-  ['mergeKeys', 'prompt'],
-  ['filter', ...cssGroups.text],
-])(Txt);
+const Prompt = map(
+  restyle([['mergeKeys', 'prompt'], ['filter', ...css.groups.text]]),
+)(Txt);
 
-const Vertical = compose<any, any>(
-  mapStyle(['view', 'small'], (view, small) => [
+const Vertical = map(
+  restyle(['view', 'small'], (view, small) => [
     [
       'scale',
       {
@@ -28,22 +25,24 @@ const Vertical = compose<any, any>(
     ['filter', 'paddingTop'],
     ['merge', { spacing: 10 }],
   ]),
-  omitProps('view', 'small'),
+  omit('view', 'small'),
 )(Div);
 
-const Column = mapStyle([
-  ['mergeKeys', 'column'],
-  ['filter', ...cssGroups.text],
-  ['merge', { padding: '8px 15px' }],
-])(Txt);
+const Column = map(
+  restyle([
+    ['mergeKeys', 'column'],
+    ['filter', ...css.groups.text],
+    ['merge', { padding: '8px 15px' }],
+  ]),
+)(Txt);
 
 export default (blockProps, blockHOC, style, admin, fieldHOC) => {
   const Field = fieldHOC(FieldBase);
   return [
     [...blockProps, 'text', 'prompt', 'vertical', 'bar', 'view'],
-    compose<any, any>(
+    compose(
       blockHOC,
-      mapProps(({ fields, attempted, ...props }: any) => ({
+      map(({ fields, attempted, ...props }) => ({
         fields: fields.map(
           ({ scalar, isList, type: _, file, invalid, ...field }) => ({
             ...field,
@@ -59,8 +58,8 @@ export default (blockProps, blockHOC, style, admin, fieldHOC) => {
         ...props,
         ...(admin ? { prompt: undefined, vertical: false } : {}),
       })),
-      renderLayer(
-        ({ text, prompt, vertical, view, fields, children }) =>
+      render(
+        ({ text, prompt, vertical, view, fields, next }) =>
           text ? (
             <Div style={{ spacing: 10 }}>
               {vertical ? (
@@ -72,7 +71,7 @@ export default (blockProps, blockHOC, style, admin, fieldHOC) => {
                     )}
                   </Question>
                   {prompt && <Prompt style={style}>{prompt}</Prompt>}
-                  {children}
+                  {next()}
                 </Div>
               ) : (
                 <Div
@@ -102,18 +101,18 @@ export default (blockProps, blockHOC, style, admin, fieldHOC) => {
                       {prompt && <Prompt style={style}>{prompt}</Prompt>}
                     </Vertical>
                   </div>
-                  {children}
+                  {next()}
                 </Div>
               )}
             </Div>
           ) : (
-            children
+            next()
           ),
       ),
       branch(
-        ({ fields }: any) => fields.length > 1,
-        renderComponent(
-          ({ fields, bar }: any) =>
+        ({ fields }) => fields.length > 1,
+        render(
+          ({ fields, bar }) =>
             bar ? (
               <div>
                 <Div style={{ layout: 'bar', width: '100%' }}>
@@ -151,7 +150,7 @@ export default (blockProps, blockHOC, style, admin, fieldHOC) => {
               </Div>
             ),
         ),
-        mapProps(({ fields }: any) => fields[0]),
+        map(({ fields }) => fields[0]),
       ),
     )(Field),
   ] as [string[], Comp];

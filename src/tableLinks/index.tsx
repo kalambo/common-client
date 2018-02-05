@@ -1,13 +1,6 @@
 import * as React from 'react';
-import {
-  branch,
-  compose,
-  renderComponent,
-  withProps,
-  withState,
-} from 'recompose';
-import { cssGroups, mapStyle, renderLayer } from 'mishmash';
-import { Div, Mark, Txt } from 'elmnt';
+import { branch, compose, enclose, map, render, restyle } from 'mishmash';
+import { css, Div, Mark, Txt } from 'elmnt';
 
 import getData from '../getData';
 import Spinner from '../Spinner';
@@ -22,25 +15,33 @@ const joinFilters = (...filters) => {
   return ['AND', ...f];
 };
 
-export default compose<any, any>(
-  mapStyle({
-    base: null,
-    spinner: [['mergeKeys', 'spinner']],
-    header: [['mergeKeys', 'header']],
-    columnCell: [
-      ['mergeKeys', 'column'],
-      ['filter', ...cssGroups.box, ...cssGroups.other],
-      ['expandFor', 'paddingLeft', 'borderTopLeftRadius'],
-    ],
-    columnText: [['mergeKeys', 'column'], ['filter', ...cssGroups.text]],
-    link: [['mergeKeys', 'link'], ['merge', { position: 'relative' }]],
-    filter: [['mergeKeys', 'filter']],
-  }),
-  withState('filter', 'setFilter', null),
-  renderLayer(({ rows, setFilter, style, children }) => (
+export default compose(
+  map(
+    restyle({
+      base: null,
+      spinner: [['mergeKeys', 'spinner']],
+      header: [['mergeKeys', 'header']],
+      columnCell: [
+        ['mergeKeys', 'column'],
+        ['filter', ...css.groups.box, ...css.groups.other],
+        ['expandFor', 'paddingLeft', 'borderTopLeftRadius'],
+      ],
+      columnText: [['mergeKeys', 'column'], ['filter', ...css.groups.text]],
+      link: [['mergeKeys', 'link'], ['merge', { position: 'relative' }]],
+      filter: [['mergeKeys', 'filter']],
+    }),
+  ),
+  enclose(
+    ({ setState }) => {
+      const setFilter = filter => setState({ filter });
+      return (props, state) => ({ ...props, ...state, setFilter });
+    },
+    { filter: null },
+  ),
+  render(({ rows, setFilter, style, next }) => (
     <Div style={{ spacing: 15 }}>
       <Filter type={rows[0].name} onChange={setFilter} style={style.filter} />
-      {children}
+      {next()}
     </Div>
   )),
   getData(({ rows, filter }) => ({
@@ -48,16 +49,17 @@ export default compose<any, any>(
     filter: joinFilters(rows[0].filter, filter),
   })),
   branch(
-    ({ data }: any) => !data,
-    renderComponent(({ style }: any) => <Spinner style={style.spinner} />),
+    ({ data }) => !data,
+    render(({ style }) => <Spinner style={style.spinner} />),
   ),
-  withProps(({ rows, data }: any) => {
+  map(({ rows, data, ...props }) => {
     const result = rows[1](data);
     return {
+      ...props,
       rows: Array.isArray(result[0] && result[0][1]) ? result : [['', result]],
     };
   }),
-)(({ path, columns, rows, style }: any) => (
+)(({ path, columns, rows, style }) => (
   <table style={{ width: '100%' }}>
     <tbody>
       {rows.reduce(

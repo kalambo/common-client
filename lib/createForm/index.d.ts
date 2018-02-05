@@ -21,4 +21,4 @@ export default function createForm<T = {}>(container: Comp<{
     attempted: boolean;
     submit: () => Promise<void>;
     [key: string]: any;
-}>, block: Comp | [string[], Comp]): React.ComponentClass<FormProps & T>;
+}>, block: Comp | [string[], Comp]): Comp<FormProps & T>;

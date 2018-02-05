@@ -1,16 +1,16 @@
 import * as React from 'react';
 import {
   branch,
+  Comp,
   compose,
-  mapProps,
+  enclose,
+  map,
+  memoize,
+  methodWrap,
+  omit,
   pure,
-  renderComponent,
-  renderNothing,
-  withHandlers,
-  withProps,
-  withState,
-} from 'recompose';
-import { combineState, Comp, memoizeProps, omitProps } from 'mishmash';
+  render,
+} from 'mishmash';
 import * as set from 'lodash.set';
 import keysToObject from 'keys-to-object';
 import { getId } from 'rgo';
@@ -43,12 +43,12 @@ export default function createForm<T = {}>(
   }>,
   block: Comp | [string[], Comp],
 ) {
-  const Block = branch<any>(
+  const Block = branch(
     ({ fields }) => fields,
     compose(
       getState,
-      branch(({ state }: any) => !state, renderNothing),
-      mapProps(({ stores, fields, state, ...props }: any) => ({
+      branch(({ state }) => !state, render()),
+      map(({ stores, fields, state, ...props }) => ({
         ...props,
         fields: fields.map(({ key, initial: _, ...f }, i) => ({
           ...state[i],
@@ -61,40 +61,45 @@ export default function createForm<T = {}>(
         })),
       })),
     ),
-    omitProps('fields', 'stores', 'state') as any,
+    map(omit('fields', 'stores', 'state')),
   )(Array.isArray(block) ? block[1] : block);
 
-  return compose<any, FormProps & T>(
-    memoizeProps('objects', 'blocks'),
+  return compose<FormProps & T>(
+    map(({ objects, blocks, ...props }) => ({
+      ...props,
+      objects: memoize(objects),
+      blocks: memoize(blocks),
+    })),
     pure,
-    combineState(
-      ({ initialProps, onNextProps, setState, onUnmount }) => {
+    enclose(
+      ({ initialProps, onProps, setState }) => {
         const stores = createStores();
 
         let fields;
         let count = 0;
-        const prepare = async ({ objects, blocks }: Obj) => {
-          const index = ++count;
-          const info = await prepareFields(
-            Array.isArray(block) ? block[0] : [],
-            objects,
-            blocks,
-            stores,
-          );
-          if (index === count) {
-            fields = info.fields;
-            setState({ info });
+        const prepare = async props => {
+          if (props) {
+            const index = ++count;
+            const info = await prepareFields(
+              Array.isArray(block) ? block[0] : [],
+              props.objects,
+              props.blocks,
+              stores,
+            );
+            if (index === count) {
+              fields = info.fields;
+              setState({ info });
+            }
+          } else {
+            root.rgo.set(
+              ...(fields || [])
+                .filter(f => f.key.store === 'rgo')
+                .map(f => ({ key: f.key.key })),
+            );
           }
         };
         setTimeout(() => prepare(initialProps));
-        onNextProps(prepare);
-        onUnmount(() => {
-          root.rgo.set(
-            ...(fields || [])
-              .filter(f => f.key.store === 'rgo')
-              .map(f => ({ key: f.key.key })),
-          );
-        });
+        onProps(prepare);
 
         return (
           { objects: _a, blocks: _b, onCommit, onError, onSubmit, ...props },
@@ -103,20 +108,29 @@ export default function createForm<T = {}>(
       },
       { info: {} },
     ),
-    withState('elem', 'setElem', null),
-    withHandlers({
-      HeightWrap: ({ setElem }: any) => ({ children }) => (
-        <div ref={setElem}>{children}</div>
-      ),
-    }),
-    withState('height', 'setHeight', null),
+    enclose(
+      ({ setState }) => {
+        const setElem = elem => setState({ elem });
+        const HeightWrap = ({ children }) => (
+          <div ref={setElem}>{children}</div>
+        );
+        const setHeight = height => setState({ height });
+        return (props, state) => ({
+          ...props,
+          ...state,
+          HeightWrap,
+          setHeight,
+        });
+      },
+      { elem: null, height: null },
+    ),
     branch(
-      ({ fields }: any) => fields,
+      ({ fields }) => fields,
       compose(
-        combineState(
-          ({ setState, onUnmount }) => {
+        enclose(
+          ({ setState, onProps }) => {
             let mounted = true;
-            onUnmount(() => (mounted = false));
+            onProps(props => !props && (mounted = false));
             const setProcessing = processing =>
               mounted && setState({ processing });
             return (props, { processing }) => ({
@@ -129,29 +143,27 @@ export default function createForm<T = {}>(
         ),
         getState,
         branch(
-          ({ state }: any) => state,
-          compose(
-            withHandlers<any, any>({
-              submit: ({
-                onCommit,
-                onSubmit,
-                onError,
-                stores,
-                objects,
-                fields,
-                elem,
-                setHeight,
-                setProcessing,
-                state,
-              }) => async () => {
-                if (!state.some(s => !s.hidden && s.invalid)) {
+          ({ state }) => state,
+          enclose(() => {
+            const methods = methodWrap();
+            return ({
+              onCommit,
+              onSubmit,
+              onError,
+              elem,
+              setHeight,
+              setProcessing,
+              ...props
+            }) => {
+              const submit = async () => {
+                if (!props.state.some(s => !s.hidden && s.invalid)) {
                   if (elem) setHeight(elem.offsetHeight);
                   setProcessing(true);
-                  const visibleFields = fields.filter(
-                    (_, i) => !state[i].hidden,
+                  const visibleFields = props.fields.filter(
+                    (_, i) => !props.state[i].hidden,
                   );
                   const values = visibleFields.reduce(
-                    (res, f, i) => set(res, f.key.name, state[i].value),
+                    (res, f, i) => set(res, f.key.name, props.state[i].value),
                     {},
                   );
                   const rgoKeys = visibleFields
@@ -166,8 +178,8 @@ export default function createForm<T = {}>(
                           key: {
                             store: 'rgo',
                             key: [
-                              objects[obj].type,
-                              objects[obj].id,
+                              props.objects[obj].type,
+                              props.objects[obj].id,
                               field,
                             ] as [string, string, string],
                             name: `${obj}.${field}`,
@@ -196,31 +208,35 @@ export default function createForm<T = {}>(
                     const newIds = await root.rgo.commit(
                       ...rgoKeys.map(key => key.key),
                     );
-                    for (const obj of Object.keys(objects)) {
-                      const { type, id } = objects[obj];
+                    for (const obj of Object.keys(props.objects)) {
+                      const { type, id } = props.objects[obj];
                       values[obj].id = getId(id, newIds[type]);
                     }
                     changes = onSubmit && (await onSubmit(values));
                   } catch {
                     changes = onError && (await onError(values));
                   }
-                  stores.rgo.set(
+                  props.stores.rgo.set(
                     Object.keys(changes || {})
-                      .filter(k => objects[k])
+                      .filter(k => props.objects[k])
                       .reduce<any[]>(
                         (res, k) => [
                           ...res,
                           ...Object.keys(changes[k]).map(field => ({
-                            key: [objects[k].type, objects[k].id, field],
+                            key: [
+                              props.objects[k].type,
+                              props.objects[k].id,
+                              field,
+                            ],
                             value: changes[k][field],
                           })),
                         ],
                         [],
                       ),
                   );
-                  stores.local.set(
+                  props.stores.local.set(
                     Object.keys(changes || {})
-                      .filter(k => !objects[k])
+                      .filter(k => !props.objects[k])
                       .reduce<any[]>(
                         (res, k) => [...res, { key: k, value: changes[k] }],
                         [],
@@ -230,21 +246,25 @@ export default function createForm<T = {}>(
                 } else {
                   setProcessing(false);
                 }
-              },
-            }),
-            withHandlers({
-              onKeyDown: ({ submit }: any) => event => {
-                if (event.which === 13) submit();
-              },
-            }),
-          ),
+              };
+              return {
+                ...props,
+                ...methods({
+                  submit,
+                  onKeyDown: event => {
+                    if (event.which === 13) submit();
+                  },
+                }),
+              };
+            };
+          }),
         ),
       ),
     ),
     branch(
-      ({ fields, processing, state }: any) => !fields || processing || !state,
-      renderComponent<any>(({ props, height }) =>
-        React.createElement(container as any, {
+      ({ fields, processing, state }) => !fields || processing || !state,
+      render(({ props, height }) =>
+        React.createElement(container, {
           HeightWrap: ({ style, children }) => (
             <div
               style={{
@@ -260,17 +280,18 @@ export default function createForm<T = {}>(
         }),
       ),
     ),
-    mapProps(({ state, ...props }: any) => ({
+    map(({ state, ...props }) => ({
       invalid: state.some(s => !s.hidden && s.invalid),
       hidden: JSON.stringify(state.map(s => s.hidden)),
       ...props,
     })),
     pure,
-    withProps<any, any>(({ fields, hidden }) => ({
+    map(({ hidden, ...props }) => ({
+      ...props,
       hidden: keysToObject(
         JSON.parse(hidden),
         h => h,
-        (_, i) => fields[i].key.name,
+        (_, i) => props.fields[i].key.name,
       ),
     })),
   )(
@@ -285,7 +306,7 @@ export default function createForm<T = {}>(
       invalid,
       hidden,
     }) =>
-      React.createElement(container as any, {
+      React.createElement(container, {
         blocks: blocks
           .map((blockSet, i) =>
             blockSet.map(

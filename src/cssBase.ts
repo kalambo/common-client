@@ -1,3 +1,5 @@
+import { css } from 'elmnt';
+
 export default `
 html,
 body,
@@ -143,4 +145,6 @@ img {
 a {
   text-decoration: none;
 }
+
+${css.base}
 `;

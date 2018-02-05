@@ -1,25 +1,27 @@
 import * as React from 'react';
-import { compose } from 'recompose';
-import { Link } from 'react-router-dom';
-import { Txt } from 'elmnt';
-import { cssGroups, mapStyle, withHover } from 'mishmash';
+import { css, Txt } from 'elmnt';
+import { compose, map, restyle, withHover } from 'mishmash';
 
-export default compose<any, any>(
+import { Link } from '../router';
+
+export default compose(
   withHover,
-  mapStyle(['isHovered'], isHovered => [['mergeKeys', { hover: isHovered }]]),
-  mapStyle({
-    cell: [
-      ['filter', ...cssGroups.box, ...cssGroups.other],
-      ['expandFor', 'paddingLeft'],
-    ],
-    cellAlt: [
-      ['mergeKeys', 'alt'],
-      ['filter', ...cssGroups.box, ...cssGroups.other],
-      ['expandFor', 'paddingLeft'],
-    ],
-    text: [['filter', ...cssGroups.text]],
-    index: [['mergeKeys', 'index'], ['filter', ...cssGroups.text]],
-  }),
+  map(
+    restyle(['isHovered'], isHovered => [['mergeKeys', { hover: isHovered }]]),
+    restyle({
+      cell: [
+        ['filter', ...css.groups.box, ...css.groups.other],
+        ['expandFor', 'paddingLeft'],
+      ],
+      cellAlt: [
+        ['mergeKeys', 'alt'],
+        ['filter', ...css.groups.box, ...css.groups.other],
+        ['expandFor', 'paddingLeft'],
+      ],
+      text: [['filter', ...css.groups.text]],
+      index: [['mergeKeys', 'index'], ['filter', ...css.groups.text]],
+    }),
+  ),
 )(({ path, values: [url, ...values], index, hoverProps, style }) => (
   <tr {...hoverProps} style={{ cursor: 'pointer' }}>
     {[`${index + 1}`, ...values].map((v, j) => (
@@ -38,6 +40,7 @@ export default compose<any, any>(
         <Txt style={j ? style.text : style.index}>{v}</Txt>
         <Link
           to={`${path}/${url}`}
+          route
           style={{
             display: 'block',
             position: 'absolute',
