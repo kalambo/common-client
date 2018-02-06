@@ -2,8 +2,8 @@ import * as React from 'react';
 import { branch, compose, enclose, map, render, restyle } from 'mishmash';
 import { css, Div, Mark, Txt } from 'elmnt';
 
-import getData from '../getData';
-import Spinner from '../Spinner';
+import getData from '../generic/getData';
+import Spinner from '../components/Spinner';
 
 import Filter from './Filter';
 import Link from './Link';

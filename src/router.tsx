@@ -22,7 +22,7 @@ import {
 import { Div, Icon, Txt } from 'elmnt';
 import st from 'style-transform';
 
-import getData from './getData';
+import getData from './generic/getData';
 
 export const routerPure = compose(withRouterBase, pure);
 

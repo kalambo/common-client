@@ -1,32 +1,11 @@
 import * as React from 'react';
 import { css, Div, Txt } from 'elmnt';
-import { branch, Comp, compose, map, omit, render, restyle } from 'mishmash';
+import { branch, Comp, compose, map, render, restyle } from 'mishmash';
+
+import createForm, { FormProps } from '../generic/createForm';
 
 import FieldBase from './Field';
-
-const Question = map(
-  restyle([['mergeKeys', 'question'], ['filter', ...css.groups.text]]),
-)(Txt);
-
-const Prompt = map(
-  restyle([['mergeKeys', 'prompt'], ['filter', ...css.groups.text]]),
-)(Txt);
-
-const Vertical = map(
-  restyle(['view', 'small'], (view, small) => [
-    [
-      'scale',
-      {
-        paddingTop: view
-          ? 0
-          : { paddingTop: small ? 0.4 : 1, borderTopWidth: 1 },
-      },
-    ],
-    ['filter', 'paddingTop'],
-    ['merge', { spacing: 10 }],
-  ]),
-  omit('view', 'small'),
-)(Div);
+import Question from './Question';
 
 const Column = map(
   restyle([
@@ -36,9 +15,10 @@ const Column = map(
   ]),
 )(Txt);
 
-export default (blockProps, blockHOC, style, admin, fieldHOC) => {
+export default (container, blockProps, blockHOC, fieldHOC, style, admin) => {
   const Field = fieldHOC(FieldBase);
-  return [
+  return createForm(
+    container,
     [...blockProps, 'text', 'prompt', 'vertical', 'bar', 'view'],
     compose(
       blockHOC,
@@ -58,57 +38,11 @@ export default (blockProps, blockHOC, style, admin, fieldHOC) => {
         ...props,
         ...(admin ? { prompt: undefined, vertical: false } : {}),
       })),
-      render(
-        ({ text, prompt, vertical, view, fields, next }) =>
-          text ? (
-            <Div style={{ spacing: 10 }}>
-              {vertical ? (
-                <Div style={{ spacing: 10 }}>
-                  <Question style={style}>
-                    {text}
-                    {fields.some(f => !f.optional) && (
-                      <span style={style.required}>&nbsp;*</span>
-                    )}
-                  </Question>
-                  {prompt && <Prompt style={style}>{prompt}</Prompt>}
-                  {next()}
-                </Div>
-              ) : (
-                <Div
-                  style={{
-                    layout: 'bar',
-                    width: '100%',
-                    verticalAlign: 'top',
-                    spacing: 30,
-                  }}
-                >
-                  <div style={{ width: 200 }}>
-                    <Vertical
-                      view={view}
-                      small={
-                        fields[0].type === 'boolean' ||
-                        (fields[0].options &&
-                          fields[0].style.layout !== 'modal')
-                      }
-                      style={style}
-                    >
-                      <Question style={style}>
-                        {text}
-                        {fields.some(f => !f.optional) && (
-                          <span style={style.required}>&nbsp;*</span>
-                        )}
-                      </Question>
-                      {prompt && <Prompt style={style}>{prompt}</Prompt>}
-                    </Vertical>
-                  </div>
-                  {next()}
-                </Div>
-              )}
-            </Div>
-          ) : (
-            next()
-          ),
-      ),
+      render(({ next, ...props }) => (
+        <Question {...props} style={style}>
+          {next()}
+        </Question>
+      )),
       branch(
         ({ fields }) => fields.length > 1,
         render(
@@ -153,5 +87,5 @@ export default (blockProps, blockHOC, style, admin, fieldHOC) => {
         map(({ fields }) => fields[0]),
       ),
     )(Field),
-  ] as [string[], Comp];
+  ) as Comp<FormProps>;
 };

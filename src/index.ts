@@ -1,10 +1,9 @@
-export { default as createBlock } from './createBlock';
-export { default as createForm } from './createForm';
+export { default as Spinner } from './components/Spinner';
+export { default as StickyFooter } from './components/StickyFooter';
+export { default as createForm } from './forms/createForm';
+export { default as getData } from './generic/getData';
+export { default as TableLinks } from './tableLinks';
 export { default as cssBase } from './cssBase';
 export { default as download } from './download';
-export { default as getData } from './getData';
-export { default as Field } from './Field';
 export { Breadcrumbs, Link, Route, routerPure, withRouter } from './router';
-export { default as StickyFooter } from './StickyFooter';
-export { default as Spinner } from './Spinner';
-export { default as TableLinks } from './tableLinks';
+export { default as withWidth } from './withWidth';

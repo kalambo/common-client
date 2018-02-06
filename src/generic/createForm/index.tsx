@@ -35,13 +35,15 @@ export interface FormProps {
 export default function createForm<T = {}>(
   container: Comp<{
     blocks: React.ReactElement<any>[][];
-    HeightWrap: Comp;
+    setHeightElem: (elem: HTMLElement) => null;
+    height: number | null;
     invalid: boolean;
     attempted: boolean;
     submit: () => Promise<void>;
     [key: string]: any;
   }>,
-  block: Comp | [string[], Comp],
+  blockProps: string[],
+  block: Comp,
 ) {
   const Block = branch(
     ({ fields }) => fields,
@@ -62,7 +64,7 @@ export default function createForm<T = {}>(
       })),
     ),
     map(omit('fields', 'stores', 'state')),
-  )(Array.isArray(block) ? block[1] : block);
+  )(block);
 
   return compose<FormProps & T>(
     map(({ objects, blocks, ...props }) => ({
@@ -81,7 +83,7 @@ export default function createForm<T = {}>(
           if (props) {
             const index = ++count;
             const info = await prepareFields(
-              Array.isArray(block) ? block[0] : [],
+              blockProps,
               props.objects,
               props.blocks,
               stores,
@@ -110,19 +112,18 @@ export default function createForm<T = {}>(
     ),
     enclose(
       ({ setState }) => {
-        const setElem = elem => setState({ elem });
-        const HeightWrap = ({ children }) => (
-          <div ref={setElem}>{children}</div>
-        );
-        const setHeight = height => setState({ height });
-        return (props, state) => ({
+        let heightElem: HTMLElement | null = null;
+        const setHeightElem = elem => (heightElem = elem);
+        const lockHeight = () =>
+          setState({ height: heightElem && heightElem.offsetHeight });
+        return (props, { height }) => ({
           ...props,
-          ...state,
-          HeightWrap,
-          setHeight,
+          height,
+          setHeightElem,
+          lockHeight,
         });
       },
-      { elem: null, height: null },
+      { height: null as number | null },
     ),
     branch(
       ({ fields }) => fields,
@@ -150,14 +151,13 @@ export default function createForm<T = {}>(
               onCommit,
               onSubmit,
               onError,
-              elem,
-              setHeight,
+              lockHeight,
               setProcessing,
               ...props
             }) => {
               const submit = async () => {
                 if (!props.state.some(s => !s.hidden && s.invalid)) {
-                  if (elem) setHeight(elem.offsetHeight);
+                  lockHeight();
                   setProcessing(true);
                   const visibleFields = props.fields.filter(
                     (_, i) => !props.state[i].hidden,
@@ -264,20 +264,7 @@ export default function createForm<T = {}>(
     branch(
       ({ fields, processing, state }) => !fields || processing || !state,
       render(({ props, height }) =>
-        React.createElement(container, {
-          HeightWrap: ({ style, children }) => (
-            <div
-              style={{
-                position: 'relative',
-                ...style,
-                height: height || style.height || 'auto',
-              }}
-            >
-              {children}
-            </div>
-          ),
-          ...props,
-        }),
+        React.createElement(container, { height, ...props }),
       ),
     ),
     map(({ state, ...props }) => ({
@@ -299,7 +286,7 @@ export default function createForm<T = {}>(
       blocks,
       stores,
       props,
-      HeightWrap,
+      setHeightElem,
       processing,
       submit,
       onKeyDown,
@@ -328,7 +315,7 @@ export default function createForm<T = {}>(
             ),
           )
           .filter(blockComps => blockComps.some(c => c)),
-        HeightWrap,
+        setHeightElem,
         attempted: processing !== null,
         submit,
         onKeyDown,

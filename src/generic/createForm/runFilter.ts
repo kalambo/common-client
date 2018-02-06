@@ -1,13 +1,23 @@
 import * as deepEqual from 'deep-equal';
 import { noUndef, Obj } from 'common';
-
 type FilterOp = '=' | '!=' | '<' | '<=' | '>' | '>=' | 'in';
 
 const isEqual = (v1: any, v2: any) => deepEqual(v1, v2, { strict: true });
 
 const runFilterValue = (value: any, op: FilterOp, filterValue: any) => {
-  if (op === '=') return isEqual(value, filterValue);
-  if (op === '!=') return !isEqual(value, filterValue);
+  if (value === undefined) return false;
+  if (op === '=') {
+    return (
+      isEqual(value, filterValue) ||
+      (Array.isArray(value) && value.some(v => isEqual(v, filterValue)))
+    );
+  }
+  if (op === '!=') {
+    return (
+      !isEqual(value, filterValue) &&
+      (!Array.isArray(value) || value.every(v => !isEqual(v, filterValue)))
+    );
+  }
   if (op === '<') return value < filterValue;
   if (op === '<=') return value <= filterValue;
   if (op === '>') return value > filterValue;

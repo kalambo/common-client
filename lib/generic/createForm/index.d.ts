@@ -16,9 +16,10 @@ export interface FormProps {
 }
 export default function createForm<T = {}>(container: Comp<{
     blocks: React.ReactElement<any>[][];
-    HeightWrap: Comp;
+    setHeightElem: (elem: HTMLElement) => null;
+    height: number | null;
     invalid: boolean;
     attempted: boolean;
     submit: () => Promise<void>;
     [key: string]: any;
-}>, block: Comp | [string[], Comp]): Comp<FormProps & T>;
+}>, blockProps: string[], block: Comp): Comp<FormProps & T>;
