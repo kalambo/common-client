@@ -1,25 +1,32 @@
 import * as React from 'react';
 import { css, Div, Txt } from 'elmnt';
-import { branch, Comp, compose, map, render, restyle } from 'mishmash';
+import { Comp, compose, map, omit, render, restyle } from 'mishmash';
 
 import createForm, { FormProps } from '../generic/createForm';
 
 import FieldBase from './Field';
 import Question from './Question';
 
-const Column = map(
+const Connect = map(
   restyle([
-    ['mergeKeys', 'column'],
     ['filter', ...css.groups.text],
-    ['merge', { padding: '8px 15px' }],
+    ['merge', { textAlign: 'center', width: 30, margin: '0 -15px' }],
   ]),
+)(Txt);
+
+const Column = map(
+  restyle([['mergeKeys', 'column'], ['filter', ...css.groups.text, 'padding']]),
 )(Txt);
 
 export default (container, blockProps, blockHOC, fieldHOC, style, admin) => {
   const Field = fieldHOC(FieldBase);
+  const RowField = map(
+    restyle(['alt'], alt => [['mergeKeys', { alt }]]),
+    omit('alt'),
+  )(Field);
   return createForm(
     container,
-    [...blockProps, 'text', 'prompt', 'vertical', 'bar', 'view'],
+    [...blockProps, 'text', 'prompt', 'vertical', 'connect', 'columns', 'view'],
     compose(
       blockHOC,
       map(({ fields, attempted, ...props }) => ({
@@ -38,53 +45,57 @@ export default (container, blockProps, blockHOC, fieldHOC, style, admin) => {
         ...props,
         ...(admin ? { prompt: undefined, vertical: false } : {}),
       })),
-      render(({ next, ...props }) => (
+      render(({ inner, ...props }) => (
         <Question {...props} style={style}>
-          {next()}
+          {inner()}
         </Question>
       )),
-      branch(
-        ({ fields }) => fields.length > 1,
-        render(
-          ({ fields, bar }) =>
-            bar ? (
-              <div>
-                <Div style={{ layout: 'bar', width: '100%' }}>
-                  <div style={{ width: '50%', paddingRight: 5 }}>
-                    <Field {...fields[0]} style={fields[0].style} />
-                  </div>
-                  <div style={{ width: '50%', paddingLeft: 5 }}>
-                    <Field {...fields[1]} style={fields[1].style} />
-                  </div>
-                </Div>
-              </div>
-            ) : fields[0].style.layout === 'table' ? (
-              <table style={{ width: '100%' }}>
-                <tbody>
+      render(
+        ({ fields, connect, columns }) =>
+          fields[0].style.layout === 'bar' ? (
+            <div>
+              <Div style={{ layout: 'bar', width: '100%' }}>
+                <div style={{ width: '50%', paddingRight: connect ? 20 : 5 }}>
+                  <Field {...fields[0]} />
+                </div>
+                {connect && (
+                  <Connect style={fields[0].style}>{connect}</Connect>
+                )}
+                <div style={{ width: '50%', paddingLeft: connect ? 20 : 5 }}>
+                  <Field {...fields[1]} />
+                </div>
+              </Div>
+            </div>
+          ) : fields[0].style.layout === 'table' ? (
+            <table style={{ width: '100%' }}>
+              <tbody>
+                {columns && (
                   <tr>
                     <td />
-                    {(fields[0].labels || fields[0].options).map(l => (
-                      <td style={{ verticalAlign: 'middle' }} key={l}>
-                        <Column style={style}>{l}</Column>
+                    {columns.map(c => (
+                      <td style={{ verticalAlign: 'middle' }} key={c}>
+                        <Column style={fields[0].style}>{c}</Column>
                       </td>
                     ))}
                   </tr>
-                  {fields.map((field, i) => (
-                    <Field
-                      {...field}
-                      labels={field.options.map(() => '')}
-                      key={i}
-                    />
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <Div style={{ spacing: 10 }}>
-                {fields.map((field, i) => <Field {...field} key={i} />)}
-              </Div>
-            ),
-        ),
-        map(({ fields }) => fields[0]),
+                )}
+                {fields.map((field, i) => (
+                  <RowField
+                    {...field}
+                    alt={i % 2 === 0}
+                    {...(columns
+                      ? { labels: field.options.map(() => '') }
+                      : {})}
+                    key={i}
+                  />
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <Div style={{ spacing: 10 }}>
+              {fields.map((field, i) => <Field {...field} key={i} />)}
+            </Div>
+          ),
       ),
     )(Field),
   ) as Comp<FormProps>;

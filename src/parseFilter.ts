@@ -2,6 +2,8 @@ import * as peg from 'pegjs';
 import { Field, fieldIs, Scalar } from 'rgo';
 import { Obj, root } from 'common';
 
+const simpleField = f => f.replace(/\s/g, '').toLowerCase();
+
 const parser = peg.generate(String.raw`
 
 start
@@ -34,9 +36,9 @@ statement
 / f:field { return [[f, '!=', 'null']]; }
 
 field
-= '\'' f:[a-z0-9-_]i+ '\'' { return f.join(''); }
-/ '"' f:[a-z0-9-_]i+ '"' { return f.join(''); }
-/ f:[a-z0-9-_]i+ { return f.join(''); }
+= '\'' f:[a-z0-9-_ ]i+ '\'' { return f.join('').trim(); }
+/ '"' f:[a-z0-9-_ ]i+ '"' { return f.join('').trim(); }
+/ f:[a-z0-9-_ ]i+ { return f.join('').trim(); }
 
 op
 = '!=' / '<=' / '>=' / '=' / '<' / '>' { return text(); }
@@ -88,7 +90,13 @@ const parseFilterValues = (filter: any[], fields: Obj<Field>) => {
       ...filter.slice(1).map(f => parseFilterValues(f, fields)),
     ];
   }
-  const field = fields[filter[0]];
+  const simple = simpleField(filter[0]);
+  const fieldKey = fields[filter[0]]
+    ? filter[0]
+    : Object.keys(fields).find(
+        k => simpleField(fields[k].meta.name) === simple,
+      );
+  const field = fields[fieldKey];
   if (!field || !fieldIs.scalar(field)) throw new Error('Invalid field');
   const op = filter.length === 3 ? filter[1] : '=';
   const value = filter[filter.length - 1];
@@ -105,14 +113,14 @@ const parseFilterValues = (filter: any[], fields: Obj<Field>) => {
   ) {
     return [
       op === '=' ? 'OR' : 'AND',
-      [[filter[0], op, null], [filter[0], op, false]],
+      [[fieldKey, op, null], [fieldKey, op, false]],
     ];
   }
   const parsedValue = parseValue(value, field.scalar);
   if (parsedValue === undefined || parsedValue !== parsedValue) {
     throw new Error('Invalid value');
   }
-  return [filter[0], op, parsedValue];
+  return [fieldKey, op, parsedValue];
 };
 
 export default function parseFilter(filter: string, type: string) {

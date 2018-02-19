@@ -6,15 +6,15 @@ import {
   memoize,
   renderLifted,
   restyle,
+  Use,
   withHover,
-  Wrap,
 } from 'mishmash';
 import { Div, Input, Txt } from 'elmnt';
 import { root } from 'common';
 import * as debounce from 'lodash.debounce';
 import st from 'style-transform';
 
-import parseFilter from './parseFilter';
+import parseFilter from '../parseFilter';
 
 const getFieldHelp = field => {
   if (field.meta && field.meta.options) {
@@ -169,32 +169,29 @@ export default compose(
       help: [['mergeKeys', 'help']],
     }),
   ),
-  enclose(
-    ({ initialProps, onProps, setState }) => {
-      let onChangeBase = initialProps.onChange;
-      const debounceChange = debounce(v => onChangeBase(v), 1000);
-      let mounted = true;
-      root.rgo.query().then(() => mounted && setState({ schemaLoaded: true }));
-      onProps(props => {
-        if (props) onChangeBase = props.onChange;
-        else mounted = false;
-      });
-      const toggleIsOpen = () =>
-        setState(({ isOpen }) => ({ isOpen: !isOpen }));
-      return (props, state) => ({
-        ...props,
-        ...state,
-        toggleIsOpen,
-        setText: text => {
-          const parsedValue = parseFilter(text, props.type);
-          const filter = !parsedValue ? parsedValue : memoize(parsedValue);
-          setState({ text, filter });
-          debounceChange(filter);
-        },
-      });
-    },
-    { text: null, filter: null, isOpen: false, schemaLoaded: false },
-  ),
+  enclose(({ initialProps, onProps, setState }) => {
+    setState({ text: null, filter: null, isOpen: false, schemaLoaded: false });
+    let onChangeBase = initialProps.onChange;
+    const debounceChange = debounce(v => onChangeBase(v), 1000);
+    let mounted = true;
+    root.rgo.query().then(() => mounted && setState({ schemaLoaded: true }));
+    onProps(props => {
+      if (props) onChangeBase = props.onChange;
+      else mounted = false;
+    });
+    const toggleIsOpen = () => setState(({ isOpen }) => ({ isOpen: !isOpen }));
+    return (props, state) => ({
+      ...props,
+      ...state,
+      toggleIsOpen,
+      setText: text => {
+        const parsedValue = parseFilter(text, props.type);
+        const filter = !parsedValue ? parsedValue : memoize(parsedValue);
+        setState({ text, filter });
+        debounceChange(filter);
+      },
+    });
+  }),
   renderLifted(
     ({ type, toggleOpen, style }) => (
       <Help type={type} toggleOpen={toggleOpen} style={style.help} />
@@ -222,7 +219,7 @@ export default compose(
       invalid={text && !filter}
     />
     <div style={{ width: style.helpLabel.width }}>
-      <Wrap hoc={withHover}>
+      <Use hoc={withHover}>
         {({ isHovered: hover, hoverProps }) => (
           <Txt
             onClick={toggleOpen}
@@ -240,7 +237,7 @@ export default compose(
             Open help
           </Txt>
         )}
-      </Wrap>
+      </Use>
     </div>
   </Div>
 ));

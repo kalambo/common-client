@@ -16,8 +16,8 @@ import {
   pure,
   render,
   restyle,
+  Use,
   withHover,
-  Wrap,
 } from 'mishmash';
 import { Div, Icon, Txt } from 'elmnt';
 import st from 'style-transform';
@@ -28,8 +28,8 @@ export const routerPure = compose(withRouterBase, pure);
 
 export const withRouter = (basename?) =>
   compose(
-    render(({ next }) => (
-      <BrowserRouter basename={basename}>{next()}</BrowserRouter>
+    render(({ inner }) => (
+      <BrowserRouter basename={basename}>{inner()}</BrowserRouter>
     )),
     withRouterBase,
     enclose(({ setState }) => {
@@ -46,7 +46,7 @@ export const withRouter = (basename?) =>
               }),
         setBreadcrumb,
       });
-    }, {}),
+    }),
     context('setBreadcrumb', ({ setBreadcrumb }) => setBreadcrumb),
     map(omit('setBreadcrumb', 'match', 'history')),
   );
@@ -152,7 +152,7 @@ export const Breadcrumbs = map(
           <Txt style={style.base}>{label}</Txt>
         ) : (
           <RouterLink to={path}>
-            <Wrap hoc={withHover}>
+            <Use hoc={withHover}>
               {({ isHovered: hover, hoverProps }) => (
                 <Txt
                   {...hoverProps}
@@ -161,7 +161,7 @@ export const Breadcrumbs = map(
                   {label}
                 </Txt>
               )}
-            </Wrap>
+            </Use>
           </RouterLink>
         )}
       </Div>

@@ -31,17 +31,15 @@ export default compose(
       filter: [['mergeKeys', 'filter']],
     }),
   ),
-  enclose(
-    ({ setState }) => {
-      const setFilter = filter => setState({ filter });
-      return (props, state) => ({ ...props, ...state, setFilter });
-    },
-    { filter: null },
-  ),
-  render(({ rows, setFilter, style, next }) => (
+  enclose(({ setState }) => {
+    setState({ filter: null });
+    const setFilter = filter => setState({ filter });
+    return (props, state) => ({ ...props, ...state, setFilter });
+  }),
+  render(({ rows, setFilter, style, inner }) => (
     <Div style={{ spacing: 15 }}>
       <Filter type={rows[0].name} onChange={setFilter} style={style.filter} />
-      {next()}
+      {inner()}
     </Div>
   )),
   getData(({ rows, filter }) => ({

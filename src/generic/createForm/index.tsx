@@ -6,7 +6,6 @@ import {
   enclose,
   map,
   memoize,
-  methodWrap,
   omit,
   pure,
   render,
@@ -73,81 +72,74 @@ export default function createForm<T = {}>(
       blocks: memoize(blocks),
     })),
     pure,
-    enclose(
-      ({ initialProps, onProps, setState }) => {
-        const stores = createStores();
+    enclose(({ initialProps, onProps, setState }) => {
+      setState({ info: {} });
+      const stores = createStores();
 
-        let fields;
-        let count = 0;
-        const prepare = async props => {
-          if (props) {
-            const index = ++count;
-            const info = await prepareFields(
-              blockProps,
-              props.objects,
-              props.blocks,
-              stores,
-            );
-            if (index === count) {
-              fields = info.fields;
-              setState({ info });
-            }
-          } else {
-            root.rgo.set(
-              ...(fields || [])
-                .filter(f => f.key.store === 'rgo')
-                .map(f => ({ key: f.key.key })),
-            );
+      let fields;
+      let count = 0;
+      const prepare = async props => {
+        if (props) {
+          const index = ++count;
+          const info = await prepareFields(
+            blockProps,
+            props.objects,
+            props.blocks,
+            stores,
+          );
+          if (index === count) {
+            fields = info.fields;
+            setState({ info });
           }
-        };
-        setTimeout(() => prepare(initialProps));
-        onProps(prepare);
+        } else {
+          root.rgo.set(
+            ...(fields || [])
+              .filter(f => f.key.store === 'rgo')
+              .map(f => ({ key: f.key.key })),
+          );
+        }
+      };
+      setTimeout(() => prepare(initialProps));
+      onProps(prepare);
 
-        return (
-          { objects: _a, blocks: _b, onCommit, onError, onSubmit, ...props },
-          { info },
-        ) => ({ onCommit, onError, onSubmit, props, stores, ...info });
-      },
-      { info: {} },
-    ),
-    enclose(
-      ({ setState }) => {
-        let heightElem: HTMLElement | null = null;
-        const setHeightElem = elem => (heightElem = elem);
-        const lockHeight = () =>
-          setState({ height: heightElem && heightElem.offsetHeight });
-        return (props, { height }) => ({
-          ...props,
-          height,
-          setHeightElem,
-          lockHeight,
-        });
-      },
-      { height: null as number | null },
-    ),
+      return (
+        { objects: _a, blocks: _b, onCommit, onError, onSubmit, ...props },
+        { info },
+      ) => ({ onCommit, onError, onSubmit, props, stores, ...info });
+    }),
+    enclose(({ setState }) => {
+      setState({ height: null as number | null });
+      let heightElem: HTMLElement | null = null;
+      const setHeightElem = elem => (heightElem = elem);
+      const lockHeight = () =>
+        setState({ height: heightElem && heightElem.offsetHeight });
+      return (props, { height }) => ({
+        ...props,
+        height,
+        setHeightElem,
+        lockHeight,
+      });
+    }),
     branch(
       ({ fields }) => fields,
       compose(
-        enclose(
-          ({ setState, onProps }) => {
-            let mounted = true;
-            onProps(props => !props && (mounted = false));
-            const setProcessing = processing =>
-              mounted && setState({ processing });
-            return (props, { processing }) => ({
-              ...props,
-              processing,
-              setProcessing,
-            });
-          },
-          { processing: null },
-        ),
+        enclose(({ setState, onProps }) => {
+          setState({ processing: null });
+          let mounted = true;
+          onProps(props => !props && (mounted = false));
+          const setProcessing = processing =>
+            mounted && setState({ processing });
+          return (props, { processing }) => ({
+            ...props,
+            processing,
+            setProcessing,
+          });
+        }),
         getState,
         branch(
           ({ state }) => state,
-          enclose(() => {
-            const methods = methodWrap();
-            return ({
+          enclose(
+            ({ methods }) => ({
               onCommit,
               onSubmit,
               onError,
@@ -256,8 +248,8 @@ export default function createForm<T = {}>(
                   },
                 }),
               };
-            };
-          }),
+            },
+          ),
         ),
       ),
     ),

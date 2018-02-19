@@ -6,8 +6,8 @@ import {
   map,
   render,
   restyle,
+  Use,
   withHover,
-  Wrap,
 } from 'mishmash';
 import { getValueString } from 'common';
 import st from 'style-transform';
@@ -20,7 +20,7 @@ const FileButton = compose(
     href={`${process.env.DATA_URL!}/storage/file/${value.split(':')[0]}`}
     target="_blank"
   >
-    <Wrap hoc={withHover}>
+    <Use hoc={withHover}>
       {({ isHovered: hover, hoverProps }) => (
         <Txt
           {...hoverProps}
@@ -31,20 +31,20 @@ const FileButton = compose(
           View file
         </Txt>
       )}
-    </Wrap>
+    </Use>
   </a>
 ));
 
 export default compose(
   branch(
     ({ type, admin }) => type === 'file' && admin,
-    render(({ value, style, next }) => (
+    render(({ value, style, inner }) => (
       <div style={{ width: '100%' }}>
         <Div style={{ spacing: 40, layout: 'bar', width: '100%' }}>
           <div style={{ width: 150 }}>
             <FileButton value={value} style={style} />
           </div>
-          {next()}
+          {inner()}
         </Div>
       </div>
     )),

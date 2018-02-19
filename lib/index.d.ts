@@ -5,5 +5,7 @@ export { default as getData } from './generic/getData';
 export { default as TableLinks } from './tableLinks';
 export { default as cssBase } from './cssBase';
 export { default as download } from './download';
+export { default as parseFilter } from './parseFilter';
 export { Breadcrumbs, Link, Route, routerPure, withRouter } from './router';
+export { getValueString } from './utils';
 export { default as withWidth } from './withWidth';
