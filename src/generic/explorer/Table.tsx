@@ -15,6 +15,7 @@ export default m()
     div: [
       ['filter', 'borderRight', 'borderBottom', 'borderLeft'],
       ['scale', { borderWidth: 2 }],
+      ['scale', { borderLeftWidth: 5 }],
     ],
     pad: [
       [

@@ -9,18 +9,22 @@ import jsonUrl from './jsonUrl';
 import Table from './Table';
 
 const initStore = (printFilter, store, fields, type?, path?) =>
-  fields.filter(f => typeof f !== 'string').forEach((f, i) => {
-    const newType = type ? (root.rgo.schema[type][f.name] as any).type : f.name;
-    const newPath = path ? `${path}.${i}` : `${i}`;
-    if (f.filter) {
-      store.set(
-        `${newPath}_filter`,
-        printFilter(f.filter, root.rgo.schema[newType]),
-      );
+  fields.forEach((f, i) => {
+    if (typeof f !== 'string') {
+      const newType = type
+        ? (root.rgo.schema[type][f.name] as any).type
+        : f.name;
+      const newPath = path ? `${path}.${i}` : `${i}`;
+      if (f.filter) {
+        store.set(
+          `${newPath}_filter`,
+          printFilter(f.filter, root.rgo.schema[newType]),
+        );
+      }
+      store.set(`${newPath}_start`, (f.start || 0) + 1);
+      if (f.end) store.set(`${newPath}_end`, f.end);
+      initStore(printFilter, store, f.fields || [], newType, newPath);
     }
-    store.set(`${newPath}_start`, (f.start || 0) + 1);
-    if (f.end) store.set(`${newPath}_end`, f.end);
-    initStore(printFilter, store, f.fields || [], newType, newPath);
   });
 
 const addAliases = (fields, alias = '') =>
@@ -39,7 +43,9 @@ const addIds = fields =>
     if (typeof f === 'string') return f;
     return {
       ...f,
-      fields: f.fields.includes('id') ? f.fields : ['id', ...f.fields],
+      fields: f.fields.includes('id')
+        ? addIds(f.fields)
+        : ['id', ...addIds(f.fields)],
     };
   });
 
@@ -94,11 +100,11 @@ export default m()
       if (addPath) {
         store.set(`${addPath}_filter`, '');
         store.set(`${addPath}_start`, 1);
-        store.set(`${addPath}_end`, 100);
+        store.set(`${addPath}_end`, addPath.split('.').length === 1 ? 100 : 10);
       }
 
       const aliasQuery = addAliases(q);
-      setState({ query: aliasQuery });
+      setState({ query: aliasQuery, linkQuery: q });
       if (unsubscribe) unsubscribe();
       unsubscribe = root.rgo.query(...addIds(aliasQuery), data => {
         if (!data) {
@@ -178,13 +184,13 @@ export default m()
   .branch(
     ({ query, data }) => !query || !data,
     m().render(({ loader }) => loader()),
-  )(({ context, query, fetching, data, style }) => (
+  )(({ context, query, fetching, data, style, linkQuery }) => (
   <div
     style={{
       position: 'relative',
       width: '100%',
       height: '100%',
-      paddingBottom: 25 + style.footer.height,
+      paddingBottom: 10 + style.footer.height,
     }}
   >
     <div
@@ -201,7 +207,7 @@ export default m()
             display: 'inline-block',
             verticalAlign: 'top',
             height: '100%',
-            paddingLeft: i !== 0 && 25,
+            paddingLeft: i !== 0 && 30,
           }}
           key={i}
         >
@@ -216,6 +222,12 @@ export default m()
         </div>
       ))}
     </div>
-    <Footer context={context} query={query} data={data} style={style.footer} />
+    <Footer
+      context={context}
+      query={query}
+      linkQuery={linkQuery}
+      data={data}
+      style={style.footer}
+    />
   </div>
 ));

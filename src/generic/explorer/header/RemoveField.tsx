@@ -11,6 +11,7 @@ export default m().enhance(({ methods }) => ({ path, ...props }) => ({
     onMouseLeave: () => props.context.setActive(null),
     onClick: () => {
       props.context.query.remove(path);
+      props.context.setActive(null);
     },
   }),
 }))(({ relation, active, onMouseMove, onMouseLeave, onClick, style }) => (

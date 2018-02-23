@@ -1,4 +1,5 @@
 import { root } from 'common';
+import { fieldIs } from 'rgo';
 
 const fieldToRows = (
   context,
@@ -40,10 +41,15 @@ const fieldToRows = (
             ? (root.rgo.schema[type][f.name] as any).type
             : f.name;
           const newRows = fieldToRows(context, f, newType, newPath);
+          const fieldSchema = type && root.rgo.schema[type][f.name];
           rows[0].push(
             {
               name: '#1',
               type: type,
+              isList:
+                !fieldSchema ||
+                fieldIs.foreignRelation(fieldSchema) ||
+                fieldSchema.isList,
               path: newPath,
               firstCol: i === 0 && !path,
             },

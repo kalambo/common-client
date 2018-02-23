@@ -16,6 +16,7 @@ const dataToRows = (
       if (typeof f === 'string') {
         const value = noUndef(values && values[f]);
         const editable =
+          values &&
           f !== '' &&
           !f.startsWith('#') &&
           f !== 'id' &&

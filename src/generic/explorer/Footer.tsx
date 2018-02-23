@@ -108,7 +108,11 @@ export default m()
               ).map(k => k.split('.')) as [string, string, string][]),
             );
             firstProps.context.store.set('initial', {});
-          } catch (error) {}
+          } catch (error) {
+            alert(
+              'Save failed. You may not have permission to edit these fields.',
+            );
+          }
         },
         clear,
         reset: () => {
@@ -117,7 +121,9 @@ export default m()
         },
         permalink: () => {
           window.open(
-            `${firstProps.context.permalink}?${jsonUrl.stringify(props.query)}`,
+            `${firstProps.context.permalink}?${jsonUrl.stringify(
+              props.linkQuery,
+            )}`,
           );
         },
         download: () => {

@@ -333,36 +333,38 @@ export default m()
                 />
               </div>
             )}
-          {name === '#1' && (
-            <PageField
-              up
-              context={context}
-              path={path}
-              active={isPathPageUp}
-              style={style}
-            />
-          )}
-          {name === '#1' && (
-            <PageField
-              context={context}
-              path={path}
-              active={isPathPageDown}
-              style={style}
-            />
-          )}
+          {name === '#1' &&
+            isList && (
+              <>
+                <PageField
+                  up
+                  context={context}
+                  path={path}
+                  active={isPathPageUp}
+                  style={style}
+                />
+                <PageField
+                  context={context}
+                  path={path}
+                  active={isPathPageDown}
+                  style={style}
+                />
+              </>
+            )}
         </div>
       )}
 
-      {name === '#1' && (
-        <LimitField
-          context={context}
-          live={live}
-          path={path}
-          active={isPathLimit}
-          focused={isPathLimit && focused}
-          style={style}
-        />
-      )}
+      {name === '#1' &&
+        isList && (
+          <LimitField
+            context={context}
+            live={live}
+            path={path}
+            active={isPathLimit}
+            focused={isPathLimit && focused}
+            style={style}
+          />
+        )}
       {!name.startsWith('#') && (
         <Div style={{ spacing: style.base.paddingRight * 1.5, layout: 'bar' }}>
           {name === '' && path !== '0' && path.indexOf('.') === -1 ? (
