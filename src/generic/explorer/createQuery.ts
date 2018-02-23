@@ -64,7 +64,11 @@ export default (initial, onUpdate) => {
       const parent = splitPath
         .slice(0, -1)
         .reduce((res, i) => res.fields[i], { fields: query });
-      const fieldSchema = type && root.rgo.schema[type][field];
+      const fieldSchema =
+        type &&
+        (root.rgo.schema[type][field] || {
+          scalar: 'string',
+        });
       const isList =
         !fieldSchema ||
         fieldIs.foreignRelation(fieldSchema) ||
@@ -82,7 +86,7 @@ export default (initial, onUpdate) => {
               }
             : { name: field, fields: [] },
       );
-      onUpdate(query, (!type || fieldIs.foreignRelation(fieldSchema)) && path);
+      onUpdate(query, (!fieldSchema || !fieldIs.scalar(fieldSchema)) && path);
     },
     remove: path => {
       const splitPath = path.split('.');

@@ -16,10 +16,7 @@ const initStore = (printFilter, store, fields, type?, path?) =>
         : f.name;
       const newPath = path ? `${path}.${i}` : `${i}`;
       if (f.filter) {
-        store.set(
-          `${newPath}_filter`,
-          printFilter(f.filter, root.rgo.schema[newType]),
-        );
+        store.set(`${newPath}_filter`, printFilter(f.filter, newType));
       }
       store.set(`${newPath}_start`, (f.start || 0) + 1);
       if (f.end) store.set(`${newPath}_end`, f.end);
@@ -92,30 +89,25 @@ export default m()
   .enhance(({ firstProps, onProps, setState }) => {
     const store = createStore();
 
-    const initial =
-      firstProps.query || jsonUrl.parse(location.search.slice(1)) || [];
-    initStore(firstProps.config.printFilter, store, initial);
     let unsubscribe;
-    const query = createQuery(initial, (q, addPath) => {
-      if (addPath) {
-        store.set(`${addPath}_filter`, '');
-        store.set(`${addPath}_start`, 1);
-        store.set(`${addPath}_end`, addPath.split('.').length === 1 ? 100 : 10);
-      }
-
-      const aliasQuery = addAliases(q);
-      setState({ query: aliasQuery, linkQuery: q });
-      if (unsubscribe) unsubscribe();
-      unsubscribe = root.rgo.query(...addIds(aliasQuery), data => {
-        if (!data) {
-          setState({ fetching: true });
-        } else {
-          setState({ data: { ...data } }, () =>
-            setTimeout(() => setState({ fetching: false })),
-          );
-        }
-      });
-    });
+    const query = createQuery(
+      firstProps.query || jsonUrl.parse(location.search.slice(1)) || [],
+      q => {
+        initStore(firstProps.config.printFilter, store, q);
+        const aliasQuery = addAliases(q);
+        setState({ query: aliasQuery, linkQuery: q });
+        if (unsubscribe) unsubscribe();
+        unsubscribe = root.rgo.query(...addIds(aliasQuery), data => {
+          if (!data) {
+            setState({ fetching: true });
+          } else {
+            setState({ data: { ...data } }, () =>
+              setTimeout(() => setState({ fetching: false })),
+            );
+          }
+        });
+      },
+    );
     onProps(props => !props && unsubscribe());
 
     const widthElems = {};
