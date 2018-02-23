@@ -77,8 +77,8 @@ const dataToRows = (
           res[rows.length] = [
             ...(res[rows.length] || []),
             ...Array.from({ length: rows[0].length }).map((_, j) => ({
-              ...rows[0][j],
-              text: undefined,
+              type: rows[0][j].type,
+              field: rows[0][j].field,
               span: height - rows.length,
               first: false,
               empty: true,
