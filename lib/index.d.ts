@@ -2,6 +2,7 @@ export { default as Spinner } from './components/Spinner';
 export { default as StickyFooter } from './components/StickyFooter';
 export { default as config } from './config';
 export { default as createForm } from './forms/createForm';
+export { default as createBaseForm } from './generic/createForm';
 export { default as getData } from './generic/getData';
 export { default as download } from './generic/download';
 export { default as Explorer } from './generic/explorer';

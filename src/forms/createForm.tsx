@@ -17,23 +17,46 @@ const Column = m().style([
   ['filter', ...css.groups.text, 'padding'],
 ])(Txt);
 
-export default (container, blockProps, blockHOC, fieldHOC, style, admin) => {
-  const Field = fieldHOC(FieldBase);
+const ErrorMessage = m().style([
+  ['mergeKeys', 'errorMessage'],
+  ['filter', ...css.groups.text],
+])(Txt);
+
+export default function<T>(
+  container,
+  blockProps,
+  blockHOC,
+  fieldHOC,
+  style,
+  admin,
+  fileServer = process.env.DATA_URL,
+) {
+  const Field = fieldHOC(FieldBase(fileServer));
   const RowField = m()
     .style(['alt'], alt => [['mergeKeys', { alt }]])
     .map(omit('alt'))(Field);
   return createForm(
     container,
-    [...blockProps, 'text', 'prompt', 'vertical', 'connect', 'columns', 'view'],
+    [
+      ...blockProps,
+      'text',
+      'prompt',
+      'errorMessage',
+      'vertical',
+      'connect',
+      'columns',
+      'view',
+    ],
     m()
       .merge(blockHOC)
       .map(({ fields, attempted, ...props }) => ({
         fields: fields.map(
-          ({ scalar, isList, type: _, file, invalid, ...field }) => ({
+          ({ scalar, isList, type, file, invalid, ...field }) => ({
             ...field,
             type: `${file ? 'file' : scalar || 'string'}${
               isList && field.index === undefined ? 'list' : ''
             }`,
+            relation: type,
             invalid: invalid && (admin || attempted),
             style: { ...style, ...field.style },
             view: props.view,
@@ -48,6 +71,17 @@ export default (container, blockProps, blockHOC, fieldHOC, style, admin) => {
           {next()}
         </Question>
       ))
+      .branch(
+        ({ errorMessage }) => errorMessage,
+        m().render(({ errorMessage, fields, next }) => (
+          <Div style={{ spacing: 15 }}>
+            {next()}
+            {fields.some(f => f.invalid) && (
+              <ErrorMessage style={style}>{errorMessage}</ErrorMessage>
+            )}
+          </Div>
+        )),
+      )
       .render(
         ({ fields, connect, columns }) =>
           fields[0].style.layout === 'bar' ? (
@@ -95,5 +129,5 @@ export default (container, blockProps, blockHOC, fieldHOC, style, admin) => {
             </Div>
           ),
       )(Field),
-  ) as Comp<FormProps>;
-};
+  ) as Comp<FormProps & T>;
+}

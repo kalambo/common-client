@@ -137,9 +137,9 @@ element-resize-detector@^1.1.13:
   dependencies:
     batch-processor "^1.0.0"
 
-elmnt@^0.5.2:
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/elmnt/-/elmnt-0.5.2.tgz#f6c39e9c89d665c29bb554f4aab570e8ad89fab9"
+elmnt@^0.5.3:
+  version "0.5.3"
+  resolved "https://registry.yarnpkg.com/elmnt/-/elmnt-0.5.3.tgz#c9245f59673c47ba61e0b6fce573b490d25edf77"
   dependencies:
     "@types/react" "^16.0.38"
     commonmark "^0.28.1"

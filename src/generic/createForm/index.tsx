@@ -17,9 +17,9 @@ export interface FormProps {
     initial?: Obj;
   }>;
   blocks: any[][];
-  onCommit?: (values: Obj) => Obj | void | Promise<Obj | void>;
-  onError?: (values: Obj) => Obj | void | Promise<Obj | void>;
-  onSubmit?: (values: Obj) => Obj | void | Promise<Obj | void>;
+  onCommit?: (values: any) => Obj | void | Promise<Obj | void>;
+  onError?: (values: any) => Obj | void | Promise<Obj | void>;
+  onSubmit?: (values: any) => Obj | void | Promise<Obj | void>;
 }
 export default function createForm<T = {}>(
   container: Comp<{
