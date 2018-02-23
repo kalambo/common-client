@@ -1,20 +1,15 @@
 import * as React from 'react';
-import {
-  compose,
-  enclose,
-  map,
-  memoize,
-  renderLifted,
-  restyle,
-  Use,
-  withHover,
-} from 'mishmash';
+import m, { memoize, renderLifted, watchHover } from 'mishmash';
 import { Div, Input, Txt } from 'elmnt';
 import { root } from 'common';
 import * as debounce from 'lodash.debounce';
 import st from 'style-transform';
 
-import parseFilter from '../parseFilter';
+import config from '../config';
+
+const Hover = m()
+  .enhance(watchHover)
+  .toComp();
 
 const getFieldHelp = field => {
   if (field.meta && field.meta.options) {
@@ -27,18 +22,16 @@ const getFieldHelp = field => {
   return field.scalar;
 };
 
-const Help = map(
-  restyle({
-    base: null,
-    title: [['mergeKeys', 'title']],
-    subtitle: [['mergeKeys', 'title']],
-    text: [['mergeKeys', 'text']],
-    indent: [['mergeKeys', 'indent']],
-    note: [['mergeKeys', 'note']],
-    op: [['mergeKeys', 'op']],
-    fields: [['mergeKeys', 'fields']],
-  }),
-)(({ type, toggleOpen, style }) => (
+const Help = m().style({
+  base: null,
+  title: [['mergeKeys', 'title']],
+  subtitle: [['mergeKeys', 'title']],
+  text: [['mergeKeys', 'text']],
+  indent: [['mergeKeys', 'indent']],
+  note: [['mergeKeys', 'note']],
+  op: [['mergeKeys', 'op']],
+  fields: [['mergeKeys', 'fields']],
+})(({ type, toggleOpen, style }) => (
   <div
     style={{
       position: 'fixed',
@@ -160,18 +153,16 @@ const Help = map(
   </div>
 ));
 
-export default compose(
-  map(
-    restyle({
-      label: [['mergeKeys', 'label']],
-      helpLabel: [['mergeKeys', 'helpLabel']],
-      field: [['mergeKeys', 'field']],
-      help: [['mergeKeys', 'help']],
-    }),
-  ),
-  enclose(({ initialProps, onProps, setState }) => {
+export default m()
+  .style({
+    label: [['mergeKeys', 'label']],
+    helpLabel: [['mergeKeys', 'helpLabel']],
+    field: [['mergeKeys', 'field']],
+    help: [['mergeKeys', 'help']],
+  })
+  .enhance(({ firstProps, onProps, setState }) => {
     setState({ text: null, filter: null, isOpen: false, schemaLoaded: false });
-    let onChangeBase = initialProps.onChange;
+    let onChangeBase = firstProps.onChange;
     const debounceChange = debounce(v => onChangeBase(v), 1000);
     let mounted = true;
     root.rgo.query().then(() => mounted && setState({ schemaLoaded: true }));
@@ -185,20 +176,21 @@ export default compose(
       ...state,
       toggleIsOpen,
       setText: text => {
-        const parsedValue = parseFilter(text, props.type);
+        const parsedValue = config.parseFilter(text, props.type);
         const filter = !parsedValue ? parsedValue : memoize(parsedValue);
         setState({ text, filter });
         debounceChange(filter);
       },
     });
-  }),
-  renderLifted(
-    ({ type, toggleOpen, style }) => (
-      <Help type={type} toggleOpen={toggleOpen} style={style.help} />
+  })
+  .merge(
+    renderLifted(
+      ({ type, toggleOpen, style }) => (
+        <Help type={type} toggleOpen={toggleOpen} style={style.help} />
+      ),
+      ({ isOpen, schemaLoaded }) => isOpen && schemaLoaded,
     ),
-    ({ isOpen, schemaLoaded }) => isOpen && schemaLoaded,
-  ),
-)(({ text, setText, filter, toggleOpen, style }) => (
+  )(({ text, setText, filter, toggleOpen, style }) => (
   <Div
     style={{
       layout: 'bar',
@@ -219,7 +211,7 @@ export default compose(
       invalid={text && !filter}
     />
     <div style={{ width: style.helpLabel.width }}>
-      <Use hoc={withHover}>
+      <Hover>
         {({ isHovered: hover, hoverProps }) => (
           <Txt
             onClick={toggleOpen}
@@ -237,7 +229,7 @@ export default compose(
             Open help
           </Txt>
         )}
-      </Use>
+      </Hover>
     </div>
   </Div>
 ));

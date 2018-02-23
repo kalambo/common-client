@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { branch, compose, enclose, map, render, restyle } from 'mishmash';
+import m from 'mishmash';
 import { css, Div, Mark, Txt } from 'elmnt';
 
 import getData from '../generic/getData';
@@ -15,49 +15,48 @@ const joinFilters = (...filters) => {
   return ['AND', ...f];
 };
 
-export default compose(
-  map(
-    restyle({
-      base: null,
-      spinner: [['mergeKeys', 'spinner']],
-      header: [['mergeKeys', 'header']],
-      columnCell: [
-        ['mergeKeys', 'column'],
-        ['filter', ...css.groups.box, ...css.groups.other],
-        ['expandFor', 'paddingLeft', 'borderTopLeftRadius'],
-      ],
-      columnText: [['mergeKeys', 'column'], ['filter', ...css.groups.text]],
-      link: [['mergeKeys', 'link'], ['merge', { position: 'relative' }]],
-      filter: [['mergeKeys', 'filter']],
-    }),
-  ),
-  enclose(({ setState }) => {
+export default m()
+  .style({
+    base: null,
+    spinner: [['mergeKeys', 'spinner']],
+    header: [['mergeKeys', 'header']],
+    columnCell: [
+      ['mergeKeys', 'column'],
+      ['filter', ...css.groups.box, ...css.groups.other],
+      ['expandFor', 'paddingLeft', 'borderTopLeftRadius'],
+    ],
+    columnText: [['mergeKeys', 'column'], ['filter', ...css.groups.text]],
+    link: [['mergeKeys', 'link'], ['merge', { position: 'relative' }]],
+    filter: [['mergeKeys', 'filter']],
+  })
+  .enhance(({ setState }) => {
     setState({ filter: null });
     const setFilter = filter => setState({ filter });
     return (props, state) => ({ ...props, ...state, setFilter });
-  }),
-  render(({ rows, setFilter, style, inner }) => (
+  })
+  .render(({ rows, setFilter, style, next }) => (
     <Div style={{ spacing: 15 }}>
       <Filter type={rows[0].name} onChange={setFilter} style={style.filter} />
-      {inner()}
+      {next()}
     </Div>
-  )),
-  getData(({ rows, filter }) => ({
-    ...rows[0],
-    filter: joinFilters(rows[0].filter, filter),
-  })),
-  branch(
+  ))
+  .merge(
+    getData(({ rows, filter }) => ({
+      ...rows[0],
+      filter: joinFilters(rows[0].filter, filter),
+    })),
+  )
+  .branch(
     ({ data }) => !data,
-    render(({ style }) => <Spinner style={style.spinner} />),
-  ),
-  map(({ rows, data, ...props }) => {
+    m().render(({ style }) => <Spinner style={style.spinner} />),
+  )
+  .map(({ rows, data, ...props }) => {
     const result = rows[1](data);
     return {
       ...props,
       rows: Array.isArray(result[0] && result[0][1]) ? result : [['', result]],
     };
-  }),
-)(({ path, columns, rows, style }) => (
+  })(({ path, columns, rows, style }) => (
   <table style={{ width: '100%' }}>
     <tbody>
       {rows.reduce(

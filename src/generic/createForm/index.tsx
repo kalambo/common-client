@@ -1,15 +1,5 @@
 import * as React from 'react';
-import {
-  branch,
-  Comp,
-  compose,
-  enclose,
-  map,
-  memoize,
-  omit,
-  pure,
-  render,
-} from 'mishmash';
+import m, { Comp, memoize, omit } from 'mishmash';
 import * as set from 'lodash.set';
 import keysToObject from 'keys-to-object';
 import { getId } from 'rgo';
@@ -44,12 +34,12 @@ export default function createForm<T = {}>(
   blockProps: string[],
   block: Comp,
 ) {
-  const Block = branch(
+  const Block = m().branch(
     ({ fields }) => fields,
-    compose(
-      getState,
-      branch(({ state }) => !state, render()),
-      map(({ stores, fields, state, ...props }) => ({
+    m()
+      .merge(getState)
+      .branch(({ state }) => !state, m().render())
+      .map(({ stores, fields, state, ...props }) => ({
         ...props,
         fields: fields.map(({ key, initial: _, ...f }, i) => ({
           ...state[i],
@@ -61,18 +51,17 @@ export default function createForm<T = {}>(
           field: key,
         })),
       })),
-    ),
-    map(omit('fields', 'stores', 'state')),
+    m().map(omit('fields', 'stores', 'state')),
   )(block);
 
-  return compose<FormProps & T>(
-    map(({ objects, blocks, ...props }) => ({
+  return m()
+    .map(({ objects, blocks, ...props }) => ({
       ...props,
       objects: memoize(objects),
       blocks: memoize(blocks),
-    })),
-    pure,
-    enclose(({ initialProps, onProps, setState }) => {
+    }))
+    .pure()
+    .enhance(({ firstProps, onProps, setState }) => {
       setState({ info: {} });
       const stores = createStores();
 
@@ -99,15 +88,15 @@ export default function createForm<T = {}>(
           );
         }
       };
-      setTimeout(() => prepare(initialProps));
+      setTimeout(() => prepare(firstProps));
       onProps(prepare);
 
       return (
         { objects: _a, blocks: _b, onCommit, onError, onSubmit, ...props },
         { info },
       ) => ({ onCommit, onError, onSubmit, props, stores, ...info });
-    }),
-    enclose(({ setState }) => {
+    })
+    .enhance(({ setState }) => {
       setState({ height: null as number | null });
       let heightElem: HTMLElement | null = null;
       const setHeightElem = elem => (heightElem = elem);
@@ -119,11 +108,11 @@ export default function createForm<T = {}>(
         setHeightElem,
         lockHeight,
       });
-    }),
-    branch(
+    })
+    .branch(
       ({ fields }) => fields,
-      compose(
-        enclose(({ setState, onProps }) => {
+      m()
+        .enhance(({ setState, onProps }) => {
           setState({ processing: null });
           let mounted = true;
           onProps(props => !props && (mounted = false));
@@ -134,11 +123,11 @@ export default function createForm<T = {}>(
             processing,
             setProcessing,
           });
-        }),
-        getState,
-        branch(
+        })
+        .merge(getState)
+        .branch(
           ({ state }) => state,
-          enclose(
+          m().enhance(
             ({ methods }) => ({
               onCommit,
               onSubmit,
@@ -251,29 +240,27 @@ export default function createForm<T = {}>(
             },
           ),
         ),
-      ),
-    ),
-    branch(
+    )
+    .branch(
       ({ fields, processing, state }) => !fields || processing || !state,
-      render(({ props, height }) =>
+      m().render(({ props, height }) =>
         React.createElement(container, { height, ...props }),
       ),
-    ),
-    map(({ state, ...props }) => ({
+    )
+    .map(({ state, ...props }) => ({
       invalid: state.some(s => !s.hidden && s.invalid),
       hidden: JSON.stringify(state.map(s => s.hidden)),
       ...props,
-    })),
-    pure,
-    map(({ hidden, ...props }) => ({
+    }))
+    .pure()
+    .map(({ hidden, ...props }) => ({
       ...props,
       hidden: keysToObject(
         JSON.parse(hidden),
         h => h,
         (_, i) => props.fields[i].key.name,
       ),
-    })),
-  )(
+    }))(
     ({
       blocks,
       stores,
@@ -314,5 +301,5 @@ export default function createForm<T = {}>(
         invalid,
         ...props,
       }),
-  );
+  ) as Comp<FormProps & T>;
 }

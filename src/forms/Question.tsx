@@ -1,19 +1,21 @@
 import * as React from 'react';
 import { css, Div, Txt } from 'elmnt';
-import { map, omit, restyle } from 'mishmash';
+import m, { omit } from 'mishmash';
 
 import withWidth from '../withWidth';
 
-const Question = map(
-  restyle([['mergeKeys', 'question'], ['filter', ...css.groups.text]]),
-)(Txt);
+const Question = m().style([
+  ['mergeKeys', 'question'],
+  ['filter', ...css.groups.text],
+])(Txt);
 
-const Prompt = map(
-  restyle([['mergeKeys', 'prompt'], ['filter', ...css.groups.text]]),
-)(Txt);
+const Prompt = m().style([
+  ['mergeKeys', 'prompt'],
+  ['filter', ...css.groups.text],
+])(Txt);
 
-const Vertical = map(
-  restyle(['view', 'small'], (view, small) => [
+const Vertical = m()
+  .style(['view', 'small'], (view, small) => [
     [
       'scale',
       {
@@ -24,9 +26,8 @@ const Vertical = map(
     ],
     ['filter', 'paddingTop'],
     ['merge', { spacing: 10 }],
-  ]),
-  omit('view', 'small'),
-)(Div);
+  ])
+  .map(omit('view', 'small'))(Div);
 
 export default withWidth(600)(
   ({

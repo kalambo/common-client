@@ -1,4 +1,4 @@
-import { enclose, HOC } from 'mishmash';
+import m, { HOC } from 'mishmash';
 import { Query } from 'rgo';
 import { root } from 'common';
 
@@ -14,7 +14,7 @@ export default function getData(
 export default function getData(...args) {
   const propName = typeof args[0] === 'string' ? (args[0] as string) : 'data';
   const queries = typeof args[0] === 'string' ? args.slice(1) : args;
-  return enclose(({ initialProps, onProps, setState }) => {
+  return m().enhance(({ firstProps, onProps, setState }) => {
     setState({ data: null as any });
     let unsubscribe;
     if (typeof queries[0] !== 'function') {
@@ -41,7 +41,7 @@ export default function getData(...args) {
           unsubscribe();
         }
       };
-      update(initialProps);
+      update(firstProps);
       onProps(update);
     }
     return (props, { data }) => ({ ...props, [propName]: data });

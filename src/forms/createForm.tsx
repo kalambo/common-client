@@ -1,35 +1,33 @@
 import * as React from 'react';
 import { css, Div, Txt } from 'elmnt';
-import { Comp, compose, map, omit, render, restyle } from 'mishmash';
+import m, { Comp, omit } from 'mishmash';
 
 import createForm, { FormProps } from '../generic/createForm';
 
 import FieldBase from './Field';
 import Question from './Question';
 
-const Connect = map(
-  restyle([
-    ['filter', ...css.groups.text],
-    ['merge', { textAlign: 'center', width: 30, margin: '0 -15px' }],
-  ]),
-)(Txt);
+const Connect = m().style([
+  ['filter', ...css.groups.text],
+  ['merge', { textAlign: 'center', width: 30, margin: '0 -15px' }],
+])(Txt);
 
-const Column = map(
-  restyle([['mergeKeys', 'column'], ['filter', ...css.groups.text, 'padding']]),
-)(Txt);
+const Column = m().style([
+  ['mergeKeys', 'column'],
+  ['filter', ...css.groups.text, 'padding'],
+])(Txt);
 
 export default (container, blockProps, blockHOC, fieldHOC, style, admin) => {
   const Field = fieldHOC(FieldBase);
-  const RowField = map(
-    restyle(['alt'], alt => [['mergeKeys', { alt }]]),
-    omit('alt'),
-  )(Field);
+  const RowField = m()
+    .style(['alt'], alt => [['mergeKeys', { alt }]])
+    .map(omit('alt'))(Field);
   return createForm(
     container,
     [...blockProps, 'text', 'prompt', 'vertical', 'connect', 'columns', 'view'],
-    compose(
-      blockHOC,
-      map(({ fields, attempted, ...props }) => ({
+    m()
+      .merge(blockHOC)
+      .map(({ fields, attempted, ...props }) => ({
         fields: fields.map(
           ({ scalar, isList, type: _, file, invalid, ...field }) => ({
             ...field,
@@ -44,13 +42,13 @@ export default (container, blockProps, blockHOC, fieldHOC, style, admin) => {
         ),
         ...props,
         ...(admin ? { prompt: undefined, vertical: false } : {}),
-      })),
-      render(({ inner, ...props }) => (
+      }))
+      .render(({ next, ...props }) => (
         <Question {...props} style={style}>
-          {inner()}
+          {next()}
         </Question>
-      )),
-      render(
+      ))
+      .render(
         ({ fields, connect, columns }) =>
           fields[0].style.layout === 'bar' ? (
             <div>
@@ -96,7 +94,6 @@ export default (container, blockProps, blockHOC, fieldHOC, style, admin) => {
               {fields.map((field, i) => <Field {...field} key={i} />)}
             </Div>
           ),
-      ),
-    )(Field),
+      )(Field),
   ) as Comp<FormProps>;
 };

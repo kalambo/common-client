@@ -6,33 +6,27 @@ import {
   withRouter as withRouterBase,
 } from 'react-router-dom';
 import GatsbyLink from 'gatsby-link';
-import {
-  branch,
-  compose,
-  context,
-  enclose,
-  map,
-  omit,
-  pure,
-  render,
-  restyle,
-  Use,
-  withHover,
-} from 'mishmash';
+import m, { HOC, omit, watchHover } from 'mishmash';
 import { Div, Icon, Txt } from 'elmnt';
 import st from 'style-transform';
 
 import getData from './generic/getData';
 
-export const routerPure = compose(withRouterBase, pure);
+const Hover = m()
+  .enhance(watchHover)
+  .toComp();
+
+export const routerPure = m()
+  .merge(withRouterBase)
+  .pure() as HOC;
 
 export const withRouter = (basename?) =>
-  compose(
-    render(({ inner }) => (
-      <BrowserRouter basename={basename}>{inner()}</BrowserRouter>
-    )),
-    withRouterBase,
-    enclose(({ setState }) => {
+  m()
+    .render(({ next }) => (
+      <BrowserRouter basename={basename}>{next()}</BrowserRouter>
+    ))
+    .merge(withRouterBase)
+    .enhance(({ setState }) => {
       const setBreadcrumb = (path: string, label: string) =>
         setState({ [path]: label });
       return ({ location, ...props }, labels) => ({
@@ -46,47 +40,42 @@ export const withRouter = (basename?) =>
               }),
         setBreadcrumb,
       });
-    }),
-    context('setBreadcrumb', ({ setBreadcrumb }) => setBreadcrumb),
-    map(omit('setBreadcrumb', 'match', 'history')),
-  );
+    })
+    .context('setBreadcrumb', ({ setBreadcrumb }) => setBreadcrumb)
+    .map(omit('setBreadcrumb', 'match', 'history')) as HOC;
 
-const RouteComponent = compose(
-  branch(
-    ({ component }) => component,
-    render(({ component: Comp, data, props }) => (
-      <Comp data={data} {...props} />
-    )),
-  ),
+const RouteComponent = m().branch(
+  ({ component }) => component,
+  m().render(({ component: Comp, data, props }) => (
+    <Comp data={data} {...props} />
+  )),
 )(({ render, data, props }) => render({ data, ...props }));
 
-const Breadcrumb = compose(
-  branch(
+const Breadcrumb = m()
+  .branch(
     ({ label }) => typeof label === 'function',
-    map(({ label, ...props }) => ({
+    m().map(({ label, ...props }) => ({
       ...props,
       label: label(props.match.params),
     })),
-  ),
-  branch(
+  )
+  .branch(
     ({ label }) => Array.isArray(label),
-    compose(
-      getData(({ label }) => label[0]),
-      map(({ label, ...props }) => ({
+    m()
+      .merge(getData(({ label }) => label[0]))
+      .map(({ label, ...props }) => ({
         ...props,
         label: props.data ? label[1](props.data) : '...',
       })),
-    ),
-  ),
-  context('setBreadcrumb'),
-  enclose(({ initialProps, onProps }) => {
+  )
+  .context('setBreadcrumb')
+  .enhance(({ firstProps, onProps }) => {
     const update = ({ label, match, setBreadcrumb }) =>
       setBreadcrumb(match.url, label);
-    update(initialProps);
+    update(firstProps);
     onProps(props => props && update(props));
     return props => props;
-  }),
-)(({ path, loader, component, render, routeProps, data }) => (
+  })(({ path, loader, component, render, routeProps, data }) => (
   <RouteBase
     path={path}
     {...routeProps}
@@ -131,13 +120,11 @@ export const Route = ({
   </div>
 );
 
-export const Breadcrumbs = map(
-  restyle({
-    base: null,
-    link: [['mergeKeys', 'link']],
-    icon: [['scale', { fontSize: 0.9 }]],
-  }),
-)(({ breadcrumbs, style }) => (
+export const Breadcrumbs = m().style({
+  base: null,
+  link: [['mergeKeys', 'link']],
+  icon: [['scale', { fontSize: 0.9 }]],
+})(({ breadcrumbs, style }) => (
   <Div style={{ layout: 'bar', spacing: 10, paddingRight: 200 }}>
     {breadcrumbs.map(([path, label], i) => (
       <Div style={{ layout: 'bar', spacing: 10 }} key={i}>
@@ -152,7 +139,7 @@ export const Breadcrumbs = map(
           <Txt style={style.base}>{label}</Txt>
         ) : (
           <RouterLink to={path}>
-            <Use hoc={withHover}>
+            <Hover>
               {({ isHovered: hover, hoverProps }) => (
                 <Txt
                   {...hoverProps}
@@ -161,7 +148,7 @@ export const Breadcrumbs = map(
                   {label}
                 </Txt>
               )}
-            </Use>
+            </Hover>
           </RouterLink>
         )}
       </Div>

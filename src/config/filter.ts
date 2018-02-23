@@ -1,6 +1,23 @@
 import * as peg from 'pegjs';
-import { Field, fieldIs, Scalar } from 'rgo';
+import { Field, fieldIs } from 'rgo';
 import { Obj, root } from 'common';
+
+import { parseValue, printValue } from './value';
+
+export const printFilter = (filter: any[] | null, type: string) => {
+  if (!filter) return '';
+  if (filter[0] === 'AND' || filter[0] === 'OR') {
+    return `(${filter
+      .slice(1)
+      .map(f => printFilter(f, type))
+      .join(filter[0] === 'AND' ? ', ' : ' OR ')})`;
+  }
+  const field = root.rgo.schema[type][filter[0]];
+  if (!field || !fieldIs.scalar(field)) throw new Error('Invalid field');
+  const op = filter.length === 3 ? filter[1] : '=';
+  const value = filter[filter.length - 1];
+  return `${filter[0]} ${op} ${printValue(value, field.scalar)}`;
+};
 
 const simpleField = f => f.replace(/\s/g, '').toLowerCase();
 
@@ -57,32 +74,6 @@ whiteSpace
 
 `).parse;
 
-const parseValue = (value: string, scalar: Scalar) => {
-  if (value === 'null') return null;
-  if (scalar === 'boolean') return { true: true, false: false }[value];
-  if (scalar === 'int') return parseInt(value, 10);
-  if (scalar === 'float') return parseFloat(value);
-  if (scalar === 'date') {
-    const parts = value
-      .split(/^(\d\d?)\/(\d\d?)\/(\d\d(?:\d\d)?)$/)
-      .slice(1)
-      .map(parseFloat);
-    if (parts.length === 0) return undefined;
-
-    const dd = parts[0];
-    const mm = parts[1] - 1;
-    const yy = parts[2] + (parts[2] < 100 ? (parts[2] < 30 ? 2000 : 1900) : 0);
-
-    const d = new Date(yy, mm, dd);
-    if (d.getDate() !== dd || d.getMonth() !== mm || d.getFullYear() !== yy) {
-      return undefined;
-    }
-
-    return d;
-  }
-  return value;
-};
-
 const parseFilterValues = (filter: any[], fields: Obj<Field>) => {
   if (filter[0] === 'AND' || filter[0] === 'OR') {
     return [
@@ -123,13 +114,13 @@ const parseFilterValues = (filter: any[], fields: Obj<Field>) => {
   return [fieldKey, op, parsedValue];
 };
 
-export default function parseFilter(filter: string, type: string) {
+export const parseFilter = (filter: string, type: string) => {
   try {
-    return parseFilterValues(
-      parser(filter.replace(/OR/g, '|')),
-      root.rgo.schema[type],
-    );
+    return parseFilterValues(parser(filter.replace(/OR/g, '|')), {
+      ...root.rgo.schema[type],
+      id: { scalar: 'string', meta: { name: 'id' } },
+    });
   } catch (error) {
     return null;
   }
-}
+};

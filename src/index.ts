@@ -1,11 +1,11 @@
 export { default as Spinner } from './components/Spinner';
 export { default as StickyFooter } from './components/StickyFooter';
+export { default as config } from './config';
 export { default as createForm } from './forms/createForm';
 export { default as getData } from './generic/getData';
+export { default as download } from './generic/download';
+export { default as Explorer } from './generic/explorer';
 export { default as TableLinks } from './tableLinks';
 export { default as cssBase } from './cssBase';
-export { default as download } from './download';
-export { default as parseFilter } from './parseFilter';
 export { Breadcrumbs, Link, Route, routerPure, withRouter } from './router';
-export { getValueString } from './utils';
 export { default as withWidth } from './withWidth';

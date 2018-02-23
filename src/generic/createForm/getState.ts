@@ -1,10 +1,10 @@
-import { enclose, HOC } from 'mishmash';
+import m, { HOC } from 'mishmash';
 import keysToObject from 'keys-to-object';
 import { isValid } from 'common';
 
 import runFilter from './runFilter';
 
-export default enclose(({ initialProps, onProps, setState }) => {
+export default m().enhance(({ firstProps, onProps, setState }) => {
   setState({ rgo: null as any, local: null as any });
 
   let unsubscribes: (() => void)[] = [];
@@ -28,7 +28,7 @@ export default enclose(({ initialProps, onProps, setState }) => {
       unsubscribes.forEach(u => u());
     }
   };
-  update(initialProps);
+  update(firstProps);
   onProps(update);
 
   return (props, state) => {

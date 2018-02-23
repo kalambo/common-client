@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { withSize } from 'mishmash';
+import m, { watchSize } from 'mishmash';
 
-export default withSize('bounds', 'setBoundsElem')(
+export default m().enhance(watchSize('bounds', 'setBoundsElem'))(
   ({ content, footer, bounds: { height = 0 }, setBoundsElem }) => (
     <>
       <div style={{ minHeight: '100%', marginBottom: -height }}>
