@@ -1,9 +1,9 @@
 import * as React from 'react';
-import m from 'mishmash';
+import m, { restyle } from 'mishmash';
 import { Input } from 'elmnt';
 import { isValid, root } from 'common';
 
-export default m()
+export default m
   .map(({ dataKey, ...props }) => {
     const { meta = {}, ...field } = root.rgo.schema[dataKey[0]][dataKey[2]];
     const rules = {
@@ -37,59 +37,61 @@ export default m()
       rules,
     };
   })
-  .style(({ type, options }) => ({
-    margin: [
-      [
-        'scale',
-        {
-          margin: {
-            borderWidth: -1,
-            ...(type === 'boolean' ? { padding: 0.6 } : {}),
+  .map(
+    restyle(({ type, options }) => ({
+      margin: [
+        [
+          'scale',
+          {
+            margin: {
+              borderWidth: -1,
+              ...(type === 'boolean' ? { padding: 0.6 } : {}),
+            },
           },
-        },
+        ],
+        ['filter', 'margin'],
       ],
-      ['filter', 'margin'],
-    ],
-    fill: [
-      [
-        'scale',
-        {
-          top: {
-            borderTopWidth: -1,
-            ...(type === 'boolean' ? { paddingTop: 0.6 } : {}),
+      fill: [
+        [
+          'scale',
+          {
+            top: {
+              borderTopWidth: -1,
+              ...(type === 'boolean' ? { paddingTop: 0.6 } : {}),
+            },
+            right: {
+              borderRightWidth: -1,
+              ...(type === 'boolean' ? { paddingRight: 0.6 } : {}),
+            },
+            bottom: {
+              borderBottomWidth: -1,
+              ...(type === 'boolean' ? { paddingBottom: 0.6 } : {}),
+            },
+            left: {
+              borderLeftWidth: -1,
+              ...(type === 'boolean' ? { paddingLeft: 0.6 } : {}),
+            },
           },
-          right: {
-            borderRightWidth: -1,
-            ...(type === 'boolean' ? { paddingRight: 0.6 } : {}),
-          },
-          bottom: {
-            borderBottomWidth: -1,
-            ...(type === 'boolean' ? { paddingBottom: 0.6 } : {}),
-          },
-          left: {
-            borderLeftWidth: -1,
-            ...(type === 'boolean' ? { paddingLeft: 0.6 } : {}),
-          },
-        },
+        ],
+        ['filter', 'top', 'right', 'bottom', 'left'],
+        ['merge', { position: 'absolute' }],
       ],
-      ['filter', 'top', 'right', 'bottom', 'left'],
-      ['merge', { position: 'absolute' }],
-    ],
-    input: Array.isArray(options) && [['merge', { layout: 'modal' }]],
-  }))
-  .enhance(({ firstProps, onProps, setState }) => {
-    firstProps.context.store.watch(
+      input: Array.isArray(options) && [['merge', { layout: 'modal' }]],
+    })),
+  )
+  .stream(({ initial, observe, push }) => {
+    initial.context.store.watch(
       'editing',
-      (editing = {}) => setState({ editing }),
-      onProps,
+      (editing = {}) => push({ editing }),
+      observe,
     );
     const onChange = value =>
-      firstProps.context.store.update('editing', v => ({ ...v, value }));
+      initial.context.store.update('editing', v => ({ ...v, value }));
     const onTextChange = text => {
-      setState({ text });
-      setTimeout(() => firstProps.context.updateWidths());
+      push({ text });
+      setTimeout(() => initial.context.updateWidths());
     };
-    let lastValue = firstProps.context.store.get('editing').value;
+    let lastValue = initial.context.store.get('editing').value;
     return ({ rules, ...props }, { editing, text }) => {
       const value =
         Object.keys(editing).length > 0

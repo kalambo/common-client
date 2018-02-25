@@ -1,26 +1,26 @@
 import * as React from 'react';
 import { css, Div, Txt } from 'elmnt';
-import m, { Comp, omit } from 'mishmash';
+import m, { Comp, restyle } from 'mishmash';
 
 import createForm, { FormProps } from '../generic/createForm';
 
 import FieldBase from './Field';
 import Question from './Question';
 
-const Connect = m().style([
-  ['filter', ...css.groups.text],
-  ['merge', { textAlign: 'center', width: 30, margin: '0 -15px' }],
-])(Txt);
+const Connect = m.map(
+  restyle([
+    ['filter', ...css.groups.text],
+    ['merge', { textAlign: 'center', width: 30, margin: '0 -15px' }],
+  ]),
+)(Txt);
 
-const Column = m().style([
-  ['mergeKeys', 'column'],
-  ['filter', ...css.groups.text, 'padding'],
-])(Txt);
+const Column = m.map(
+  restyle([['mergeKeys', 'column'], ['filter', ...css.groups.text, 'padding']]),
+)(Txt);
 
-const ErrorMessage = m().style([
-  ['mergeKeys', 'errorMessage'],
-  ['filter', ...css.groups.text],
-])(Txt);
+const ErrorMessage = m.map(
+  restyle([['mergeKeys', 'errorMessage'], ['filter', ...css.groups.text]]),
+)(Txt);
 
 export default function<T>(
   container,
@@ -32,9 +32,9 @@ export default function<T>(
   fileServer = process.env.DATA_URL,
 ) {
   const Field = fieldHOC(FieldBase(fileServer));
-  const RowField = m()
-    .style(['alt'], alt => [['mergeKeys', { alt }]])
-    .map(omit('alt'))(Field);
+  const RowField = m
+    .map(restyle(['alt'], alt => [['mergeKeys', { alt }]]))
+    .map(({ alt: _, ...props }) => props)(Field);
   return createForm(
     container,
     [
@@ -47,8 +47,8 @@ export default function<T>(
       'columns',
       'view',
     ],
-    m()
-      .merge(blockHOC)
+    m
+      .do(blockHOC)
       .map(({ fields, attempted, ...props }) => ({
         fields: fields.map(
           ({ scalar, isList, type, file, invalid, ...field }) => ({
@@ -73,7 +73,7 @@ export default function<T>(
       ))
       .branch(
         ({ errorMessage }) => errorMessage,
-        m().render(({ errorMessage, fields, next }) => (
+        m.render(({ errorMessage, fields, next }) => (
           <Div style={{ spacing: 15 }}>
             {next()}
             {fields.some(f => f.invalid) && (

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import m from 'mishmash';
+import m, { restyle } from 'mishmash';
 import { css, Div, Mark, Txt } from 'elmnt';
 
 import getData from '../generic/getData';
@@ -15,23 +15,25 @@ const joinFilters = (...filters) => {
   return ['AND', ...f];
 };
 
-export default m()
-  .style({
-    base: null,
-    spinner: [['mergeKeys', 'spinner']],
-    header: [['mergeKeys', 'header']],
-    columnCell: [
-      ['mergeKeys', 'column'],
-      ['filter', ...css.groups.box, ...css.groups.other],
-      ['expandFor', 'paddingLeft', 'borderTopLeftRadius'],
-    ],
-    columnText: [['mergeKeys', 'column'], ['filter', ...css.groups.text]],
-    link: [['mergeKeys', 'link'], ['merge', { position: 'relative' }]],
-    filter: [['mergeKeys', 'filter']],
-  })
-  .enhance(({ setState }) => {
-    setState({ filter: null });
-    const setFilter = filter => setState({ filter });
+export default m
+  .map(
+    restyle({
+      base: null,
+      spinner: [['mergeKeys', 'spinner']],
+      header: [['mergeKeys', 'header']],
+      columnCell: [
+        ['mergeKeys', 'column'],
+        ['filter', ...css.groups.box, ...css.groups.other],
+        ['expandFor', 'paddingLeft', 'borderTopLeftRadius'],
+      ],
+      columnText: [['mergeKeys', 'column'], ['filter', ...css.groups.text]],
+      link: [['mergeKeys', 'link'], ['merge', { position: 'relative' }]],
+      filter: [['mergeKeys', 'filter']],
+    }),
+  )
+  .stream(({ push }) => {
+    push({ filter: null });
+    const setFilter = filter => push({ filter });
     return (props, state) => ({ ...props, ...state, setFilter });
   })
   .render(({ rows, setFilter, style, next }) => (
@@ -40,7 +42,7 @@ export default m()
       {next()}
     </Div>
   ))
-  .merge(
+  .do(
     getData(({ rows, filter }) => ({
       ...rows[0],
       filter: joinFilters(rows[0].filter, filter),
@@ -48,7 +50,7 @@ export default m()
   )
   .branch(
     ({ data }) => !data,
-    m().render(({ style }) => <Spinner style={style.spinner} />),
+    m.render(({ style }) => <Spinner style={style.spinner} />),
   )
   .map(({ rows, data, ...props }) => {
     const result = rows[1](data);

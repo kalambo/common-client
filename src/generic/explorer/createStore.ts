@@ -20,11 +20,11 @@ export default () => {
     set,
     update: (key, map: (v) => any) => set(key, map(values[key])),
     listen,
-    watch: (key, listener, onProps, firstProps) => {
+    watch: (key, listener, observe, initial) => {
       const getKey = props => (typeof key === 'string' ? key : key(props));
-      let currentKey = getKey(firstProps);
+      let currentKey = getKey(initial);
       let unlisten = listen(currentKey, listener);
-      onProps(props => {
+      observe(props => {
         const newKey = props && getKey(props);
         if (newKey !== currentKey) {
           unlisten();

@@ -1,3 +1,2 @@
-import { HOC } from 'mishmash';
-declare const _default: (toggleWidth: number) => HOC<any, any>;
+declare const _default: any;
 export default _default;

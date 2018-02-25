@@ -1,5 +1,5 @@
 import * as React from 'react';
-import m from 'mishmash';
+import m, { restyle } from 'mishmash';
 import { root } from 'common';
 
 import createQuery from './createQuery';
@@ -46,69 +46,76 @@ const addIds = fields =>
     };
   });
 
-export default m()
-  .style({
-    base: [
-      ['numeric', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft'],
-      [
-        'scale',
-        {
-          borderTopWidth: { borderTopWidth: 0.5, borderBottomWidth: 0.5 },
-          borderRightWidth: { borderLeftWidth: 0.5, borderRightWidth: 0.5 },
-          borderBottomWidth: { borderTopWidth: 0.5, borderBottomWidth: 0.5 },
-          borderLeftWidth: { borderLeftWidth: 0.5, borderRightWidth: 0.5 },
-        },
-      ],
-    ],
-    footer: [
-      [
-        'scale',
-        {
-          height: {
-            fontSize: 1,
-            paddingTop: 1,
-            paddingBottom: 1,
-            borderTopWidth: 2,
-            borderBottomWidth: 2,
+export default m
+  .map(
+    restyle({
+      base: [
+        [
+          'numeric',
+          'paddingTop',
+          'paddingRight',
+          'paddingBottom',
+          'paddingLeft',
+        ],
+        [
+          'scale',
+          {
+            borderTopWidth: { borderTopWidth: 0.5, borderBottomWidth: 0.5 },
+            borderRightWidth: { borderLeftWidth: 0.5, borderRightWidth: 0.5 },
+            borderBottomWidth: { borderTopWidth: 0.5, borderBottomWidth: 0.5 },
+            borderLeftWidth: { borderLeftWidth: 0.5, borderRightWidth: 0.5 },
           },
-        },
+        ],
       ],
-    ],
-  })
-  .enhance(({ setState }) => {
-    setState({ loading: true });
-    root.rgo.query().then(() => setState({ loading: false }));
-    const reset = () =>
-      setState({ isReset: true }, () => setState({ isReset: false }));
+      footer: [
+        [
+          'scale',
+          {
+            height: {
+              fontSize: 1,
+              paddingTop: 1,
+              paddingBottom: 1,
+              borderTopWidth: 2,
+              borderBottomWidth: 2,
+            },
+          },
+        ],
+      ],
+    }),
+  )
+  .stream(({ push }) => {
+    push({ loading: true });
+    root.rgo.query().then(() => push({ loading: false }));
+    const reset = () => push({ isReset: true }, () => push({ isReset: false }));
     return (props, state) => ({ ...props, ...state, reset });
   })
   .branch(
     ({ loading, isReset }) => loading || isReset,
-    m().render(({ loader }) => loader()),
+    m.render(({ loader }) => loader()),
   )
-  .enhance(({ firstProps, onProps, setState }) => {
+  .stream(({ initial, observe, push }) => {
     const store = createStore();
 
     let unsubscribe;
     const query = createQuery(
-      firstProps.query || jsonUrl.parse(location.search.slice(1)) || [],
+      initial.query || jsonUrl.parse(location.search.slice(1)) || [],
       q => {
-        initStore(firstProps.config.printFilter, store, q);
+        initStore(initial.config.printFilter, store, q);
         const aliasQuery = addAliases(q);
-        setState({ query: aliasQuery, linkQuery: q });
+        push({ query: aliasQuery, linkQuery: q });
         if (unsubscribe) unsubscribe();
         unsubscribe = root.rgo.query(...addIds(aliasQuery), data => {
           if (!data) {
-            setState({ fetching: true });
+            push({ fetching: true });
           } else {
-            setState({ data: { ...data } }, () =>
-              setTimeout(() => setState({ fetching: false })),
+            push({ data: { ...data } }, () =>
+              setTimeout(() => push({ fetching: false })),
             );
           }
         });
       },
     );
-    onProps(props => !props && unsubscribe());
+    observe(props => !props && unsubscribe());
 
     const widthElems = {};
     const setWidthElem = (key, elem) => {
@@ -125,7 +132,7 @@ export default m()
       );
     };
     store.listen('', () => setTimeout(updateWidths));
-    firstProps.resizer && firstProps.resizer(updateWidths);
+    initial.resizer && initial.resizer(updateWidths);
 
     const setActive = (active, focus) => {
       store.update(
@@ -168,14 +175,14 @@ export default m()
         style,
       };
     };
-    updateContext(firstProps);
-    onProps(props => props && updateContext(props));
+    updateContext(initial);
+    observe(props => props && updateContext(props));
 
     return (props, state) => ({ ...props, ...state, context });
   })
   .branch(
     ({ query, data }) => !query || !data,
-    m().render(({ loader }) => loader()),
+    m.render(({ loader }) => loader()),
   )(({ context, query, fetching, data, style, linkQuery }) => (
   <div
     style={{

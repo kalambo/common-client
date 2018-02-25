@@ -6,29 +6,22 @@ import {
   withRouter as withRouterBase,
 } from 'react-router-dom';
 import GatsbyLink from 'gatsby-link';
-import m, { HOC, omit, watchHover } from 'mishmash';
-import { Div, Icon, Txt } from 'elmnt';
-import st from 'style-transform';
+import m, { HOC, restyle } from 'mishmash';
+import { Div, Hover, Icon, Txt } from 'elmnt';
 
 import getData from './generic/getData';
 
-const Hover = m()
-  .enhance(watchHover)
-  .toComp();
-
-export const routerPure = m()
-  .merge(withRouterBase)
-  .pure() as HOC;
+export const routerPure = m.do(withRouterBase).pure() as HOC;
 
 export const withRouter = (basename?) =>
-  m()
+  m
     .render(({ next }) => (
       <BrowserRouter basename={basename}>{next()}</BrowserRouter>
     ))
-    .merge(withRouterBase)
-    .enhance(({ setState }) => {
+    .do(withRouterBase)
+    .stream(({ push }) => {
       const setBreadcrumb = (path: string, label: string) =>
-        setState({ [path]: label });
+        push({ [path]: label });
       return ({ location, ...props }, labels) => ({
         ...props,
         breadcrumbs:
@@ -42,38 +35,38 @@ export const withRouter = (basename?) =>
       });
     })
     .context('setBreadcrumb', ({ setBreadcrumb }) => setBreadcrumb)
-    .map(omit('setBreadcrumb', 'match', 'history')) as HOC;
+    .map(
+      ({ setBreadcrumb: _a, match: _b, history: _c, ...props }) => props,
+    ) as HOC;
 
-const RouteComponent = m().branch(
+const RouteComponent = m.branch(
   ({ component }) => component,
-  m().render(({ component: Comp, data, props }) => (
+  m.render(({ component: Comp, data, props }) => (
     <Comp data={data} {...props} />
   )),
 )(({ render, data, props }) => render({ data, ...props }));
 
-const Breadcrumb = m()
+const Breadcrumb = m
   .branch(
     ({ label }) => typeof label === 'function',
-    m().map(({ label, ...props }) => ({
+    m.map(({ label, ...props }) => ({
       ...props,
       label: label(props.match.params),
     })),
   )
   .branch(
     ({ label }) => Array.isArray(label),
-    m()
-      .merge(getData(({ label }) => label[0]))
-      .map(({ label, ...props }) => ({
-        ...props,
-        label: props.data ? label[1](props.data) : '...',
-      })),
+    m.do(getData(({ label }) => label[0])).map(({ label, ...props }) => ({
+      ...props,
+      label: props.data ? label[1](props.data) : '...',
+    })),
   )
   .context('setBreadcrumb')
-  .enhance(({ firstProps, onProps }) => {
+  .stream(({ initial, observe }) => {
     const update = ({ label, match, setBreadcrumb }) =>
       setBreadcrumb(match.url, label);
-    update(firstProps);
-    onProps(props => props && update(props));
+    update(initial);
+    observe(props => props && update(props));
     return props => props;
   })(({ path, loader, component, render, routeProps, data }) => (
   <RouteBase
@@ -120,11 +113,13 @@ export const Route = ({
   </div>
 );
 
-export const Breadcrumbs = m().style({
-  base: null,
-  link: [['mergeKeys', 'link']],
-  icon: [['scale', { fontSize: 0.9 }]],
-})(({ breadcrumbs, style }) => (
+export const Breadcrumbs = m.map(
+  restyle({
+    base: null,
+    link: [['mergeKeys', 'link']],
+    icon: [['scale', { fontSize: 0.9 }]],
+  }),
+)(({ breadcrumbs, style }) => (
   <Div style={{ layout: 'bar', spacing: 10, paddingRight: 200 }}>
     {breadcrumbs.map(([path, label], i) => (
       <Div style={{ layout: 'bar', spacing: 10 }} key={i}>
@@ -139,12 +134,9 @@ export const Breadcrumbs = m().style({
           <Txt style={style.base}>{label}</Txt>
         ) : (
           <RouterLink to={path}>
-            <Hover>
-              {({ isHovered: hover, hoverProps }) => (
-                <Txt
-                  {...hoverProps}
-                  style={st(style.link, [['mergeKeys', { hover }]])}
-                >
+            <Hover style={style.link}>
+              {({ hoverProps, style }) => (
+                <Txt {...hoverProps} style={style}>
                   {label}
                 </Txt>
               )}

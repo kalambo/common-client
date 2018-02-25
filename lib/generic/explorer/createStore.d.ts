@@ -3,6 +3,6 @@ declare const _default: () => {
     set: (key: any, value?: any) => void;
     update: (key: any, map: (v: any) => any) => void;
     listen: (key: any, listener: any) => () => any;
-    watch: (key: any, listener: any, onProps: any, firstProps: any) => void;
+    watch: (key: any, listener: any, observe: any, initial: any) => void;
 };
 export default _default;

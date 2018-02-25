@@ -1,15 +1,13 @@
 import * as React from 'react';
-import m, { memoize, renderLifted, watchHover } from 'mishmash';
-import { Div, Input, Txt } from 'elmnt';
+import m, { renderLifted, restyle } from 'mishmash';
+import { Div, Hover, Input, Txt } from 'elmnt';
 import { root } from 'common';
 import * as debounce from 'lodash.debounce';
-import st from 'style-transform';
+import * as memoize from 'fast-memoize';
 
 import config from '../config';
 
-const Hover = m()
-  .enhance(watchHover)
-  .toComp();
+const memoizeValue = memoize(x => x);
 
 const getFieldHelp = field => {
   if (field.meta && field.meta.options) {
@@ -22,16 +20,18 @@ const getFieldHelp = field => {
   return field.scalar;
 };
 
-const Help = m().style({
-  base: null,
-  title: [['mergeKeys', 'title']],
-  subtitle: [['mergeKeys', 'title']],
-  text: [['mergeKeys', 'text']],
-  indent: [['mergeKeys', 'indent']],
-  note: [['mergeKeys', 'note']],
-  op: [['mergeKeys', 'op']],
-  fields: [['mergeKeys', 'fields']],
-})(({ type, toggleOpen, style }) => (
+const Help = m.map(
+  restyle({
+    base: null,
+    title: [['mergeKeys', 'title']],
+    subtitle: [['mergeKeys', 'title']],
+    text: [['mergeKeys', 'text']],
+    indent: [['mergeKeys', 'indent']],
+    note: [['mergeKeys', 'note']],
+    op: [['mergeKeys', 'op']],
+    fields: [['mergeKeys', 'fields']],
+  }),
+)(({ type, toggleOpen, style }) => (
   <div
     style={{
       position: 'fixed',
@@ -153,37 +153,39 @@ const Help = m().style({
   </div>
 ));
 
-export default m()
-  .style({
-    label: [['mergeKeys', 'label']],
-    helpLabel: [['mergeKeys', 'helpLabel']],
-    field: [['mergeKeys', 'field']],
-    help: [['mergeKeys', 'help']],
-  })
-  .enhance(({ firstProps, onProps, setState }) => {
-    setState({ text: null, filter: null, isOpen: false, schemaLoaded: false });
-    let onChangeBase = firstProps.onChange;
+export default m
+  .map(
+    restyle({
+      label: [['mergeKeys', 'label']],
+      helpLabel: [['mergeKeys', 'helpLabel']],
+      field: [['mergeKeys', 'field']],
+      help: [['mergeKeys', 'help']],
+    }),
+  )
+  .stream(({ initial, observe, push }) => {
+    push({ text: null, filter: null, isOpen: false, schemaLoaded: false });
+    let onChangeBase = initial.onChange;
     const debounceChange = debounce(v => onChangeBase(v), 1000);
     let mounted = true;
-    root.rgo.query().then(() => mounted && setState({ schemaLoaded: true }));
-    onProps(props => {
+    root.rgo.query().then(() => mounted && push({ schemaLoaded: true }));
+    observe(props => {
       if (props) onChangeBase = props.onChange;
       else mounted = false;
     });
-    const toggleIsOpen = () => setState(({ isOpen }) => ({ isOpen: !isOpen }));
+    const toggleIsOpen = () => push(({ isOpen }) => ({ isOpen: !isOpen }));
     return (props, state) => ({
       ...props,
       ...state,
       toggleIsOpen,
       setText: text => {
         const parsedValue = config.parseFilter(text, props.type);
-        const filter = !parsedValue ? parsedValue : memoize(parsedValue);
-        setState({ text, filter });
+        const filter = !parsedValue ? parsedValue : memoizeValue(parsedValue);
+        push({ text, filter });
         debounceChange(filter);
       },
     });
   })
-  .merge(
+  .do(
     renderLifted(
       ({ type, toggleOpen, style }) => (
         <Help type={type} toggleOpen={toggleOpen} style={style.help} />
@@ -211,21 +213,16 @@ export default m()
       invalid={text && !filter}
     />
     <div style={{ width: style.helpLabel.width }}>
-      <Hover>
-        {({ isHovered: hover, hoverProps }) => (
-          <Txt
-            onClick={toggleOpen}
-            {...hoverProps}
-            style={st(
-              {
-                ...style.helpLabel,
-                cursor: 'pointer',
-                textAlign: 'right',
-                width: 'auto',
-              },
-              [['mergeKeys', { hover }]],
-            )}
-          >
+      <Hover
+        style={{
+          ...style.helpLabel,
+          cursor: 'pointer',
+          textAlign: 'right',
+          width: 'auto',
+        }}
+      >
+        {({ hoverProps, style }) => (
+          <Txt onClick={toggleOpen} {...hoverProps} style={style}>
             Open help
           </Txt>
         )}

@@ -1,20 +1,20 @@
 import * as React from 'react';
 import { css, Div, Icon, Input } from 'elmnt';
-import m, { onClickOutside } from 'mishmash';
+import m, { onClickOutside, restyle } from 'mishmash';
 
 import icons from '../icons';
 
-export default m()
-  .enhance(({ firstProps, onProps, setState, methods }) => {
+export default m
+  .stream(({ initial, observe, push }) => {
     let inputElem;
     const setInputElem = e => (inputElem = e);
 
     let filter;
-    firstProps.context.store.watch(
+    initial.context.store.watch(
       props => `${props.path}_filter`,
-      (text = '') => setState({ text }),
-      onProps,
-      firstProps,
+      (text = '') => push({ text }),
+      observe,
+      initial,
     );
 
     return (props, { text }) => {
@@ -23,78 +23,91 @@ export default m()
         ...props,
         text,
         invalid,
-        ...methods({
-          setText: text => {
-            filter = props.context.config.parseFilter(text, props.type);
-            props.context.store.set(`${props.path}_filter`, text);
-          },
-          onMouseMove: () =>
-            props.context.setActive({ type: 'filter', path: props.path }),
-          onMouseLeave: () => props.context.setActive(null),
-          onClick: () => {
-            props.context.setActive({ type: 'filter', path: props.path }, true);
-            inputElem && inputElem.focus();
-          },
-          onClickOutside: () => {
-            if (props.focused) {
-              if (!invalid) {
-                props.context.query.filter(props.path, filter);
-                props.context.setActive(null, true);
-              }
-              return true;
-            }
-          },
-          onKeyDown: event => {
-            if (props.focused && event.keyCode === 13 && !invalid) {
+        setText: text => {
+          filter = props.context.config.parseFilter(text, props.type);
+          props.context.store.set(`${props.path}_filter`, text);
+        },
+        onMouseMove: () =>
+          props.context.setActive({ type: 'filter', path: props.path }),
+        onMouseLeave: () => props.context.setActive(null),
+        onClick: () => {
+          props.context.setActive({ type: 'filter', path: props.path }, true);
+          inputElem && inputElem.focus();
+        },
+        onClickOutside: () => {
+          if (props.focused) {
+            if (!invalid) {
               props.context.query.filter(props.path, filter);
               props.context.setActive(null, true);
-              (document.activeElement as HTMLElement).blur();
             }
-          },
-        }),
+            return true;
+          }
+        },
+        onKeyDown: event => {
+          if (props.focused && event.keyCode === 13 && !invalid) {
+            props.context.query.filter(props.path, filter);
+            props.context.setActive(null, true);
+            (document.activeElement as HTMLElement).blur();
+          }
+        },
         setInputElem,
       };
     };
   })
-  .style(['active', 'focused', 'invalid'], (active, focused, invalid) => ({
-    base: {
-      input: [
-        ['mergeKeys', { input: true, hover: active, focus: focused, invalid }],
-      ],
-    },
-  }))
-  .style(['focused'], focused => ({
-    input: {
-      div: [
-        ['scale', { margin: { padding: -1 } }],
-        ['filter', 'margin', 'background'],
-        ['merge', { position: 'relative' }],
-      ],
-      bar: [
-        ['scale', { minWidth: { fontSize: 5 } }],
-        ['filter', 'minWidth'],
-        [
-          'merge',
-          { layout: 'bar', position: 'relative', zIndex: focused ? 30 : 5 },
+  .cache(
+    'setText',
+    'onMouseMove',
+    'onMouseLeave',
+    'onClick',
+    'onClickOutside',
+    'onKeyDown',
+  )
+  .map(
+    restyle(['active', 'focused', 'invalid'], (active, focused, invalid) => ({
+      base: {
+        input: [
+          [
+            'mergeKeys',
+            { input: true, hover: active, focus: focused, invalid },
+          ],
         ],
-      ],
-      filterIcon: [
-        ['scale', { fontSize: 0.8 }],
-        ['filter', 'color', 'fontSize', 'padding'],
-      ],
-      iconWidth: [
-        [
-          'scale',
-          { width: { fontSize: 0.8, paddingLeft: 0.5, paddingRight: 0.5 } },
+      },
+    })),
+  )
+  .map(
+    restyle(['focused'], focused => ({
+      input: {
+        div: [
+          ['scale', { margin: { padding: -1 } }],
+          ['filter', 'margin', 'background'],
+          ['merge', { position: 'relative' }],
         ],
-      ],
-      text: [
-        ['filter', ...css.groups.text, 'padding'],
-        ['scale', { paddingRight: 2 }],
-      ],
-    },
-  }))
-  .enhance(onClickOutside(props => props.onClickOutside(), 'setClickElem'))(
+        bar: [
+          ['scale', { minWidth: { fontSize: 5 } }],
+          ['filter', 'minWidth'],
+          [
+            'merge',
+            { layout: 'bar', position: 'relative', zIndex: focused ? 30 : 5 },
+          ],
+        ],
+        filterIcon: [
+          ['scale', { fontSize: 0.8 }],
+          ['filter', 'color', 'fontSize', 'padding'],
+        ],
+        iconWidth: [
+          [
+            'scale',
+            { width: { fontSize: 0.8, paddingLeft: 0.5, paddingRight: 0.5 } },
+          ],
+        ],
+        text: [
+          ['filter', ...css.groups.text, 'padding'],
+          ['scale', { paddingRight: 2 }],
+        ],
+      },
+    })),
+  )
+  .do(onClickOutside(props => props.onClickOutside(), 'setClickElem'))(
   ({
     live,
     text,

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { css, Div, Icon, Txt } from 'elmnt';
-import m from 'mishmash';
+import m, { restyle } from 'mishmash';
 
 import icons from '../icons';
 
@@ -11,149 +11,153 @@ import RemoveField from './RemoveField';
 import SortField from './SortField';
 import PageField from './PageField';
 
-export default m()
+export default m
   .pure()
-  .style(
-    [
-      'alt',
-      'name',
-      'isPathAdd',
-      'isLastPathAdd',
-      'isPathSort',
-      'isSiblingSort',
-      'isPathRemove',
-      'isChildRemove',
-      'isPathPageUp',
-      'isPathPageDown',
-    ],
-    (
-      alt,
-      name,
-      isPathAdd,
-      isLastPathAdd,
-      isPathSort,
-      isSiblingSort,
-      isPathRemove,
-      isChildRemove,
-      isPathPageUp,
-      isPathPageDown,
-    ) => [
+  .map(
+    restyle(
       [
-        'mergeKeys',
-        {
-          header: true,
-          alt,
-          empty: name === '',
-          sort: isPathSort || isSiblingSort,
-          remove: isPathRemove || isChildRemove,
-          active:
-            isPathAdd ||
-            isLastPathAdd ||
-            isPathSort ||
-            isSiblingSort ||
-            isPathRemove ||
-            isChildRemove ||
-            isPathPageUp ||
-            isPathPageDown,
-        },
+        'alt',
+        'name',
+        'isPathAdd',
+        'isLastPathAdd',
+        'isPathSort',
+        'isSiblingSort',
+        'isPathRemove',
+        'isChildRemove',
+        'isPathPageUp',
+        'isPathPageDown',
       ],
-    ],
+      (
+        alt,
+        name,
+        isPathAdd,
+        isLastPathAdd,
+        isPathSort,
+        isSiblingSort,
+        isPathRemove,
+        isChildRemove,
+        isPathPageUp,
+        isPathPageDown,
+      ) => [
+        [
+          'mergeKeys',
+          {
+            header: true,
+            alt,
+            empty: name === '',
+            sort: isPathSort || isSiblingSort,
+            remove: isPathRemove || isChildRemove,
+            active:
+              isPathAdd ||
+              isLastPathAdd ||
+              isPathSort ||
+              isSiblingSort ||
+              isPathRemove ||
+              isChildRemove ||
+              isPathPageUp ||
+              isPathPageDown,
+          },
+        ],
+      ],
+    ),
   )
-  .style(
-    ['name', 'path', 'span', 'firstCol', 'lastCol'],
-    (name, path, span, firstCol, lastCol) => ({
-      base: null,
-      td: [
-        [
-          'scale',
-          {
-            paddingTop: {
-              paddingTop: 1,
-              borderTopWidth: span || name.startsWith('#') ? -1 : 0,
-            },
-            paddingLeft: {
-              paddingLeft: 1,
-              borderLeftWidth: span ? 1 : 0,
-            },
-            borderTopWidth: span || name.startsWith('#') ? 2 : 1,
-            borderRightWidth: !lastCol && name === '#2' ? 1 : 0,
-            borderBottomWidth: !span ? 2 : 0,
-            borderLeftWidth:
-              (!firstCol && (name === '#1' ? 2 : !span && 1)) || 0,
-            ...(name === '' && path.indexOf('.') === -1
-              ? {
-                  borderTopWidth: 2,
-                  borderRightWidth: 0,
-                  borderBottomWidth: 0,
-                  borderLeftWidth: 0,
-                }
-              : {}),
-          },
-        ],
-        ['merge', { position: 'relative', verticalAlign: 'top' }],
-      ],
-      fill: [
-        [
-          'scale',
-          {
-            top: { borderTopWidth: span || name.startsWith('#') ? -2 : -1 },
-            right: {
-              borderRightWidth: (!lastCol && (name === '#2' ? -2 : -1)) || 0,
-            },
-            bottom: { borderBottomWidth: !span ? -2 : -1 },
-            left: {
+  .map(
+    restyle(
+      ['name', 'path', 'span', 'firstCol', 'lastCol'],
+      (name, path, span, firstCol, lastCol) => ({
+        base: null,
+        td: [
+          [
+            'scale',
+            {
+              paddingTop: {
+                paddingTop: 1,
+                borderTopWidth: span || name.startsWith('#') ? -1 : 0,
+              },
+              paddingLeft: {
+                paddingLeft: 1,
+                borderLeftWidth: span ? 1 : 0,
+              },
+              borderTopWidth: span || name.startsWith('#') ? 2 : 1,
+              borderRightWidth: !lastCol && name === '#2' ? 1 : 0,
+              borderBottomWidth: !span ? 2 : 0,
               borderLeftWidth:
-                (!firstCol && (name === '#1' ? -2 : !span && -1)) || 0,
+                (!firstCol && (name === '#1' ? 2 : !span && 1)) || 0,
+              ...(name === '' && path.indexOf('.') === -1
+                ? {
+                    borderTopWidth: 2,
+                    borderRightWidth: 0,
+                    borderBottomWidth: 0,
+                    borderLeftWidth: 0,
+                  }
+                : {}),
             },
-          },
+          ],
+          ['merge', { position: 'relative', verticalAlign: 'top' }],
         ],
-        ['filter', 'top', 'right', 'bottom', 'left'],
-        ['merge', { position: 'absolute' }],
-      ],
-      icon: [
-        ['mergeKeys', 'icon'],
-        ['filter', ...css.groups.text, 'background'],
-        [
-          'scale',
-          {
-            fontSize: 0.6,
-            padding: { fontSize: 0.15 },
-            radius: { fontSize: 0.375 },
-          },
+        fill: [
+          [
+            'scale',
+            {
+              top: { borderTopWidth: span || name.startsWith('#') ? -2 : -1 },
+              right: {
+                borderRightWidth: (!lastCol && (name === '#2' ? -2 : -1)) || 0,
+              },
+              bottom: { borderBottomWidth: !span ? -2 : -1 },
+              left: {
+                borderLeftWidth:
+                  (!firstCol && (name === '#1' ? -2 : !span && -1)) || 0,
+              },
+            },
+          ],
+          ['filter', 'top', 'right', 'bottom', 'left'],
+          ['merge', { position: 'absolute' }],
         ],
-        ['merge', { borderRadius: 100 }],
-      ],
-      text: [
-        ['filter', ...css.groups.text],
-        [
-          'merge',
-          {
-            cursor: 'default',
-            position: 'relative',
-            userSelect: 'none',
-            MozUserSelect: 'none',
-            WebkitUserSelect: 'none',
-            msUserSelect: 'none',
-          },
+        icon: [
+          ['mergeKeys', 'icon'],
+          ['filter', ...css.groups.text, 'background'],
+          [
+            'scale',
+            {
+              fontSize: 0.6,
+              padding: { fontSize: 0.15 },
+              radius: { fontSize: 0.375 },
+            },
+          ],
+          ['merge', { borderRadius: 100 }],
         ],
-      ],
-    }),
+        text: [
+          ['filter', ...css.groups.text],
+          [
+            'merge',
+            {
+              cursor: 'default',
+              position: 'relative',
+              userSelect: 'none',
+              MozUserSelect: 'none',
+              WebkitUserSelect: 'none',
+              msUserSelect: 'none',
+            },
+          ],
+        ],
+      }),
+    ),
   )
   .branch(
     ({ live }) => !live,
-    m().enhance(({ methods }) => props => ({
-      ...props,
-      ...methods({
+    m
+      .map(props => ({
+        ...props,
         setWidthElem: elem =>
           props.context.setWidthElem(`${props.path}_${props.name}_width`, elem),
-      }),
-    })),
-    m().enhance(({ firstProps, onProps, setState }) => {
-      firstProps.context.store.watch(
+      }))
+      .cache('setWidthElem'),
+    m.stream(({ initial, observe, push }) => {
+      initial.context.store.watch(
         props => `${props.path}_${props.name}_width`,
-        width => setState({ width }),
-        onProps,
-        firstProps,
+        width => push({ width }),
+        observe,
+        initial,
       );
       return (props, state) => ({ ...props, ...state });
     }),

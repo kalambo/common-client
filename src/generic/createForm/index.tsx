@@ -1,5 +1,5 @@
 import * as React from 'react';
-import m, { Comp, memoize, omit } from 'mishmash';
+import m, { Comp } from 'mishmash';
 import * as set from 'lodash.set';
 import keysToObject from 'keys-to-object';
 import { getId } from 'rgo';
@@ -34,11 +34,11 @@ export default function createForm<T = {}>(
   blockProps: string[],
   block: Comp,
 ) {
-  const Block = m().branch(
+  const Block = m.branch(
     ({ fields }) => fields,
-    m()
-      .merge(getState)
-      .branch(({ state }) => !state, m().render())
+    m
+      .do(getState)
+      .branch(({ state }) => !state, m.render())
       .map(({ stores, fields, state, ...props }) => ({
         ...props,
         fields: fields.map(({ key, initial: _, ...f }, i) => ({
@@ -51,18 +51,14 @@ export default function createForm<T = {}>(
           field: key,
         })),
       })),
-    m().map(omit('fields', 'stores', 'state')),
+    m.map(({ fields: _a, stores: _b, state: _c, ...props }) => props),
   )(block);
 
-  return m()
-    .map(({ objects, blocks, ...props }) => ({
-      ...props,
-      objects: memoize(objects),
-      blocks: memoize(blocks),
-    }))
+  return m
+    .cache('objects', 'blocks')
     .pure()
-    .enhance(({ firstProps, onProps, setState }) => {
-      setState({ info: {} });
+    .stream(({ initial, observe, push }) => {
+      push({ info: {} });
       const stores = createStores();
 
       let fields;
@@ -78,7 +74,7 @@ export default function createForm<T = {}>(
           );
           if (index === count) {
             fields = info.fields;
-            setState({ info });
+            push({ info });
           }
         } else {
           root.rgo.set(
@@ -88,20 +84,20 @@ export default function createForm<T = {}>(
           );
         }
       };
-      setTimeout(() => prepare(firstProps));
-      onProps(prepare);
+      setTimeout(() => prepare(initial));
+      observe(prepare);
 
       return (
         { objects: _a, blocks: _b, onCommit, onError, onSubmit, ...props },
         { info },
       ) => ({ onCommit, onError, onSubmit, props, stores, ...info });
     })
-    .enhance(({ setState }) => {
-      setState({ height: null as number | null });
+    .stream(({ push }) => {
+      push({ height: null as number | null });
       let heightElem: HTMLElement | null = null;
       const setHeightElem = elem => (heightElem = elem);
       const lockHeight = () =>
-        setState({ height: heightElem && heightElem.offsetHeight });
+        push({ height: heightElem && heightElem.offsetHeight });
       return (props, { height }) => ({
         ...props,
         height,
@@ -111,139 +107,137 @@ export default function createForm<T = {}>(
     })
     .branch(
       ({ fields }) => fields,
-      m()
-        .enhance(({ setState, onProps }) => {
-          setState({ processing: null });
+      m
+        .stream(({ observe, push }) => {
+          push({ processing: null });
           let mounted = true;
-          onProps(props => !props && (mounted = false));
-          const setProcessing = processing =>
-            mounted && setState({ processing });
+          observe(props => !props && (mounted = false));
+          const setProcessing = processing => mounted && push({ processing });
           return (props, { processing }) => ({
             ...props,
             processing,
             setProcessing,
           });
         })
-        .merge(getState)
+        .do(getState)
         .branch(
           ({ state }) => state,
-          m().enhance(
-            ({ methods }) => ({
-              onCommit,
-              onSubmit,
-              onError,
-              lockHeight,
-              setProcessing,
-              ...props
-            }) => {
-              const submit = async () => {
-                if (!props.state.some(s => !s.hidden && s.invalid)) {
-                  lockHeight();
-                  setProcessing(true);
-                  const visibleFields = props.fields.filter(
-                    (_, i) => !props.state[i].hidden,
-                  );
-                  const values = visibleFields.reduce(
-                    (res, f, i) => set(res, f.key.name, props.state[i].value),
-                    {},
-                  );
-                  const rgoKeys = visibleFields
-                    .filter(f => f.key.store === 'rgo')
-                    .map(f => f.key);
-                  if (onCommit) {
-                    const extra = (await onCommit(values)) || {};
-                    const extraValues = Object.keys(extra).reduce<any[]>(
-                      (res, obj) => [
-                        ...res,
-                        ...Object.keys(extra[obj] || {}).map(field => ({
-                          key: {
-                            store: 'rgo',
-                            key: [
-                              props.objects[obj].type,
-                              props.objects[obj].id,
-                              field,
-                            ] as [string, string, string],
-                            name: `${obj}.${field}`,
-                          },
-                          value: extra[obj][field],
-                        })),
-                      ],
-                      [],
+          m
+            .map(
+              ({
+                onCommit,
+                onSubmit,
+                onError,
+                lockHeight,
+                setProcessing,
+                ...props
+              }) => {
+                const submit = async () => {
+                  if (!props.state.some(s => !s.hidden && s.invalid)) {
+                    lockHeight();
+                    setProcessing(true);
+                    const visibleFields = props.fields.filter(
+                      (_, i) => !props.state[i].hidden,
                     );
-                    root.rgo.set(
-                      ...extraValues.map(({ key, value }) => ({
-                        key: key.key,
-                        value,
-                      })),
+                    const values = visibleFields.reduce(
+                      (res, f, i) => set(res, f.key.name, props.state[i].value),
+                      {},
                     );
-                    rgoKeys.push(
-                      ...extraValues
-                        .filter(
-                          ({ key }) => !rgoKeys.some(k => k.name === key.name),
-                        )
-                        .map(({ key }) => key),
-                    );
-                  }
-                  let changes: any;
-                  try {
-                    const newIds = await root.rgo.commit(
-                      ...rgoKeys.map(key => key.key),
-                    );
-                    for (const obj of Object.keys(props.objects)) {
-                      const { type, id } = props.objects[obj];
-                      values[obj].id = getId(id, newIds[type]);
-                    }
-                    changes = onSubmit && (await onSubmit(values));
-                  } catch {
-                    changes = onError && (await onError(values));
-                  }
-                  props.stores.rgo.set(
-                    Object.keys(changes || {})
-                      .filter(k => props.objects[k])
-                      .reduce<any[]>(
-                        (res, k) => [
+                    const rgoKeys = visibleFields
+                      .filter(f => f.key.store === 'rgo')
+                      .map(f => f.key);
+                    if (onCommit) {
+                      const extra = (await onCommit(values)) || {};
+                      const extraValues = Object.keys(extra).reduce<any[]>(
+                        (res, obj) => [
                           ...res,
-                          ...Object.keys(changes[k]).map(field => ({
-                            key: [
-                              props.objects[k].type,
-                              props.objects[k].id,
-                              field,
-                            ],
-                            value: changes[k][field],
+                          ...Object.keys(extra[obj] || {}).map(field => ({
+                            key: {
+                              store: 'rgo',
+                              key: [
+                                props.objects[obj].type,
+                                props.objects[obj].id,
+                                field,
+                              ] as [string, string, string],
+                              name: `${obj}.${field}`,
+                            },
+                            value: extra[obj][field],
                           })),
                         ],
                         [],
-                      ),
-                  );
-                  props.stores.local.set(
-                    Object.keys(changes || {})
-                      .filter(k => !props.objects[k])
-                      .reduce<any[]>(
-                        (res, k) => [...res, { key: k, value: changes[k] }],
-                        [],
-                      ),
-                  );
-                  setProcessing(changes ? false : null);
-                } else {
-                  setProcessing(false);
-                }
-              };
-              return {
-                ...props,
-                ...methods({
+                      );
+                      root.rgo.set(
+                        ...extraValues.map(({ key, value }) => ({
+                          key: key.key,
+                          value,
+                        })),
+                      );
+                      rgoKeys.push(
+                        ...extraValues
+                          .filter(
+                            ({ key }) =>
+                              !rgoKeys.some(k => k.name === key.name),
+                          )
+                          .map(({ key }) => key),
+                      );
+                    }
+                    let changes: any;
+                    try {
+                      const newIds = await root.rgo.commit(
+                        ...rgoKeys.map(key => key.key),
+                      );
+                      for (const obj of Object.keys(props.objects)) {
+                        const { type, id } = props.objects[obj];
+                        values[obj].id = getId(id, newIds[type]);
+                      }
+                      changes = onSubmit && (await onSubmit(values));
+                    } catch {
+                      changes = onError && (await onError(values));
+                    }
+                    props.stores.rgo.set(
+                      Object.keys(changes || {})
+                        .filter(k => props.objects[k])
+                        .reduce<any[]>(
+                          (res, k) => [
+                            ...res,
+                            ...Object.keys(changes[k]).map(field => ({
+                              key: [
+                                props.objects[k].type,
+                                props.objects[k].id,
+                                field,
+                              ],
+                              value: changes[k][field],
+                            })),
+                          ],
+                          [],
+                        ),
+                    );
+                    props.stores.local.set(
+                      Object.keys(changes || {})
+                        .filter(k => !props.objects[k])
+                        .reduce<any[]>(
+                          (res, k) => [...res, { key: k, value: changes[k] }],
+                          [],
+                        ),
+                    );
+                    setProcessing(changes ? false : null);
+                  } else {
+                    setProcessing(false);
+                  }
+                };
+                return {
+                  ...props,
                   submit,
-                  onKeyDown: event => {
-                    if (event.which === 13) submit();
-                  },
-                }),
-              };
-            },
-          ),
+                  onKeyDown: event => event.which === 13 && submit(),
+                };
+              },
+            )
+            .cache('submit', 'onKeyDown'),
         ),
     )
     .branch(
       ({ fields, processing, state }) => !fields || processing || !state,
-      m().render(({ props, height }) =>
+      m.render(({ props, height }) =>
         React.createElement(container, { height, ...props }),
       ),
     )

@@ -4,8 +4,8 @@ import { isValid } from 'common';
 
 import runFilter from './runFilter';
 
-export default m().enhance(({ firstProps, onProps, setState }) => {
-  setState({ rgo: null as any, local: null as any });
+export default m.stream(({ initial, observe, push }) => {
+  push({ rgo: null as any, local: null as any });
 
   let unsubscribes: (() => void)[] = [];
   let prevJSON;
@@ -19,7 +19,7 @@ export default m().enhance(({ firstProps, onProps, setState }) => {
         );
         unsubscribes = ['rgo', 'local'].map((store, i) =>
           props.stores[store].get(storeFields[i].map(f => f.key.key), value =>
-            setState({ [store]: value }),
+            push({ [store]: value }),
           ),
         );
       }
@@ -28,8 +28,8 @@ export default m().enhance(({ firstProps, onProps, setState }) => {
       unsubscribes.forEach(u => u());
     }
   };
-  update(firstProps);
-  onProps(update);
+  update(initial);
+  observe(update);
 
   return (props, state) => {
     const indices = { rgo: 0, local: 0 };

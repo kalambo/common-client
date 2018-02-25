@@ -137,15 +137,15 @@ element-resize-detector@^1.1.13:
   dependencies:
     batch-processor "^1.0.0"
 
-elmnt@^0.5.3:
-  version "0.5.3"
-  resolved "https://registry.yarnpkg.com/elmnt/-/elmnt-0.5.3.tgz#c9245f59673c47ba61e0b6fce573b490d25edf77"
+elmnt@^0.5.4:
+  version "0.5.4"
+  resolved "https://registry.yarnpkg.com/elmnt/-/elmnt-0.5.4.tgz#729b12bc60d175e1357e9ca59847d68d071d9807"
   dependencies:
     "@types/react" "^16.0.38"
     commonmark "^0.28.1"
     commonmark-react-renderer "^4.3.4"
-    mishmash "^0.7.0"
-    style-transform "^0.1.11"
+    fast-memoize "^2.3.0"
+    mishmash "^0.7.1"
 
 encoding@^0.1.11:
   version "0.1.12"
@@ -160,6 +160,10 @@ encoding@^0.1.11:
 exenv@^1.2.1:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/exenv/-/exenv-1.2.2.tgz#2ae78e85d9894158670b03d47bec1f03bd91bb9d"
+
+fast-memoize@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/fast-memoize/-/fast-memoize-2.3.0.tgz#d7f81dc864489f582e30538923c423d85887af32"
 
 fbjs@^0.8.16:
   version "0.8.16"
@@ -312,12 +316,13 @@ minimatch@^3.0.4:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.0.tgz#a35008b20f41383eec1fb914f4cd5df79a264284"
 
-mishmash@^0.7.0:
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/mishmash/-/mishmash-0.7.0.tgz#f605e7bb9c02b226897624f603460a9bfad3f61b"
+mishmash@^0.7.1:
+  version "0.7.1"
+  resolved "https://registry.yarnpkg.com/mishmash/-/mishmash-0.7.1.tgz#a7578445c34d237e97ccd691f3f795e4d456306f"
   dependencies:
     "@types/react" "^16.0.38"
     element-resize-detector "^1.1.13"
+    fast-memoize "^2.3.0"
     keys-to-object "^0.2.0"
     lodash.throttle "^4.1.1"
     prop-types "^15.6.0"

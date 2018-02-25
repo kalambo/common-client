@@ -1,13 +1,12 @@
-import m, { HOC, memoize, watchSize } from 'mishmash';
+import m, { watchSize } from 'mishmash';
+import * as memoize from 'fast-memoize';
 
-export default memoize(
-  toggleWidth =>
-    m().enhance(
-      watchSize(
-        'small',
-        'setWidthElem',
-        ({ width }) => width && width <= toggleWidth,
-      ),
+export default memoize(toggleWidth =>
+  m.do(
+    watchSize(
+      'small',
+      'setWidthElem',
+      ({ width }) => width && width <= toggleWidth,
     ),
-  (...args) => JSON.stringify(args),
-) as (toggleWidth: number) => HOC;
+  ),
+);

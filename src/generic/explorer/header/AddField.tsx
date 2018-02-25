@@ -4,46 +4,51 @@ import m, {
   onClickOutside,
   fitScreen,
   renderLifted,
+  restyle,
   watchHover,
 } from 'mishmash';
 import { root } from 'common';
 
 import icons from '../icons';
 
-const Item = m()
-  .enhance(({ methods }) => props => ({
+const Item = m
+  .map(props => ({
     ...props,
-    ...methods({ onClick: () => props.onClick(props.field) }),
+    onClick: () => props.onClick(props.field),
   }))
-  .enhance(watchHover)
-  .style(['relation', 'isHovered'], (relation, isHovered) => [
-    ['mergeKeys', { item: true, relation, hover: isHovered }],
-    ['merge', { border: 'none', cursor: 'pointer' }],
-  ])(({ context, type, field, onClick, hoverProps, style }) => (
+  .cache('onClick')
+  .do(watchHover)
+  .map(
+    restyle(['relation', 'isHovered'], (relation, isHovered) => [
+      ['mergeKeys', { item: true, relation, hover: isHovered }],
+      ['merge', { border: 'none', cursor: 'pointer' }],
+    ]),
+  )(({ context, type, field, onClick, hoverProps, style }) => (
   <Txt onClick={onClick} {...hoverProps} style={style}>
     {type ? context.config.fieldName(field, type) : context.types[field]}
   </Txt>
 ));
 
-export default m()
-  .style({
-    base: {
-      modal: [['mergeKeys', 'modal'], ['filter', 'background', 'padding']],
-    },
-  })
-  .enhance(({ methods }) => ({ path, ...props }) => ({
-    ...props,
-    ...methods({
-      onMouseMove: () => props.context.setActive({ type: 'add', path }),
-      onMouseLeave: () => props.context.setActive(null),
-      onClick: () => props.context.setActive({ type: 'add', path }, true),
-      onClickItem: field => {
-        props.context.query.add(path, props.type, field);
-        props.context.setActive(null, true);
+export default m
+  .map(
+    restyle({
+      base: {
+        modal: [['mergeKeys', 'modal'], ['filter', 'background', 'padding']],
       },
     }),
+  )
+  .map(({ path, ...props }) => ({
+    ...props,
+    onMouseMove: () => props.context.setActive({ type: 'add', path }),
+    onMouseLeave: () => props.context.setActive(null),
+    onClick: () => props.context.setActive({ type: 'add', path }, true),
+    onClickItem: field => {
+      props.context.query.add(path, props.type, field);
+      props.context.setActive(null, true);
+    },
   }))
-  .enhance(
+  .cache('onMouseMove', 'onMouseLeave', 'onClick', 'onClickItem')
+  .do(
     onClickOutside(props => {
       if (props.focused) {
         props.context.setActive(null, true);
@@ -51,7 +56,7 @@ export default m()
       }
     }, 'setClickElem'),
   )
-  .merge(
+  .do(
     renderLifted(
       fitScreen(({ liftBounds: { top, left, height, width } }) => ({
         base: { top: top + height, left: left + width * 0.5 - 100, width: 203 },

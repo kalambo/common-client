@@ -1,39 +1,39 @@
 import * as React from 'react';
-import m, { watchSize } from 'mishmash';
+import m, { restyle, watchSize } from 'mishmash';
 
 import Body from './body';
 import Header, { fieldToRows } from './header';
 
-const Pure = m()
-  .pure()
-  .toComp();
+const Pure = m.pure().toComp();
 
-export default m()
+export default m
   .pure()
-  .style({
-    base: null,
-    div: [
-      ['filter', 'borderRight', 'borderBottom', 'borderLeft'],
-      ['scale', { borderWidth: 2 }],
-      ['scale', { borderLeftWidth: 5 }],
-    ],
-    pad: [
-      [
-        'scale',
-        {
-          height: {
-            fontSize: 1,
-            borderTopWidth: 1,
-            paddingTop: 1,
-            paddingBottom: 1,
-          },
-          extra: {
-            borderBottomWidth: 1,
-          },
-        },
+  .map(
+    restyle({
+      base: null,
+      div: [
+        ['filter', 'borderRight', 'borderBottom', 'borderLeft'],
+        ['scale', { borderWidth: 2 }],
+        ['scale', { borderLeftWidth: 5 }],
       ],
-    ],
-  })
+      pad: [
+        [
+          'scale',
+          {
+            height: {
+              fontSize: 1,
+              borderTopWidth: 1,
+              paddingTop: 1,
+              paddingBottom: 1,
+            },
+            extra: {
+              borderBottomWidth: 1,
+            },
+          },
+        ],
+      ],
+    }),
+  )
   .map(props => ({
     ...props,
     fieldRows: fieldToRows(
@@ -44,13 +44,13 @@ export default m()
       props.index,
     ),
   }))
-  .enhance(watchSize('height', 'setHeightElem', ({ height = 0 }) => height))
-  .enhance(({ firstProps, onProps, setState, methods }) => {
-    firstProps.context.store.watch(
+  .do(watchSize('height', 'setHeightElem', ({ height = 0 }) => height))
+  .stream(({ initial, observe, push }) => {
+    initial.context.store.watch(
       props => `table_${props.index}_width`,
-      (width = 0) => setState({ width }),
-      onProps,
-      firstProps,
+      (width = 0) => push({ width }),
+      observe,
+      initial,
     );
     let elem;
     const noScrollEvent = () => (elem.scrollLeft = 0);
@@ -63,14 +63,13 @@ export default m()
       ...props,
       ...state,
       setNoScrollElem,
-      ...methods({
-        setSizeElem: elem => {
-          props.setHeightElem(elem);
-          props.context.setWidthElem(`table_${props.index}_width`, elem);
-        },
-      }),
+      setSizeElem: elem => {
+        props.setHeightElem(elem);
+        props.context.setWidthElem(`table_${props.index}_width`, elem);
+      },
     });
-  })(
+  })
+  .cache('setSizeElem')(
   ({
     context,
     query,

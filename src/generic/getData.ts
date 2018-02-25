@@ -14,12 +14,12 @@ export default function getData(
 export default function getData(...args) {
   const propName = typeof args[0] === 'string' ? (args[0] as string) : 'data';
   const queries = typeof args[0] === 'string' ? args.slice(1) : args;
-  return m().enhance(({ firstProps, onProps, setState }) => {
-    setState({ data: null as any });
+  return m.stream(({ initial, observe, push }) => {
+    push({ data: null as any });
     let unsubscribe;
     if (typeof queries[0] !== 'function') {
       unsubscribe = root.rgo.query(...queries, data =>
-        setState({ data: data && { ...data } }),
+        push({ data: data && { ...data } }),
       );
     } else {
       let prevJSON;
@@ -30,10 +30,10 @@ export default function getData(...args) {
           if (nextJSON !== prevJSON) {
             if (unsubscribe) {
               unsubscribe();
-              setState({ data: null });
+              push({ data: null });
             }
             unsubscribe = root.rgo.query(...q, data =>
-              setState({ data: data && { ...data } }),
+              push({ data: data && { ...data } }),
             );
           }
           prevJSON = nextJSON;
@@ -41,8 +41,8 @@ export default function getData(...args) {
           unsubscribe();
         }
       };
-      update(firstProps);
-      onProps(update);
+      update(initial);
+      observe(update);
     }
     return (props, { data }) => ({ ...props, [propName]: data });
   });

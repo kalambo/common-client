@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import m, { isolate } from 'mishmash';
+import m, { isolate, restyle } from 'mishmash';
 import { root } from 'common';
 import { css } from 'elmnt';
 import * as deepEqual from 'deep-equal';
@@ -8,91 +8,98 @@ import * as deepEqual from 'deep-equal';
 import d3 from './d3';
 import dataToRows from './dataToRows';
 
-export default m()
-  .style({
-    base: [
-      ['mergeKeys', 'data'],
-      ['defaults', { fontStyle: 'normal', fontWeight: 'normal' }],
-      [
-        'scale',
-        {
-          paddingTop: { paddingTop: 1, fontSize: 0.5, lineHeight: -0.5 },
-          paddingBottom: {
-            paddingBottom: 1,
-            fontSize: 0.5,
-            lineHeight: -0.5,
+export default m
+  .map(
+    restyle({
+      base: [
+        ['mergeKeys', 'data'],
+        ['defaults', { fontStyle: 'normal', fontWeight: 'normal' }],
+        [
+          'scale',
+          {
+            paddingTop: { paddingTop: 1, fontSize: 0.5, lineHeight: -0.5 },
+            paddingBottom: {
+              paddingBottom: 1,
+              fontSize: 0.5,
+              lineHeight: -0.5,
+            },
           },
-        },
+        ],
+        [
+          'filter',
+          ...css.groups.text,
+          'padding',
+          'border',
+          'background',
+          'maxWidth',
+        ],
+        [
+          'merge',
+          {
+            position: 'relative',
+            verticalAlign: 'top',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+          },
+        ],
       ],
-      [
-        'filter',
-        ...css.groups.text,
-        'padding',
-        'border',
-        'background',
-        'maxWidth',
+      input: [
+        ['mergeKeys', 'data', 'input'],
+        ['scale', { maxWidth: { maxWidth: 1, borderLeftWidth: 1 } }],
+        ['merge', { zIndex: 200 }],
       ],
-      [
-        'merge',
-        {
-          position: 'relative',
-          verticalAlign: 'top',
-          whiteSpace: 'pre-wrap',
-          wordBreak: 'break-word',
-        },
-      ],
-    ],
-    input: [
-      ['mergeKeys', 'data', 'input'],
-      ['scale', { maxWidth: { maxWidth: 1, borderLeftWidth: 1 } }],
-      ['merge', { zIndex: 200 }],
-    ],
-  })
-  .style({
-    base: {
-      null: [['mergeKeys', 'null']],
-      empty: [['mergeKeys', 'empty']],
-      changed: [['mergeKeys', 'changed']],
-    },
-  })
-  .enhance(({ firstProps, onProps, setState }) => {
-    firstProps.context.store.watch(
-      'initial',
-      (initial = {}) => setState({ initial }),
-      onProps,
+    }),
+  )
+  .map(
+    restyle({
+      base: {
+        null: [['mergeKeys', 'null']],
+        empty: [['mergeKeys', 'empty']],
+        changed: [['mergeKeys', 'changed']],
+      },
+    }),
+  )
+  .stream(({ initial, observe, push }) => {
+    initial.context.store.watch(
+      'unchanged',
+      (unchanged = {}) => push({ unchanged }),
+      observe,
     );
-    return ({ context, query, data, style }, { initial }) => ({
+    return ({ context, query, data, style }, { unchanged }) => ({
       context,
       dataRows: dataToRows(context, query, data),
       style,
-      initial,
+      unchanged,
     });
   })(
-  isolate((elem, firstProps, onProps) => {
-    const Input = firstProps.context.input;
+  isolate((elem, initial, observe) => {
+    const Input = initial.context.input;
 
     const startEditing = (key, value) => {
-      firstProps.context.store.set('editing', { key, value });
-      firstProps.context.store.update('initial', (initial = {}) => ({
-        ...initial,
-        ...(initial[key] === undefined ? { [key]: value } : {}),
+      initial.context.store.set('editing', { key, value });
+      initial.context.store.update('unchanged', (unchanged = {}) => ({
+        ...unchanged,
+        ...(unchanged[key] === undefined ? { [key]: value } : {}),
       }));
     };
     const stopEditing = invalid => {
-      const { key, value } = firstProps.context.store.get('editing');
-      firstProps.context.store.set('editing', {});
-      firstProps.context.store.update('initial', ({ [key]: v, ...initial }) => {
-        if (deepEqual(v, value, { strict: true }) || invalid) {
-          root.rgo.set({ key: key.split('.'), value: undefined });
-          return initial;
-        }
-        root.rgo.set({ key: key.split('.'), value });
-        return { ...initial, [key]: v };
-      });
+      const { key, value } = initial.context.store.get('editing');
+      initial.context.store.set('editing', {});
+      initial.context.store.update(
+        'unchanged',
+        ({ [key]: v, ...unchanged }) => {
+          if (deepEqual(v, value, { strict: true }) || invalid) {
+            root.rgo.set({ key: key.split('.'), value: undefined });
+            return unchanged;
+          }
+          root.rgo.set({ key: key.split('.'), value });
+          return { ...unchanged, [key]: v };
+        },
+      );
     };
 
     let inputRef = null;
-    const unlisten = firstProps.context.store.listen(
+    const unlisten = initial.context.store.listen(
       'editing',
       (editing = {} as any) => {
         if (editing.key) {
@@ -100,7 +107,7 @@ export default m()
           const elems = elem.querySelectorAll(`[data-key='${editing.key}']`);
           for (let i = 0; i < elems.length; i++) {
             if (elems[i] !== inputRef) {
-              elems[i].textContent = firstProps.context.config.printValue(
+              elems[i].textContent = initial.context.config.printValue(
                 editing.value,
                 (root.rgo.schema[splitKey[0]][splitKey[2]] as any).scalar,
               );
@@ -110,7 +117,7 @@ export default m()
       },
     );
 
-    onProps(props => {
+    observe(props => {
       if (props) {
         const editing = props.context.store.get('editing') || {};
 
@@ -148,7 +155,7 @@ export default m()
           .datum(d => ({
             ...d,
             style:
-              inputRef !== this && Object.keys(props.initial).includes(d.key)
+              inputRef !== this && Object.keys(props.unchanged).includes(d.key)
                 ? 'changed'
                 : d.empty
                   ? 'empty'
