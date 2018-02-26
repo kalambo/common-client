@@ -9,13 +9,17 @@ const csvHeader = (
   if (fields.length === 0) return [['Add field']];
   const blocks = fields.map(f => {
     if (typeof f === 'string') {
-      const fieldName = type ? config.fieldName(f, type) : types[f];
+      const fieldName = type
+        ? types[type].fields.find(x => x[0] === f)[1]
+        : types[f].name;
       const fieldSort = sort.includes(f)
         ? 'asc'
         : sort.includes(`-${f}`) ? 'desc' : '';
       return [[fieldSort ? `${fieldName} [${fieldSort}]` : fieldName]];
     }
-    const fieldName = type ? config.fieldName(f.name, type) : types[f.name];
+    const fieldName = type
+      ? types[type].fields.find(x => x[0] === f.name)[1]
+      : types[f.name].name;
     const newType = type ? (root.rgo.schema[type][f.name] as any).type : f.name;
     const filter = config.printFilter(f.filter, newType);
     const rows = csvHeader(config, types, f, newType);

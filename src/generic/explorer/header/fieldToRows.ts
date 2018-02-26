@@ -33,7 +33,7 @@ const fieldToRows = (
                 ? 'asc'
                 : sort.includes(`-${f}`) ? 'desc' : null,
               last: i === fields.length - 1 && nextPath,
-              text: context.config.fieldName(f, type),
+              text: context.types[type].fields.find(x => x[0] === f)[1],
             });
             return rows;
           }
@@ -59,8 +59,8 @@ const fieldToRows = (
               path: newPath,
               span: newRows[0].reduce((res, g) => res + (g.span || 1), 0),
               text: type
-                ? context.config.fieldName(f.name, type)
-                : context.types[f.name],
+                ? context.types[type].fields.find(x => x[0] === f.name)[1]
+                : context.types[f.name].name,
             },
             {
               name: '#2',

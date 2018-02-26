@@ -29,7 +29,7 @@ export default m
       <div
         onMouseMove={onMouseMove}
         onMouseLeave={onMouseLeave}
-        onClick={onClick}
+        onDoubleClick={onClick}
         style={{
           position: 'absolute',
           top: -style.icon.radius,

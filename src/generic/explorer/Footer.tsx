@@ -87,18 +87,18 @@ export default m
   )
   .stream(({ initial, observe, push }) => {
     initial.context.store.watch(
-      'initial',
-      (initial = {}) => push({ editing: Object.keys(initial).length > 0 }),
+      'unchanged',
+      (unchanged = {}) => push({ editing: Object.keys(unchanged).length > 0 }),
       observe,
     );
     const clear = () => {
       root.rgo.set(
-        ...Object.keys(initial.context.store.get('initial') || {}).map(k => ({
+        ...Object.keys(initial.context.store.get('unchanged') || {}).map(k => ({
           key: k.split('.') as [string, string, string],
           value: undefined,
         })),
       );
-      initial.context.store.set('initial', {});
+      initial.context.store.set('unchanged', {});
     };
     return (props, state) => ({
       ...props,
@@ -106,11 +106,11 @@ export default m
       save: async () => {
         try {
           await root.rgo.commit(
-            ...(Object.keys(initial.context.store.get('initial') || {}).map(k =>
-              k.split('.'),
+            ...(Object.keys(initial.context.store.get('unchanged') || {}).map(
+              k => k.split('.'),
             ) as [string, string, string][]),
           );
-          initial.context.store.set('initial', {});
+          initial.context.store.set('unchanged', {});
         } catch (error) {
           alert(
             'Save failed. You may not have permission to edit these fields.',

@@ -40,6 +40,6 @@
     "pegjs": "^0.10.0",
     "react-helmet": "^5.2.0",
     "react-router-dom": "^4.2.2",
-    "rgo": "^0.3.10"
+    "rgo": "^0.3.13"
   }
 }

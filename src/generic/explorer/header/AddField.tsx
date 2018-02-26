@@ -25,7 +25,9 @@ const Item = m
     ]),
   )(({ context, type, field, onClick, hoverProps, style }) => (
   <Txt onClick={onClick} {...hoverProps} style={style}>
-    {type ? context.config.fieldName(field, type) : context.types[field]}
+    {type
+      ? context.types[type].fields.find(x => x[0] === field)[1]
+      : context.types[field].name}
   </Txt>
 ));
 
@@ -59,7 +61,7 @@ export default m
   .do(
     renderLifted(
       fitScreen(({ liftBounds: { top, left, height, width } }) => ({
-        base: { top: top + height, left: left + width * 0.5 - 100, width: 203 },
+        base: { top: top + height, left: left + width * 0.5 - 150, width: 303 },
         gap: 4,
       }))(
         ({
@@ -97,8 +99,8 @@ export default m
               <div ref={setInnerElem}>
                 <Div style={style.modal}>
                   {(type
-                    ? ['id', ...Object.keys(root.rgo.schema[type])]
-                    : Object.keys(context.types)
+                    ? context.types[type].fields.map(x => x[0])
+                    : Object.keys(context.types).sort()
                   ).map((f, i) => (
                     <Item
                       context={context}
