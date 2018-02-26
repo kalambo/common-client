@@ -18,7 +18,6 @@ export default m
     return {
       ...props,
       ...info,
-      rows: 0,
       type: `${file ? 'file' : scalar || 'string'}${isList ? 'list' : ''}`,
       ...(!isList && Array.isArray(info.options)
         ? {
