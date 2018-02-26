@@ -52,15 +52,18 @@ Object.keys(isUnitlessNumber).forEach(prop =>
   }),
 );
 
+export const applyStyle = (elem, style) => {
+  Object.keys(style).forEach(k => {
+    elem.style[k] =
+      typeof style[k] === 'number' && style[k] !== 0 && !isUnitlessNumber[k]
+        ? `${style[k]}px`
+        : style[k];
+  });
+};
+
 function style(styles) {
   return this.each(function(d) {
-    const s = typeof styles === 'function' ? styles(d) : styles;
-    Object.keys(s).forEach(k => {
-      this.style[k] =
-        typeof s[k] === 'number' && s[k] !== 0 && !isUnitlessNumber[k]
-          ? `${s[k]}px`
-          : s[k];
-    });
+    applyStyle(this, typeof styles === 'function' ? styles(d) : styles);
   });
 }
 d3.selection.prototype.style = style;

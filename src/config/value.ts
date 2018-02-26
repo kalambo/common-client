@@ -1,27 +1,28 @@
-import { Scalar } from 'rgo';
+import { ScalarField } from 'rgo';
 import * as moment from 'moment';
 
-const printSingleValue = (value: any, scalar: Scalar) => {
+const printSingleValue = (value: any, field: ScalarField) => {
   if (value === undefined) return '';
   else if (value === null) return '-';
-  else if (scalar === 'boolean') return value ? 'Yes' : 'No';
-  else if (scalar === 'date') return moment(value).format('DD/MM/YY');
+  else if (field.scalar === 'boolean') return value ? 'Yes' : 'No';
+  else if (field.scalar === 'date') return moment(value).format('DD/MM/YY');
+  else if (field.meta && field.meta.file) return value.split(':')[1];
   return `${value}`;
 };
-export const printValue = (value: any, scalar: Scalar) => {
+export const printValue = (value: any, field: ScalarField) => {
   if (Array.isArray(value)) {
     if (value.length === 0) return '-';
-    return value.map(v => printSingleValue(v, scalar)).join(', ');
+    return value.map(v => printSingleValue(v, field)).join(', ');
   }
-  return printSingleValue(value, scalar);
+  return printSingleValue(value, field);
 };
 
-export const parseValue = (value: string, scalar: Scalar) => {
+export const parseValue = (value: string, field: ScalarField) => {
   if (value === 'null') return null;
-  if (scalar === 'boolean') return { true: true, false: false }[value];
-  if (scalar === 'int') return parseInt(value, 10);
-  if (scalar === 'float') return parseFloat(value);
-  if (scalar === 'date') {
+  if (field.scalar === 'boolean') return { true: true, false: false }[value];
+  if (field.scalar === 'int') return parseInt(value, 10);
+  if (field.scalar === 'float') return parseFloat(value);
+  if (field.scalar === 'date') {
     const parts = value
       .split(/^(\d\d?)\/(\d\d?)\/(\d\d(?:\d\d)?)$/)
       .slice(1)

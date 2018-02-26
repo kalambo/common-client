@@ -16,7 +16,7 @@ export const printFilter = (filter: any[] | null, type: string) => {
   if (!field || !fieldIs.scalar(field)) throw new Error('Invalid field');
   const op = filter.length === 3 ? filter[1] : '=';
   const value = filter[filter.length - 1];
-  return `${filter[0]} ${op} ${printValue(value, field.scalar)}`;
+  return `${filter[0]} ${op} ${printValue(value, field)}`;
 };
 
 const simpleField = f => f.replace(/\s/g, '').toLowerCase();
@@ -107,7 +107,7 @@ const parseFilterValues = (filter: any[], fields: Obj<Field>) => {
       [[fieldKey, op, null], [fieldKey, op, false]],
     ];
   }
-  const parsedValue = parseValue(value, field.scalar);
+  const parsedValue = parseValue(value, field);
   if (parsedValue === undefined || parsedValue !== parsedValue) {
     throw new Error('Invalid value');
   }

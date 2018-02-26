@@ -21,6 +21,7 @@ const dataToRows = (
           !f.startsWith('#') &&
           f !== 'id' &&
           context.editable(type, f);
+        const schemaField = type && root.rgo.schema[type!][f];
         return [
           [
             {
@@ -36,10 +37,14 @@ const dataToRows = (
                     ? `${start + i + 1}`
                     : context.config.printValue(
                         value,
-                        f === 'id'
-                          ? 'string'
-                          : (root.rgo.schema[type!][f] as any).scalar,
+                        f === 'id' ? { scalar: 'string' } : schemaField,
                       ),
+              link:
+                schemaField &&
+                schemaField.meta &&
+                schemaField.meta.file &&
+                value &&
+                `${context.fileServer}/storage/file/${value.split(':')[0]}`,
               first: first && i === 0,
               firstCol: f === '#0',
               lastCol: f === '#3',

@@ -156,6 +156,7 @@ export default m
       editable,
       input,
       permalink,
+      fileServer,
       reset,
       style,
     }) => {
@@ -166,6 +167,7 @@ export default m
         editable,
         input,
         permalink,
+        fileServer,
         reset,
         store,
         query,

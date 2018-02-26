@@ -5,7 +5,7 @@ import { root } from 'common';
 import { css } from 'elmnt';
 import * as deepEqual from 'deep-equal';
 
-import d3 from './d3';
+import d3, { applyStyle } from './d3';
 import dataToRows from './dataToRows';
 
 export default m
@@ -55,6 +55,7 @@ export default m
       base: {
         null: [['mergeKeys', 'null']],
         empty: [['mergeKeys', 'empty']],
+        fileLink: [['mergeKeys', 'fileLink'], ['filter', ...css.groups.text]],
         changed: [['mergeKeys', 'changed']],
       },
     }),
@@ -109,7 +110,7 @@ export default m
             if (elems[i] !== inputRef) {
               elems[i].textContent = initial.context.config.printValue(
                 editing.value,
-                (root.rgo.schema[splitKey[0]][splitKey[2]] as any).scalar,
+                root.rgo.schema[splitKey[0]][splitKey[2]],
               );
             }
           }
@@ -216,7 +217,7 @@ export default m
               if (editing.key === key) {
                 this.textContent = props.context.config.printValue(
                   editing.value,
-                  (root.rgo.schema[type][field] as any).scalar,
+                  root.rgo.schema[type][field],
                 );
               } else {
                 this.textContent = text;
@@ -230,9 +231,17 @@ export default m
           .on('mouseenter', null)
           .on('mouseleave', null)
           .on('dblclick', null)
-          .each(function({ text }) {
+          .each(function({ text, link }) {
             ReactDOM.unmountComponentAtNode(this);
-            this.textContent = text;
+            this.textContent = link ? '' : text;
+            if (link) {
+              const a = document.createElement('a');
+              a.textContent = text;
+              a.href = link;
+              a.target = '_blank';
+              applyStyle(a, props.style.fileLink);
+              this.appendChild(a);
+            }
           });
 
         props.context.updateWidths();

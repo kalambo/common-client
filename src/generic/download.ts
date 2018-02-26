@@ -65,8 +65,8 @@ const csvData = (
                 : config.printValue(
                     value,
                     f === 'id'
-                      ? 'string'
-                      : (root.rgo.schema[type!][f] as any).scalar,
+                      ? { scalar: 'string' }
+                      : root.rgo.schema[type!][f],
                   ),
           ],
         ];
