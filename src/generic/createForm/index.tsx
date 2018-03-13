@@ -9,6 +9,8 @@ import createStores from './createStores';
 import getState from './getState';
 import prepareFields from './prepareFields';
 
+const mapProps = map => C => props => React.createElement(C, map(props));
+
 export interface FormProps {
   objects?: Obj<{
     type: string;
@@ -34,13 +36,12 @@ export default function createForm<T = {}>(
   blockProps: string[],
   block: Comp,
 ) {
-  const Block = m.branch(
-    ({ fields }) => fields,
+  const Block = m.doIf(
+    'fields',
     m
       .do(getState)
-      .branch(({ state }) => !state, m.render())
-      .map(({ stores, fields, state, ...props }) => ({
-        ...props,
+      .doIf(({ state }) => !state, m.yield(() => null))
+      .merge('stores', 'fields', 'state', (stores, fields, state) => ({
         fields: fields.map(({ key, initial: _, ...f }, i) => ({
           ...state[i],
           onChange: value =>
@@ -50,209 +51,191 @@ export default function createForm<T = {}>(
           ...f,
           field: key,
         })),
+        stores: undefined,
+        state: undefined,
       })),
-    m.map(({ fields: _a, stores: _b, state: _c, ...props }) => props),
+    m.merge({ fields: undefined, stores: undefined, state: undefined }),
   )(block);
 
   return m
-    .cache('objects', 'blocks')
-    .pure()
-    .stream(({ initial, observe, push }) => {
-      push({ info: {} });
+    .pure(true)
+    .do(
+      mapProps(
+        ({ objects, blocks, onCommit, onError, onSubmit, ...props }) => ({
+          objects,
+          blocks,
+          onCommit,
+          onError,
+          onSubmit,
+          props,
+        }),
+      ),
+    )
+    .merge((props$, push) => {
       const stores = createStores();
-
-      let fields;
       let count = 0;
-      const prepare = async props => {
-        if (props) {
+      props$('objects', 'blocks', (objects, blocks) => {
+        setTimeout(async () => {
           const index = ++count;
-          const info = await prepareFields(
-            blockProps,
-            props.objects,
-            props.blocks,
-            stores,
-          );
-          if (index === count) {
-            fields = info.fields;
-            push({ info });
-          }
-        } else {
+          const info = await prepareFields(blockProps, objects, blocks, stores);
+          if (index === count) push(info);
+        });
+        return () => {
           root.rgo.set(
-            ...(fields || [])
+            ...(props$().$fields || [])
               .filter(f => f.key.store === 'rgo')
               .map(f => ({ key: f.key.key })),
           );
-        }
-      };
-      setTimeout(() => prepare(initial));
-      observe(prepare);
-
-      return (
-        { objects: _a, blocks: _b, onCommit, onError, onSubmit, ...props },
-        { info },
-      ) => ({ onCommit, onError, onSubmit, props, stores, ...info });
-    })
-    .stream(({ push }) => {
-      push({ height: null as number | null });
-      let heightElem: HTMLElement | null = null;
-      const setHeightElem = elem => (heightElem = elem);
-      const lockHeight = () =>
-        push({ height: heightElem && heightElem.offsetHeight });
-      return (props, { height }) => ({
-        ...props,
-        height,
-        setHeightElem,
-        lockHeight,
+        };
       });
+      return {
+        stores,
+        objects: undefined,
+        blocks: undefined,
+      };
     })
-    .branch(
-      ({ fields }) => fields,
+    .merge((_, push) => {
+      let heightElem: HTMLElement | null = null;
+      return {
+        height: null,
+        setHeightElem: elem => (heightElem = elem),
+        lockHeight: () =>
+          push({ height: heightElem && heightElem.offsetHeight }),
+      };
+    })
+    .doIf(
+      'fields',
       m
-        .stream(({ observe, push }) => {
-          push({ processing: null });
+        .merge((_, push) => {
           let mounted = true;
-          observe(props => !props && (mounted = false));
-          const setProcessing = processing => mounted && push({ processing });
-          return (props, { processing }) => ({
-            ...props,
-            processing,
-            setProcessing,
+          push({
+            processing: null,
+            setProcessing: processing => mounted && push({ processing }),
           });
+          return () => (mounted = false);
         })
         .do(getState)
-        .branch(
-          ({ state }) => state,
-          m
-            .map(
-              ({
+        .doIf(
+          'state',
+          m.merge(props$ => {
+            const submit = async () => {
+              const {
                 onCommit,
                 onSubmit,
                 onError,
+                stores,
+                objects,
+                fields,
+                state,
                 lockHeight,
                 setProcessing,
-                ...props
-              }) => {
-                const submit = async () => {
-                  if (!props.state.some(s => !s.hidden && s.invalid)) {
-                    lockHeight();
-                    setProcessing(true);
-                    const visibleFields = props.fields.filter(
-                      (_, i) => !props.state[i].hidden,
-                    );
-                    const values = visibleFields.reduce(
-                      (res, f, i) => set(res, f.key.name, props.state[i].value),
-                      {},
-                    );
-                    const rgoKeys = visibleFields
-                      .filter(f => f.key.store === 'rgo')
-                      .map(f => f.key);
-                    if (onCommit) {
-                      const extra = (await onCommit(values)) || {};
-                      const extraValues = Object.keys(extra).reduce<any[]>(
-                        (res, obj) => [
-                          ...res,
-                          ...Object.keys(extra[obj] || {}).map(field => ({
-                            key: {
-                              store: 'rgo',
-                              key: [
-                                props.objects[obj].type,
-                                props.objects[obj].id,
-                                field,
-                              ] as [string, string, string],
-                              name: `${obj}.${field}`,
-                            },
-                            value: extra[obj][field],
-                          })),
-                        ],
-                        [],
-                      );
-                      root.rgo.set(
-                        ...extraValues.map(({ key, value }) => ({
-                          key: key.key,
-                          value,
-                        })),
-                      );
-                      rgoKeys.push(
-                        ...extraValues
-                          .filter(
-                            ({ key }) =>
-                              !rgoKeys.some(k => k.name === key.name),
-                          )
-                          .map(({ key }) => key),
-                      );
-                    }
-                    let changes: any;
-                    try {
-                      const newIds = await root.rgo.commit(
-                        ...rgoKeys.map(key => key.key),
-                      );
-                      for (const obj of Object.keys(props.objects)) {
-                        const { type, id } = props.objects[obj];
-                        values[obj].id = getId(id, newIds[type]);
-                      }
-                      changes = onSubmit && (await onSubmit(values));
-                    } catch {
-                      changes = onError && (await onError(values));
-                    }
-                    props.stores.rgo.set(
-                      Object.keys(changes || {})
-                        .filter(k => props.objects[k])
-                        .reduce<any[]>(
-                          (res, k) => [
-                            ...res,
-                            ...Object.keys(changes[k]).map(field => ({
-                              key: [
-                                props.objects[k].type,
-                                props.objects[k].id,
-                                field,
-                              ],
-                              value: changes[k][field],
-                            })),
-                          ],
-                          [],
-                        ),
-                    );
-                    props.stores.local.set(
-                      Object.keys(changes || {})
-                        .filter(k => !props.objects[k])
-                        .reduce<any[]>(
-                          (res, k) => [...res, { key: k, value: changes[k] }],
-                          [],
-                        ),
-                    );
-                    setProcessing(changes ? false : null);
-                  } else {
-                    setProcessing(false);
+              } = props$();
+
+              if (!state.some(s => !s.hidden && s.invalid)) {
+                lockHeight();
+                setProcessing(true);
+                const visibleFields = fields.filter((_, i) => !state[i].hidden);
+                const values = visibleFields.reduce(
+                  (res, f, i) => set(res, f.key.name, state[i].value),
+                  {},
+                );
+                const rgoKeys = visibleFields
+                  .filter(f => f.key.store === 'rgo')
+                  .map(f => f.key);
+                if (onCommit) {
+                  const extra = (await onCommit(values)) || {};
+                  const extraValues = Object.keys(extra).reduce<any[]>(
+                    (res, obj) => [
+                      ...res,
+                      ...Object.keys(extra[obj] || {}).map(field => ({
+                        key: {
+                          store: 'rgo',
+                          key: [objects[obj].type, objects[obj].id, field],
+                          name: `${obj}.${field}`,
+                        },
+                        value: extra[obj][field],
+                      })),
+                    ],
+                    [],
+                  );
+                  root.rgo.set(
+                    ...extraValues.map(({ key, value }) => ({
+                      key: key.key,
+                      value,
+                    })),
+                  );
+                  rgoKeys.push(
+                    ...extraValues
+                      .filter(
+                        ({ key }) => !rgoKeys.some(k => k.name === key.name),
+                      )
+                      .map(({ key }) => key),
+                  );
+                }
+                let changes: any;
+                try {
+                  const newIds = await root.rgo.commit(
+                    ...rgoKeys.map(key => key.key),
+                  );
+                  for (const obj of Object.keys(objects)) {
+                    const { type, id } = objects[obj];
+                    values[obj].id = getId(id, newIds[type]);
                   }
-                };
-                return {
-                  ...props,
-                  submit,
-                  onKeyDown: event => event.which === 13 && submit(),
-                };
-              },
-            )
-            .cache('submit', 'onKeyDown'),
+                  changes = onSubmit && (await onSubmit(values));
+                } catch {
+                  changes = onError && (await onError(values));
+                }
+                stores.rgo.set(
+                  Object.keys(changes || {})
+                    .filter(k => objects[k])
+                    .reduce<any[]>(
+                      (res, k) => [
+                        ...res,
+                        ...Object.keys(changes[k]).map(field => ({
+                          key: [objects[k].type, objects[k].id, field],
+                          value: changes[k][field],
+                        })),
+                      ],
+                      [],
+                    ),
+                );
+                stores.local.set(
+                  Object.keys(changes || {})
+                    .filter(k => !objects[k])
+                    .reduce<any[]>(
+                      (res, k) => [...res, { key: k, value: changes[k] }],
+                      [],
+                    ),
+                );
+                setProcessing(changes ? false : null);
+              } else {
+                setProcessing(false);
+              }
+            };
+            return {
+              submit,
+              onKeyDown: event => event.which === 13 && submit(),
+            };
+          }),
         ),
     )
-    .branch(
+    .doIf(
       ({ fields, processing, state }) => !fields || processing || !state,
-      m.render(({ props, height }) =>
+      m.yield(({ props, height }) =>
         React.createElement(container, { height, ...props }),
       ),
     )
-    .map(({ state, ...props }) => ({
+    .merge('state', state => ({
       invalid: state.some(s => !s.hidden && s.invalid),
       hidden: JSON.stringify(state.map(s => s.hidden)),
-      ...props,
+      state: undefined,
     }))
     .pure()
-    .map(({ hidden, ...props }) => ({
-      ...props,
+    .merge('fields', 'hidden', (fields, hidden) => ({
       hidden: keysToObject(
         JSON.parse(hidden),
         h => h,
-        (_, i) => props.fields[i].key.name,
+        (_, i) => fields[i].key.name,
       ),
     }))(
     ({

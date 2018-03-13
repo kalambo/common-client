@@ -3,27 +3,24 @@ import { Div, Icon, Txt } from 'elmnt';
 import m, {
   onClickOutside,
   fitScreen,
-  renderLifted,
-  restyle,
   watchHover,
+  yieldLifted,
 } from 'mishmash';
+import st from 'style-transform';
 import { root } from 'common';
 
 import icons from '../icons';
 
 const Item = m
-  .map(props => ({
-    ...props,
-    onClick: () => props.onClick(props.field),
+  .merge('onClick', 'field', (onClick, field) => ({
+    onClick: () => onClick(field),
   }))
-  .cache('onClick')
   .do(watchHover)
-  .map(
-    restyle(['relation', 'isHovered'], (relation, isHovered) => [
-      ['mergeKeys', { item: true, relation, hover: isHovered }],
-      ['merge', { border: 'none', cursor: 'pointer' }],
-    ]),
-  )(({ context, type, field, onClick, hoverProps, style }) => (
+  .merge('style', 'relation', 'isHovered', (style, relation, isHovered) => ({
+    style: st(style)
+      .mergeKeys({ item: true, relation, hover: isHovered })
+      .merge({ border: 'none', cursor: 'pointer' }),
+  }))(({ context, type, field, onClick, hoverProps, style }) => (
   <Txt onClick={onClick} {...hoverProps} style={style}>
     {type
       ? context.types[type].fields.find(x => x[0] === field)[1]
@@ -32,24 +29,33 @@ const Item = m
 ));
 
 export default m
-  .map(
-    restyle({
-      base: {
-        modal: [['mergeKeys', 'modal'], ['filter', 'background', 'padding']],
-      },
-    }),
-  )
-  .map(({ path, ...props }) => ({
-    ...props,
-    onMouseMove: () => props.context.setActive({ type: 'add', path }),
-    onMouseLeave: () => props.context.setActive(null),
-    onClick: () => props.context.setActive({ type: 'add', path }, true),
-    onClickItem: field => {
-      props.context.query.add(path, props.type, field);
-      props.context.setActive(null, true);
+  .merge('style', style => ({
+    style: {
+      ...style,
+      modal: st(style.base)
+        .mergeKeys('modal')
+        .filter('background', 'padding'),
     },
   }))
-  .cache('onMouseMove', 'onMouseLeave', 'onClick', 'onClickItem')
+  .merge(props$ => ({
+    onMouseMove: () => {
+      const { context, path } = props$();
+      context.setActive({ type: 'add', path });
+    },
+    onMouseLeave: () => {
+      const { context } = props$();
+      context.setActive(null);
+    },
+    onClick: () => {
+      const { context, path } = props$();
+      context.setActive({ type: 'add', path }, true);
+    },
+    onClickItem: field => {
+      const { context, type, path } = props$();
+      context.query.add(path, type, field);
+      context.setActive(null, true);
+    },
+  }))
   .do(
     onClickOutside(props => {
       if (props.focused) {
@@ -59,9 +65,13 @@ export default m
     }, 'setClickElem'),
   )
   .do(
-    renderLifted(
+    yieldLifted(
+      'liftBounds',
+      'setBoundsElem',
       fitScreen(({ liftBounds: { top, left, height, width } }) => ({
-        base: { top: top + height, left: left + width * 0.5 - 150, width: 303 },
+        top: top + height,
+        left: left + width * 0.5 - 150,
+        width: 303,
         gap: 4,
       }))(
         ({
@@ -126,7 +136,7 @@ export default m
   )(
   ({
     wide,
-    setLiftBaseElem,
+    setBoundsElem,
     active,
     focused,
     onMouseMove,
@@ -156,7 +166,7 @@ export default m
                   }),
               background: !empty && style.icon.background,
             }}
-            ref={setLiftBaseElem}
+            ref={setBoundsElem}
           />
           {!empty && (
             <Icon

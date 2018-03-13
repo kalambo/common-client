@@ -5,42 +5,41 @@ import m from 'mishmash';
 import icons from '../icons';
 
 export default m
-  .stream(({ initial, observe, push }) => {
-    initial.context.store.watch(
-      props => `${props.path}_start`,
-      (start = 1) => push({ start }),
-      observe,
-      initial,
-    );
-    initial.context.store.watch(
-      props => `${props.path}_end`,
-      (end = null) => push({ end }),
-      observe,
-      initial,
-    );
-    return ({ path, ...props }, { start, end }) => ({
-      show: props.up ? start && start > 1 && end : end,
-      ...props,
-      onMouseMove: () =>
-        props.context.setActive({
-          type: props.up ? 'pageup' : 'pagedown',
-          path,
-        }),
-      onMouseLeave: () => props.context.setActive(null),
-      onClick: () => {
-        const move = props.up
-          ? -Math.min(start - 1, end - (start || 1) + 1)
-          : end - (start || 1) + 1;
-        const newStart = (start || 1) + move;
-        const newEnd = end + move;
-        props.context.store.set(`${path}_start`, newStart);
-        props.context.store.set(`${path}_end`, newEnd);
-        props.context.query.limit(path, newStart - 1, newEnd);
-      },
-    });
+  .merge('context', 'path', (context, path, push) => {
+    const unlistens = [
+      context.store.listen(`${path}_start`, (start = 1) => push({ start })),
+      context.store.listen(`${path}_end`, (end = null) => push({ end })),
+    ];
+    return () => unlistens.forEach(u => u());
   })
-  .cache('onMouseMove', 'onMouseLeave', 'onClick')
-  .branch(({ show }) => !show, m.render())(
+  .merge('up', 'start', 'end', (up, start, end) => ({
+    show: up ? start && start > 1 && end : end,
+  }))
+  .merge(props$ => ({
+    onMouseMove: () => {
+      const { context, path, up } = props$();
+      context.setActive({
+        type: up ? 'pageup' : 'pagedown',
+        path,
+      });
+    },
+    onMouseLeave: () => {
+      const { context } = props$();
+      context.setActive(null);
+    },
+    onClick: () => {
+      const { context, path, up, start, end } = props$();
+      const move = up
+        ? -Math.min(start - 1, end - (start || 1) + 1)
+        : end - (start || 1) + 1;
+      const newStart = (start || 1) + move;
+      const newEnd = end + move;
+      context.store.set(`${path}_start`, newStart);
+      context.store.set(`${path}_end`, newEnd);
+      context.query.limit(path, newStart - 1, newEnd);
+    },
+  }))
+  .doIf(({ show }) => !show, m.yield(() => null))(
   ({ up, active, onMouseMove, onMouseLeave, onClick, style }) => (
     <div
       style={{

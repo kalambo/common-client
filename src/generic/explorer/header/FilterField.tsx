@@ -1,111 +1,98 @@
 import * as React from 'react';
 import { css, Div, Icon, Input } from 'elmnt';
-import m, { onClickOutside, restyle } from 'mishmash';
+import m, { onClickOutside } from 'mishmash';
+import st from 'style-transform';
 
 import icons from '../icons';
 
 export default m
-  .stream(({ initial, observe, push }) => {
+  .merge('context', 'path', (context, path, push) =>
+    context.store.listen(`${path}_filter`, (text = '') => push({ text })),
+  )
+  .merge(props$ => {
     let inputElem;
-    const setInputElem = e => (inputElem = e);
-
     let filter;
-    initial.context.store.watch(
-      props => `${props.path}_filter`,
-      (text = '') => push({ text }),
-      observe,
-      initial,
-    );
-
-    return (props, { text }) => {
-      const invalid = text && !filter;
-      return {
-        ...props,
-        text,
-        invalid,
-        setText: text => {
-          filter = props.context.config.parseFilter(text, props.type);
-          props.context.store.set(`${props.path}_filter`, text);
-        },
-        onMouseMove: () =>
-          props.context.setActive({ type: 'filter', path: props.path }),
-        onMouseLeave: () => props.context.setActive(null),
-        onClick: () => {
-          props.context.setActive({ type: 'filter', path: props.path }, true);
-          inputElem && inputElem.focus();
-        },
-        onClickOutside: () => {
-          if (props.focused) {
-            if (!invalid) {
-              props.context.query.filter(props.path, filter);
-              props.context.setActive(null, true);
-            }
-            return true;
+    props$('text', text => ({ invalid: text && !filter }));
+    return {
+      setInputElem: e => (inputElem = e),
+      setText: text => {
+        const { context, type, path } = props$();
+        filter = context.config.parseFilter(text, type);
+        context.store.set(`${path}_filter`, text);
+      },
+      onMouseMove: () => {
+        const { context, path } = props$();
+        context.setActive({ type: 'filter', path });
+      },
+      onMouseLeave: () => {
+        const { context } = props$();
+        context.setActive(null);
+      },
+      onClick: () => {
+        const { context, path } = props$();
+        context.setActive({ type: 'filter', path }, true);
+        inputElem && inputElem.focus();
+      },
+      onClickOutside: () => {
+        const { context, path, focused, $invalid } = props$();
+        if (focused) {
+          if (!$invalid) {
+            context.query.filter(path, filter);
+            context.setActive(null, true);
           }
-        },
-        onKeyDown: event => {
-          if (props.focused && event.keyCode === 13 && !invalid) {
-            props.context.query.filter(props.path, filter);
-            props.context.setActive(null, true);
-            (document.activeElement as HTMLElement).blur();
-          }
-        },
-        setInputElem,
-      };
+          return true;
+        }
+      },
+      onKeyDown: event => {
+        const { context, path, focused, $invalid } = props$();
+        if (focused && event.keyCode === 13 && !$invalid) {
+          context.query.filter(path, filter);
+          context.setActive(null, true);
+          (document.activeElement as HTMLElement).blur();
+        }
+      },
     };
   })
-  .cache(
-    'setText',
-    'onMouseMove',
-    'onMouseLeave',
-    'onClick',
-    'onClickOutside',
-    'onKeyDown',
-  )
-  .map(
-    restyle(['active', 'focused', 'invalid'], (active, focused, invalid) => ({
-      base: {
-        input: [
-          [
-            'mergeKeys',
-            { input: true, hover: active, focus: focused, invalid },
-          ],
-        ],
-      },
-    })),
-  )
-  .map(
-    restyle(['focused'], focused => ({
-      input: {
-        div: [
-          ['scale', { margin: { padding: -1 } }],
-          ['filter', 'margin', 'background'],
-          ['merge', { position: 'relative' }],
-        ],
-        bar: [
-          ['scale', { minWidth: { fontSize: 5 } }],
-          ['filter', 'minWidth'],
-          [
-            'merge',
-            { layout: 'bar', position: 'relative', zIndex: focused ? 30 : 5 },
-          ],
-        ],
-        filterIcon: [
-          ['scale', { fontSize: 0.8 }],
-          ['filter', 'color', 'fontSize', 'padding'],
-        ],
-        iconWidth: [
-          [
-            'scale',
-            { width: { fontSize: 0.8, paddingLeft: 0.5, paddingRight: 0.5 } },
-          ],
-        ],
-        text: [
-          ['filter', ...css.groups.text, 'padding'],
-          ['scale', { paddingRight: 2 }],
-        ],
-      },
-    })),
+  .merge(
+    'style',
+    'active',
+    'focused',
+    'invalid',
+    (style, active, focused, invalid) => {
+      const input = st(style.base).mergeKeys({
+        input: true,
+        hover: active,
+        focus: focused,
+        invalid,
+      });
+      return {
+        style: {
+          ...style,
+          input,
+          div: st(input)
+            .scale({ margin: { padding: -1 } })
+            .filter('margin', 'background')
+            .merge({ position: 'relative' }),
+          bar: st(input)
+            .scale({ minWidth: { fontSize: 5 } })
+            .filter('minWidth')
+            .merge({
+              layout: 'bar',
+              position: 'relative',
+              zIndex: focused ? 30 : 5,
+            }),
+          filterIcon: st(input)
+            .scale({ fontSize: 0.8 })
+            .filter('color', 'fontSize', 'padding'),
+          iconWidth: st(input).scale({
+            width: { fontSize: 0.8, paddingLeft: 0.5, paddingRight: 0.5 },
+          }),
+          text: st(input)
+            .filter(...css.groups.text, 'padding')
+            .scale({ paddingRight: 2 }),
+        },
+      };
+    },
   )
   .do(onClickOutside(props => props.onClickOutside(), 'setClickElem'))(
   ({

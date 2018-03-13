@@ -1,5 +1,6 @@
 import * as React from 'react';
-import m, { restyle } from 'mishmash';
+import m from 'mishmash';
+import st from 'style-transform';
 import { css, Div, Mark, Txt } from 'elmnt';
 
 import getData from '../generic/getData';
@@ -16,27 +17,29 @@ const joinFilters = (...filters) => {
 };
 
 export default m
-  .map(
-    restyle({
-      base: null,
-      spinner: [['mergeKeys', 'spinner']],
-      header: [['mergeKeys', 'header']],
-      columnCell: [
-        ['mergeKeys', 'column'],
-        ['filter', ...css.groups.box, ...css.groups.other],
-        ['expandFor', 'paddingLeft', 'borderTopLeftRadius'],
-      ],
-      columnText: [['mergeKeys', 'column'], ['filter', ...css.groups.text]],
-      link: [['mergeKeys', 'link'], ['merge', { position: 'relative' }]],
-      filter: [['mergeKeys', 'filter']],
-    }),
-  )
-  .stream(({ push }) => {
-    push({ filter: null });
-    const setFilter = filter => push({ filter });
-    return (props, state) => ({ ...props, ...state, setFilter });
-  })
-  .render(({ rows, setFilter, style, next }) => (
+  .merge('style', style => ({
+    style: {
+      base: style,
+      spinner: st(style).mergeKeys('spinner'),
+      header: st(style).mergeKeys('header'),
+      columnCell: st(style)
+        .mergeKeys('column')
+        .filter(...css.groups.box, ...css.groups.other)
+        .expandFor('paddingLeft', 'borderTopLeftRadius'),
+      columnText: st(style)
+        .mergeKeys('column')
+        .filter(...css.groups.text),
+      link: st(style)
+        .mergeKeys('link')
+        .merge({ position: 'relative' }),
+      filter: st(style).mergeKeys('filter'),
+    },
+  }))
+  .merge((_, push) => ({
+    filter: null,
+    setFilter: filter => push({ filter }),
+  }))
+  .yield(({ rows, setFilter, style, next }) => (
     <Div style={{ spacing: 15 }}>
       <Filter type={rows[0].name} onChange={setFilter} style={style.filter} />
       {next()}
@@ -48,14 +51,13 @@ export default m
       filter: joinFilters(rows[0].filter, filter),
     })),
   )
-  .branch(
+  .doIf(
     ({ data }) => !data,
-    m.render(({ style }) => <Spinner style={style.spinner} />),
+    m.yield(({ style }) => <Spinner style={style.spinner} />),
   )
-  .map(({ rows, data, ...props }) => {
+  .merge('rows', 'data', (rows, data) => {
     const result = rows[1](data);
     return {
-      ...props,
       rows: Array.isArray(result[0] && result[0][1]) ? result : [['', result]],
     };
   })(({ path, columns, rows, style }) => (

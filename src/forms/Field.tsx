@@ -1,60 +1,60 @@
 import * as React from 'react';
 import { css, Div, Hover, Input, Txt } from 'elmnt';
-import m, { restyle } from 'mishmash';
+import m from 'mishmash';
 import { getValueString, noUndef } from 'common';
+import st from 'style-transform';
 
 import getData from '../generic/getData';
 
 export default fileServer => {
   const FileButton = m
-    .branch(({ value }) => !value, m.render())
-    .map(restyle([['mergeKeys', 'button'], ['merge', { width: '100%' }]]))(
-    ({ value, style }) => (
-      <a
-        href={`${fileServer}/storage/file/${value.split(':')[0]}`}
-        target="_blank"
-      >
-        <Hover style={{ ...style, fontSize: 15, padding: 8 }}>
-          {({ hoverProps, style }) => (
-            <Txt {...hoverProps} style={style}>
-              View file
-            </Txt>
-          )}
-        </Hover>
-      </a>
-    ),
-  );
+    .yield(({ value, next }) => (value ? next() : null))
+    .merge('style', style => ({
+      style: st(style)
+        .mergeKeys('button')
+        .merge({ width: '100%' }),
+    }))(({ value, style }) => (
+    <a
+      href={`${fileServer}/storage/file/${value.split(':')[0]}`}
+      target="_blank"
+    >
+      <Hover style={{ ...style, fontSize: 15, padding: 8 }}>
+        {({ hoverProps, style }) => (
+          <Txt {...hoverProps} style={style}>
+            View file
+          </Txt>
+        )}
+      </Hover>
+    </a>
+  ));
   return m
-    .branch(
+    .doIf(
       ({ index }) => index !== undefined,
-      m
-        .map(({ value, ...props }) => ({
-          ...props,
-          value: (value && value[props.index]) || null,
-          onChange: indexValue => {
-            const newValue = [
-              ...[...new Array(props.index)].map((_, i) =>
-                noUndef(value && value[i]),
-              ),
-              indexValue,
-              ...(value || []).slice(props.index + 1).map(noUndef),
-            ];
-            props.onChange(newValue.some(v => v !== null) ? newValue : null);
-          },
-        }))
-        .cache('onChange'),
+      m.merge('value', 'onChange', 'index', (value, onChange, index) => ({
+        value: (value && value[index]) || null,
+        onChange: indexValue => {
+          const newValue = [
+            ...[...new Array(index)].map((_, i) => noUndef(value && value[i])),
+            indexValue,
+            ...(value || []).slice(index + 1).map(noUndef),
+          ];
+          onChange(newValue.some(v => v !== null) ? newValue : null);
+        },
+      })),
     )
-    .branch(
-      ({ view }) => view,
+    .doIf(
+      'view',
       m
-        .map(restyle([['filter', ...css.groups.text]]))
-        .render(({ type, value, style }) => (
+        .merge('style', style => ({
+          style: st(style).filter(...css.groups.text),
+        }))
+        .yield(({ type, value, style }) => (
           <Txt style={style}>{getValueString(value, type)}</Txt>
         )),
     )
-    .branch(
+    .doIf(
       ({ type, admin }) => type === 'file' && admin,
-      m.render(({ value, style, next }) => (
+      m.yield(({ value, style, next }) => (
         <div style={{ width: '100%' }}>
           <Div style={{ spacing: 40, layout: 'bar', width: '100%' }}>
             <div style={{ width: 150 }}>
@@ -65,11 +65,10 @@ export default fileServer => {
         </div>
       )),
     )
-    .branch(
+    .doIf(
       ({ type, options, admin }) =>
         admin && !type.endsWith('list') && Array.isArray(options),
-      m.map(({ options, labels, ...props }) => ({
-        ...props,
+      m.merge('options', 'labels', (options, labels) => ({
         options:
           options && (!options.includes(null) ? [...options, null] : options),
         labels:
@@ -77,8 +76,8 @@ export default fileServer => {
           (!options.includes(null) ? [...labels, '-- None --'] : labels),
       })),
     )
-    .branch(
-      ({ relation }) => relation,
+    .doIf(
+      'relation',
       m
         .do(
           getData(({ relation, filter, sort, label }) => ({
@@ -88,45 +87,36 @@ export default fileServer => {
             fields: ['id', ...(Array.isArray(label) ? label[0] : [label])],
           })),
         )
-        .map(props => ({
-          ...props,
-          options: props.data ? props.data[props.relation].map(d => d.id) : [],
-          labels: props.data
-            ? props.data[props.relation].map(
+        .merge('relation', 'label', 'data', (relation, label, data) => ({
+          options: data ? data[relation].map(d => d.id) : [],
+          labels: data
+            ? data[relation].map(
                 d =>
-                  Array.isArray(props.label)
-                    ? props.label[1](...props.label[0].map(k => d[k]))
-                    : d[props.label],
+                  Array.isArray(label)
+                    ? label[1](...label[0].map(k => d[k]))
+                    : d[label],
               )
             : [],
         })),
     )
-    .branch(
-      ({ other }) => other,
+    .doIf(
+      'other',
       m
-        .stream(
-          ({ initial, push }) =>
-            push({
-              otherOpen:
-                initial.value !== null &&
-                !initial.options.includes(initial.value),
-            }) ||
-            ((props, state) => ({
-              ...props,
-              ...state,
-              onBaseChange: value => {
-                if (value === props.other) {
-                  push({ otherOpen: true });
-                  props.onChange(null);
-                } else {
-                  push({ otherOpen: false });
-                  props.onChange(value);
-                }
-              },
-            })),
-        )
-        .cache('onBaseChange')
-        .render(
+        .merge('value', 'options', (value, options) => ({
+          otherOpen: value !== null && !options.includes(value),
+        }))
+        .merge('onChange', 'other', (onChange, other, push) => ({
+          onBaseChange: value => {
+            if (value === other) {
+              push({ otherOpen: true });
+              onChange(null);
+            } else {
+              push({ otherOpen: false });
+              onChange(value);
+            }
+          },
+        }))
+        .yield(
           ({ value, options, other, otherOpen, onBaseChange, ...props }) => (
             <Div style={{ spacing: 10 }}>
               <Input

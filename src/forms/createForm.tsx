@@ -1,26 +1,30 @@
 import * as React from 'react';
 import { css, Div, Txt } from 'elmnt';
-import m, { Comp, restyle } from 'mishmash';
+import m, { Comp } from 'mishmash';
+import st from 'style-transform';
 
 import createForm, { FormProps } from '../generic/createForm';
 
 import FieldBase from './Field';
 import Question from './Question';
 
-const Connect = m.map(
-  restyle([
-    ['filter', ...css.groups.text],
-    ['merge', { textAlign: 'center', width: 30, margin: '0 -15px' }],
-  ]),
-)(Txt);
+const Connect = m.merge('style', style => ({
+  style: st(style)
+    .filter(...css.groups.text)
+    .merge({ textAlign: 'center', width: 30, margin: '0 -15px' }),
+}))(Txt);
 
-const Column = m.map(
-  restyle([['mergeKeys', 'column'], ['filter', ...css.groups.text, 'padding']]),
-)(Txt);
+const Column = m.merge('style', style => ({
+  style: st(style)
+    .mergeKeys('column')
+    .filter(...css.groups.text, 'padding'),
+}))(Txt);
 
-const ErrorMessage = m.map(
-  restyle([['mergeKeys', 'errorMessage'], ['filter', ...css.groups.text]]),
-)(Txt);
+const ErrorMessage = m.merge('style', style => ({
+  style: st(style)
+    .mergeKeys('errorMessage')
+    .filter(...css.groups.text),
+}))(Txt);
 
 export default function<T>(
   container,
@@ -32,9 +36,10 @@ export default function<T>(
   fileServer = process.env.DATA_URL,
 ) {
   const Field = fieldHOC(FieldBase(fileServer));
-  const RowField = m
-    .map(restyle(['alt'], alt => [['mergeKeys', { alt }]]))
-    .map(({ alt: _, ...props }) => props)(Field);
+  const RowField = m.merge('style', 'alt', (style, alt) => ({
+    style: st(style).mergeKeys({ alt }),
+    alt: undefined,
+  }))(Field);
   return createForm(
     container,
     [
@@ -49,7 +54,7 @@ export default function<T>(
     ],
     m
       .do(blockHOC)
-      .map(({ fields, attempted, ...props }) => ({
+      .merge('fields', 'attempted', 'view', (fields, attempted, view) => ({
         fields: fields.map(
           ({ scalar, isList, type, file, invalid, ...field }) => ({
             ...field,
@@ -59,30 +64,32 @@ export default function<T>(
             relation: type,
             invalid: invalid && (admin || attempted),
             style: { ...style, ...field.style },
-            view: props.view,
+            view,
             admin,
           }),
         ),
-        ...props,
         ...(admin ? { prompt: undefined, vertical: false } : {}),
+        attempted: undefined,
       }))
-      .render(({ next, ...props }) => (
+      .yield(({ next, ...props }) => (
         <Question {...props} style={style}>
           {next()}
         </Question>
       ))
-      .branch(
-        ({ errorMessage }) => errorMessage,
-        m.render(({ errorMessage, fields, next }) => (
-          <Div style={{ spacing: 15 }}>
-            {next()}
-            {fields.some(f => f.invalid) && (
-              <ErrorMessage style={style}>{errorMessage}</ErrorMessage>
-            )}
-          </Div>
-        )),
+      .yield(
+        ({ errorMessage, fields, next }) =>
+          errorMessage ? (
+            <Div style={{ spacing: 15 }}>
+              {next()}
+              {fields.some(f => f.invalid) && (
+                <ErrorMessage style={style}>{errorMessage}</ErrorMessage>
+              )}
+            </Div>
+          ) : (
+            next()
+          ),
       )
-      .render(
+      .yield(
         ({ fields, connect, columns }) =>
           fields[0].style.layout === 'bar' ? (
             <div>

@@ -1,29 +1,28 @@
 import * as React from 'react';
 import { css, Txt } from 'elmnt';
-import m, { restyle, watchHover } from 'mishmash';
+import m, { watchHover } from 'mishmash';
+import st from 'style-transform';
 
 import { Link } from '../router';
 
 export default m
   .do(watchHover)
-  .map(
-    restyle(['isHovered'], isHovered => [['mergeKeys', { hover: isHovered }]]),
-  )
-  .map(
-    restyle({
-      cell: [
-        ['filter', ...css.groups.box, ...css.groups.other],
-        ['expandFor', 'paddingLeft'],
-      ],
-      cellAlt: [
-        ['mergeKeys', 'alt'],
-        ['filter', ...css.groups.box, ...css.groups.other],
-        ['expandFor', 'paddingLeft'],
-      ],
-      text: [['filter', ...css.groups.text]],
-      index: [['mergeKeys', 'index'], ['filter', ...css.groups.text]],
-    }),
-  )(({ path, values: [url, ...values], index, hoverProps, style }) => (
+  .merge('style', 'isHovered', (style, isHovered) => {
+    const base = st(style).mergeKeys({ hover: isHovered });
+    return {
+      style: {
+        cell: base
+          .filter(...css.groups.box, ...css.groups.other)
+          .expandFor('paddingLeft'),
+        cellAlt: base
+          .mergeKeys('alt')
+          .filter(...css.groups.box, ...css.groups.other)
+          .expandFor('paddingLeft'),
+        text: base.filter(...css.groups.text),
+        index: base.mergeKeys('index').filter(...css.groups.text),
+      },
+    };
+  })(({ path, values: [url, ...values], index, hoverProps, style }) => (
   <tr {...hoverProps} style={{ cursor: 'pointer' }}>
     {[`${index + 1}`, ...values].map((v, j) => (
       <td

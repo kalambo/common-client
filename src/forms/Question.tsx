@@ -1,33 +1,32 @@
 import * as React from 'react';
 import { css, Div, Txt } from 'elmnt';
-import m, { restyle } from 'mishmash';
+import m from 'mishmash';
+import st from 'style-transform';
 
 import withWidth from '../withWidth';
 
-const Question = m.map(
-  restyle([['mergeKeys', 'question'], ['filter', ...css.groups.text]]),
-)(Txt);
+const Question = m.merge('style', style => ({
+  style: st(style)
+    .mergeKeys('question')
+    .filter(...css.groups.text),
+}))(Txt);
 
-const Prompt = m.map(
-  restyle([['mergeKeys', 'prompt'], ['filter', ...css.groups.text]]),
-)(Txt);
+const Prompt = m.merge('style', style => ({
+  style: st(style)
+    .mergeKeys('prompt')
+    .filter(...css.groups.text),
+}))(Txt);
 
-const Vertical = m
-  .map(
-    restyle(['view', 'small'], (view, small) => [
-      [
-        'scale',
-        {
-          paddingTop: view
-            ? 0
-            : { paddingTop: small ? 0.4 : 1, borderTopWidth: 1 },
-        },
-      ],
-      ['filter', 'paddingTop'],
-      ['merge', { spacing: 10 }],
-    ]),
-  )
-  .map(({ view: _a, small: _b, ...props }) => props)(Div);
+const Vertical = m.merge('style', 'view', 'small', (style, view, small) => ({
+  style: st(style)
+    .scale({
+      paddingTop: view ? 0 : { paddingTop: small ? 0.4 : 1, borderTopWidth: 1 },
+    })
+    .filter('paddingTop')
+    .merge({ spacing: 10 }),
+  view: undefined,
+  small: undefined,
+}))(Div);
 
 export default withWidth(600)(
   ({

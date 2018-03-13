@@ -1,9 +1,9 @@
 import * as React from 'react';
-import m, { restyle } from 'mishmash';
+import m from 'mishmash';
+import st from 'style-transform';
 import { root } from 'common';
 
 import createQuery from './createQuery';
-import createStore from './createStore';
 import Footer from './Footer';
 import jsonUrl from './jsonUrl';
 import Table from './Table';
@@ -47,62 +47,68 @@ const addIds = fields =>
   });
 
 export default m
-  .map(
-    restyle({
-      base: [
-        [
-          'numeric',
-          'paddingTop',
-          'paddingRight',
-          'paddingBottom',
-          'paddingLeft',
-        ],
-        [
-          'scale',
-          {
-            borderTopWidth: { borderTopWidth: 0.5, borderBottomWidth: 0.5 },
-            borderRightWidth: { borderLeftWidth: 0.5, borderRightWidth: 0.5 },
-            borderBottomWidth: { borderTopWidth: 0.5, borderBottomWidth: 0.5 },
-            borderLeftWidth: { borderLeftWidth: 0.5, borderRightWidth: 0.5 },
-          },
-        ],
-      ],
-      footer: [
-        [
-          'scale',
-          {
-            height: {
-              fontSize: 1,
-              paddingTop: 1,
-              paddingBottom: 1,
-              borderTopWidth: 2,
-              borderBottomWidth: 2,
-            },
-          },
-        ],
-      ],
-    }),
-  )
-  .stream(({ push }) => {
-    push({ loading: true });
+  .merge('style', style => ({
+    style: {
+      base: st(style)
+        .numeric('paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft')
+        .scale({
+          borderTopWidth: { borderTopWidth: 0.5, borderBottomWidth: 0.5 },
+          borderRightWidth: { borderLeftWidth: 0.5, borderRightWidth: 0.5 },
+          borderBottomWidth: { borderTopWidth: 0.5, borderBottomWidth: 0.5 },
+          borderLeftWidth: { borderLeftWidth: 0.5, borderRightWidth: 0.5 },
+        }),
+      footer: st(style).scale({
+        height: {
+          fontSize: 1,
+          paddingTop: 1,
+          paddingBottom: 1,
+          borderTopWidth: 2,
+          borderBottomWidth: 2,
+        },
+      }),
+    },
+  }))
+  .merge((_, push) => {
     root.rgo.query().then(() => push({ loading: false }));
-    const reset = () => push({ isReset: true }, () => push({ isReset: false }));
-    return (props, state) => ({ ...props, ...state, reset });
+    return {
+      loading: true,
+      reset: () => push({ isReset: true }, () => push({ isReset: false })),
+    };
   })
-  .branch(
+  .doIf(
     ({ loading, isReset }) => loading || isReset,
-    m.render(({ loader }) => loader()),
+    m.yield(({ loader }) => loader()),
   )
-  .stream(({ initial, observe, push }) => {
-    const store = createStore();
+  .merge((props$, push) => {
+    const values = {};
+    const listeners = {};
+    const set = (key, value?) => {
+      if (value !== values[key]) {
+        if (value === undefined) delete values[key];
+        else values[key] = value;
+        listeners[''] && listeners[''].forEach(l => l(values));
+        listeners[key] && listeners[key].forEach(l => l(value));
+      }
+    };
+    const store = {
+      get: key => values[key],
+      set,
+      update: (key, map: (v) => any) => set(key, map(values[key])),
+      listen: (key, listener) => {
+        listener(key ? values[key] : values);
+        listeners[key] = listeners[key] || [];
+        listeners[key].push(listener);
+        return () => listeners[key].splice(listeners[key].indexOf(listener), 1);
+      },
+    };
 
     let unsubscribe;
     const query = createQuery(
-      initial.query || jsonUrl.parse(location.search.slice(1)) || [],
+      props$().query || jsonUrl.parse(location.search.slice(1)) || [],
       q => {
-        initStore(initial.config.printFilter, store, q);
+        initStore(props$().config.printFilter, store, q);
         const aliasQuery = addAliases(q);
-        push({ query: aliasQuery, linkQuery: q });
+        push({ query: aliasQuery, linkQuery: [...q] });
         if (unsubscribe) unsubscribe();
         unsubscribe = root.rgo.query(...addIds(aliasQuery), data => {
           if (!data) {
@@ -115,7 +121,6 @@ export default m
         });
       },
     );
-    observe(props => !props && unsubscribe());
 
     const widthElems = {};
     const setWidthElem = (key, elem) => {
@@ -132,59 +137,65 @@ export default m
       );
     };
     store.listen('', () => setTimeout(updateWidths));
-    initial.resizer && initial.resizer(updateWidths);
+    props$().resizer && props$().resizer(updateWidths);
 
-    const setActive = (active, focus) => {
-      store.update(
-        'header',
-        (state = {}) =>
-          state.activeFocus && !focus
-            ? state
-            : {
-                activeFocus: active && focus,
-                activeType: active && active.type,
-                activePath: active && active.path,
-              },
-      );
-    };
-
-    let context;
-    const updateContext = ({
-      config,
-      types,
-      meta = {},
-      editable,
-      input,
-      permalink,
-      fileServer,
-      reset,
-      style,
-    }) => {
-      context = {
+    props$(
+      'config',
+      'types',
+      'meta',
+      'editable',
+      'input',
+      'permalink',
+      'fileServer',
+      'reset',
+      'style',
+      (
         config,
         types,
-        meta,
+        meta = {},
         editable,
         input,
         permalink,
         fileServer,
         reset,
-        store,
-        query,
-        setWidthElem,
-        updateWidths,
-        setActive,
         style,
-      };
-    };
-    updateContext(initial);
-    observe(props => props && updateContext(props));
+      ) => ({
+        context: {
+          config,
+          types,
+          meta,
+          editable,
+          input,
+          permalink,
+          fileServer,
+          reset,
+          store,
+          query,
+          setWidthElem,
+          updateWidths,
+          setActive: (active, focus) => {
+            store.update(
+              'header',
+              (state = {}) =>
+                state.activeFocus && !focus
+                  ? state
+                  : {
+                      activeFocus: active && focus,
+                      activeType: active && active.type,
+                      activePath: active && active.path,
+                    },
+            );
+          },
+          style,
+        },
+      }),
+    );
 
-    return (props, state) => ({ ...props, ...state, context });
+    return unsubscribe;
   })
-  .branch(
+  .doIf(
     ({ query, data }) => !query || !data,
-    m.render(({ loader }) => loader()),
+    m.yield(({ loader }) => loader()),
   )(({ context, query, fetching, data, style, linkQuery }) => (
   <div
     style={{

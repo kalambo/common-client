@@ -14,36 +14,15 @@ export default function getData(
 export default function getData(...args) {
   const propName = typeof args[0] === 'string' ? (args[0] as string) : 'data';
   const queries = typeof args[0] === 'string' ? args.slice(1) : args;
-  return m.stream(({ initial, observe, push }) => {
-    push({ data: null as any });
-    let unsubscribe;
-    if (typeof queries[0] !== 'function') {
-      unsubscribe = root.rgo.query(...queries, data =>
-        push({ data: data && { ...data } }),
+  return m.merge(
+    props =>
+      typeof queries[0] === 'function' && JSON.stringify(queries[0](props)),
+    (jsonQueries, push) => {
+      push({ data: null });
+      return root.rgo.query(
+        ...(jsonQueries ? JSON.parse(jsonQueries) : queries),
+        data => push({ [propName]: data && { ...data } }),
       );
-    } else {
-      let prevJSON;
-      const update = props => {
-        if (props) {
-          const q = queries[0](props);
-          const nextJSON = JSON.stringify(q);
-          if (nextJSON !== prevJSON) {
-            if (unsubscribe) {
-              unsubscribe();
-              push({ data: null });
-            }
-            unsubscribe = root.rgo.query(...q, data =>
-              push({ data: data && { ...data } }),
-            );
-          }
-          prevJSON = nextJSON;
-        } else {
-          unsubscribe();
-        }
-      };
-      update(initial);
-      observe(update);
-    }
-    return (props, { data }) => ({ ...props, [propName]: data });
-  });
+    },
+  );
 }

@@ -1,22 +1,21 @@
 import * as React from 'react';
-import m, { restyle } from 'mishmash';
+import m from 'mishmash';
+import st from 'style-transform';
 import { Input } from 'elmnt';
 import { isValid, root } from 'common';
 
 export default m
-  .map(({ dataKey, ...props }) => {
+  .merge('dataKey', 'context', (dataKey, context) => {
     const { meta = {}, ...field } = root.rgo.schema[dataKey[0]][dataKey[2]];
     const rules = {
       ...field,
       ...meta,
-      ...((props.context.meta[dataKey[0]] &&
-        props.context.meta[dataKey[0]][dataKey[2]]) ||
+      ...((context.meta[dataKey[0]] && context.meta[dataKey[0]][dataKey[2]]) ||
         {}),
       optional: true,
     };
     const { scalar, isList, file, ...info } = rules;
     return {
-      ...props,
       ...info,
       type: `${file ? 'file' : scalar || 'string'}${isList ? 'list' : ''}`,
       ...(!isList && Array.isArray(info.options)
@@ -34,26 +33,23 @@ export default m
           }
         : {}),
       rules,
+      dataKey: undefined,
     };
   })
-  .map(
-    restyle(({ type, options }) => ({
-      margin: [
-        [
-          'scale',
-          {
-            margin: {
-              borderWidth: -1,
-              ...(type === 'boolean' ? { padding: 0.6 } : {}),
-            },
+  .merge('style', 'type', 'options', (style, type, options) => {
+    const input = Array.isArray(options)
+      ? st(style).merge({ layout: 'modal' })
+      : style;
+    return {
+      style: {
+        margin: st(input).scale({
+          margin: {
+            borderWidth: -1,
+            ...(type === 'boolean' ? { padding: 0.6 } : {}),
           },
-        ],
-        ['filter', 'margin'],
-      ],
-      fill: [
-        [
-          'scale',
-          {
+        }),
+        fill: st(input)
+          .scale({
             top: {
               borderTopWidth: -1,
               ...(type === 'boolean' ? { paddingTop: 0.6 } : {}),
@@ -70,44 +66,37 @@ export default m
               borderLeftWidth: -1,
               ...(type === 'boolean' ? { paddingLeft: 0.6 } : {}),
             },
-          },
-        ],
-        ['filter', 'top', 'right', 'bottom', 'left'],
-        ['merge', { position: 'absolute' }],
-      ],
-      input: Array.isArray(options) && [['merge', { layout: 'modal' }]],
-    })),
-  )
-  .stream(({ initial, observe, push }) => {
-    initial.context.store.watch(
-      'editing',
-      (editing = {}) => push({ editing }),
-      observe,
-    );
-    const onChange = value =>
-      initial.context.store.update('editing', v => ({ ...v, value }));
-    const onTextChange = text => {
-      push({ text });
-      setTimeout(() => initial.context.updateWidths());
+          })
+          .merge({ position: 'absolute' }),
+      },
     };
-    let lastValue = initial.context.store.get('editing').value;
-    return ({ rules, ...props }, { editing, text }) => {
-      const value =
-        Object.keys(editing).length > 0
-          ? (lastValue = editing.value)
-          : lastValue;
-      const invalid = !isValid(rules, value, {});
-      return {
-        ...props,
-        value,
-        onChange,
-        invalid,
-        text,
-        onTextChange,
-        onBlur: () => props.onBlur(invalid),
-        onKeyDown: e =>
-          (e.keyCode === 13 || e.keyCode === 27) && props.onBlur(invalid),
-      };
+  })
+  .merge('context', (context, push) => {
+    push({
+      onChange: value =>
+        context.store.update('editing', v => ({ ...v, value })),
+      onTextChange: text => {
+        push({ text });
+        setTimeout(() => context.updateWidths());
+      },
+    });
+    let lastValue = context.store.get('editing').value;
+    return context.store.listen('editing', (editing = {} as any) =>
+      push({
+        value:
+          Object.keys(editing).length > 0
+            ? (lastValue = editing.value)
+            : lastValue,
+      }),
+    );
+  })
+  .merge('value', 'rules', 'onBlur', (value, rules, onBlur) => {
+    const invalid = !isValid(rules, value, {});
+    return {
+      invalid,
+      onBlur: () => onBlur(invalid),
+      onKeyDown: e => (e.keyCode === 13 || e.keyCode === 27) && onBlur(invalid),
+      rules: undefined,
     };
   })(
   ({
@@ -126,7 +115,7 @@ export default m
       <Input
         value={['int', 'float', 'date'].includes(props.type) ? text : value}
         onChange={onChange}
-        style={{ ...style.input, ...style.margin }}
+        style={style.margin}
         spellCheck={false}
         {...props}
         {...(['int', 'float', 'date'].includes(props.type)
@@ -138,7 +127,7 @@ export default m
         value={value}
         onChange={onChange}
         onTextChange={onTextChange}
-        style={{ ...style.input, ...style.fill }}
+        style={style.fill}
         spellCheck={false}
         onBlur={onBlur}
         ref={inputRef}

@@ -6,8 +6,9 @@ import {
   withRouter as withRouterBase,
 } from 'react-router-dom';
 import GatsbyLink from 'gatsby-link';
-import m, { HOC, restyle } from 'mishmash';
+import m, { HOC } from 'mishmash';
 import { Div, Hover, Icon, Txt } from 'elmnt';
+import st from 'style-transform';
 
 import getData from './generic/getData';
 
@@ -15,59 +16,54 @@ export const routerPure = m.do(withRouterBase).pure() as HOC;
 
 export const withRouter = (basename?) =>
   m
-    .render(({ next }) => (
+    .yield(({ next }) => (
       <BrowserRouter basename={basename}>{next()}</BrowserRouter>
     ))
     .do(withRouterBase)
-    .stream(({ push }) => {
-      const setBreadcrumb = (path: string, label: string) =>
-        push({ [path]: label });
-      return ({ location, ...props }, labels) => ({
-        ...props,
-        breadcrumbs:
-          location.pathname === '/'
-            ? [['/', labels['/'] || '']]
-            : location.pathname.split('/').map((path, i, paths) => {
-                const current = paths.slice(0, i + 1).join('/');
-                return [current || '/', labels[current || '/'] || path];
-              }),
-        setBreadcrumb,
-      });
+    .merge((props$, push) => {
+      const labels = {};
+      return {
+        setBreadcrumb: (path, label) => {
+          const { location } = props$();
+          labels[path] = label;
+          push({
+            breadcrumbs:
+              location.pathname === '/'
+                ? [['/', labels['/'] || '']]
+                : location.pathname.split('/').map((path, i, paths) => {
+                    const current = paths.slice(0, i + 1).join('/');
+                    return [current || '/', labels[current || '/'] || path];
+                  }),
+          });
+        },
+        match: undefined,
+        history: undefined,
+      };
     })
     .context('setBreadcrumb', ({ setBreadcrumb }) => setBreadcrumb)
-    .map(
-      ({ setBreadcrumb: _a, match: _b, history: _c, ...props }) => props,
-    ) as HOC;
+    .merge({ setBreadcrumb: undefined }) as HOC;
 
-const RouteComponent = m.branch(
-  ({ component }) => component,
-  m.render(({ component: Comp, data, props }) => (
-    <Comp data={data} {...props} />
-  )),
-)(({ render, data, props }) => render({ data, ...props }));
+const RouteComponent = ({ component: Comp, render, data, props }) =>
+  Comp ? <Comp data={data} {...props} /> : render({ data, ...props });
 
 const Breadcrumb = m
-  .branch(
+  .doIf(
     ({ label }) => typeof label === 'function',
-    m.map(({ label, ...props }) => ({
-      ...props,
-      label: label(props.match.params),
+    m.merge('label', 'match', (label, match) => ({
+      label: label(match.params),
     })),
   )
-  .branch(
+  .doIf(
     ({ label }) => Array.isArray(label),
-    m.do(getData(({ label }) => label[0])).map(({ label, ...props }) => ({
-      ...props,
-      label: props.data ? label[1](props.data) : '...',
-    })),
+    m
+      .do(getData(({ label }) => label[0]))
+      .merge('label', 'data', (label, data) => ({
+        label: data ? label[1](data) : '...',
+      })),
   )
   .context('setBreadcrumb')
-  .stream(({ initial, observe }) => {
-    const update = ({ label, match, setBreadcrumb }) =>
-      setBreadcrumb(match.url, label);
-    update(initial);
-    observe(props => props && update(props));
-    return props => props;
+  .merge('label', 'match', 'setBreadcrumb', (label, match, setBreadcrumb) => {
+    setBreadcrumb(match.url, label);
   })(({ path, loader, component, render, routeProps, data }) => (
   <RouteBase
     path={path}
@@ -113,13 +109,13 @@ export const Route = ({
   </div>
 );
 
-export const Breadcrumbs = m.map(
-  restyle({
-    base: null,
-    link: [['mergeKeys', 'link']],
-    icon: [['scale', { fontSize: 0.9 }]],
-  }),
-)(({ breadcrumbs, style }) => (
+export const Breadcrumbs = m.merge('style', style => ({
+  style: {
+    base: style,
+    link: st(style).mergeKeys('link'),
+    icon: st(style).scale({ fontSize: 0.9 }),
+  },
+}))(({ breadcrumbs = [], style }) => (
   <Div style={{ layout: 'bar', spacing: 10, paddingRight: 200 }}>
     {breadcrumbs.map(([path, label], i) => (
       <Div style={{ layout: 'bar', spacing: 10 }} key={i}>

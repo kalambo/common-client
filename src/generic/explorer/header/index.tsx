@@ -12,17 +12,14 @@ const parent = (path, depth = 1) =>
     .slice(0, -depth)
     .join('.');
 
-export default m.pure().branch(
-  ({ live }) => live,
-  m.stream(({ initial, observe, push }) => {
-    initial.context.store.watch(
-      'header',
-      (header = {}) => push(header),
-      observe,
-    );
-    return (props, state) => ({ ...props, ...state });
-  }),
-)(
+export default m
+  .pure()
+  .doIf(
+    'live',
+    m.merge('context', (context, push) =>
+      context.store.listen('header', (header = {}) => push(header)),
+    ),
+  )(
   ({
     context,
     fieldRows,

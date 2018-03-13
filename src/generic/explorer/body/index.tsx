@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import m, { isolate, restyle } from 'mishmash';
+import m, { isolate } from 'mishmash';
+import st from 'style-transform';
 import { root } from 'common';
 import { css } from 'elmnt';
 import * as deepEqual from 'deep-equal';
@@ -9,84 +10,59 @@ import d3, { applyStyle } from './d3';
 import dataToRows from './dataToRows';
 
 export default m
-  .map(
-    restyle({
-      base: [
-        ['mergeKeys', 'data'],
-        ['defaults', { fontStyle: 'normal', fontWeight: 'normal' }],
-        [
-          'scale',
-          {
-            paddingTop: { paddingTop: 1, fontSize: 0.5, lineHeight: -0.5 },
-            paddingBottom: {
-              paddingBottom: 1,
-              fontSize: 0.5,
-              lineHeight: -0.5,
-            },
-          },
-        ],
-        [
-          'filter',
-          ...css.groups.text,
-          'padding',
-          'border',
-          'background',
-          'maxWidth',
-        ],
-        [
-          'merge',
-          {
-            position: 'relative',
-            verticalAlign: 'top',
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word',
-          },
-        ],
-      ],
-      input: [
-        ['mergeKeys', 'data', 'input'],
-        ['scale', { maxWidth: { maxWidth: 1, borderLeftWidth: 1 } }],
-        ['merge', { zIndex: 200 }],
-      ],
-    }),
-  )
-  .map(
-    restyle({
-      base: {
-        null: [['mergeKeys', 'null']],
-        empty: [['mergeKeys', 'empty']],
-        fileLink: [['mergeKeys', 'fileLink'], ['filter', ...css.groups.text]],
-        changed: [['mergeKeys', 'changed']],
+  .merge('style', style => {
+    const base = st(style)
+      .mergeKeys('data')
+      .defaults({ fontStyle: 'normal', fontWeight: 'normal' })
+      .scale({
+        paddingTop: { paddingTop: 1, fontSize: 0.5, lineHeight: -0.5 },
+        paddingBottom: {
+          paddingBottom: 1,
+          fontSize: 0.5,
+          lineHeight: -0.5,
+        },
+      })
+      .filter(...css.groups.text, 'padding', 'border', 'background', 'maxWidth')
+      .merge({
+        position: 'relative',
+        verticalAlign: 'top',
+        whiteSpace: 'pre-wrap',
+        wordBreak: 'break-word',
+      });
+    return {
+      style: {
+        base,
+        null: base.mergeKeys('null'),
+        empty: base.mergeKeys('empty'),
+        fileLink: base.mergeKeys('fileLink').filter(...css.groups.text),
+        changed: base.mergeKeys('changed'),
+        input: st(style)
+          .mergeKeys('data', 'input')
+          .scale({ maxWidth: { maxWidth: 1, borderLeftWidth: 1 } })
+          .merge({ zIndex: 200 }),
       },
-    }),
-  )
-  .stream(({ initial, observe, push }) => {
-    initial.context.store.watch(
-      'unchanged',
-      (unchanged = {}) => push({ unchanged }),
-      observe,
-    );
-    return ({ context, query, data, style }, { unchanged }) => ({
-      context,
-      dataRows: dataToRows(context, query, data),
-      style,
-      unchanged,
-    });
-  })(
-  isolate((elem, initial, observe) => {
-    const Input = initial.context.input;
+    };
+  })
+  .merge('context', 'query', 'data', (context, query, data) => ({
+    dataRows: dataToRows(context, query, data),
+  }))
+  .merge('context', (context, push) =>
+    context.store.listen('unchanged', (unchanged = {}) => push({ unchanged })),
+  )(
+  isolate((elem, props$) => {
+    const Input = props$().context.input;
 
     const startEditing = (key, value) => {
-      initial.context.store.set('editing', { key, value });
-      initial.context.store.update('unchanged', (unchanged = {}) => ({
+      props$().context.store.set('editing', { key, value });
+      props$().context.store.update('unchanged', (unchanged = {}) => ({
         ...unchanged,
         ...(unchanged[key] === undefined ? { [key]: value } : {}),
       }));
     };
     const stopEditing = invalid => {
-      const { key, value } = initial.context.store.get('editing');
-      initial.context.store.set('editing', {});
-      initial.context.store.update(
+      const { key, value } = props$().context.store.get('editing');
+      props$().context.store.set('editing', {});
+      props$().context.store.update(
         'unchanged',
         ({ [key]: v, ...unchanged }) => {
           if (deepEqual(v, value, { strict: true }) || invalid) {
@@ -100,7 +76,7 @@ export default m
     };
 
     let inputRef = null;
-    const unlisten = initial.context.store.listen(
+    const unlisten = props$().context.store.listen(
       'editing',
       (editing = {} as any) => {
         if (editing.key) {
@@ -108,7 +84,7 @@ export default m
           const elems = elem.querySelectorAll(`[data-key='${editing.key}']`);
           for (let i = 0; i < elems.length; i++) {
             if (elems[i] !== inputRef) {
-              elems[i].textContent = initial.context.config.printValue(
+              elems[i].textContent = props$().context.config.printValue(
                 editing.value,
                 root.rgo.schema[splitKey[0]][splitKey[2]],
               );
@@ -118,14 +94,18 @@ export default m
       },
     );
 
-    observe(props => {
-      if (props) {
-        const editing = props.context.store.get('editing') || {};
+    props$(
+      'context',
+      'dataRows',
+      'style',
+      'unchanged',
+      (context, dataRows, style, unchanged) => {
+        const editing = context.store.get('editing') || {};
 
         const rows = d3
           .select(elem)
           .selectAll('tr')
-          .data([...props.dataRows]);
+          .data([...dataRows]);
 
         rows
           .exit()
@@ -156,7 +136,7 @@ export default m
           .datum(d => ({
             ...d,
             style:
-              inputRef !== this && Object.keys(props.unchanged).includes(d.key)
+              inputRef !== this && Object.keys(unchanged).includes(d.key)
                 ? 'changed'
                 : d.empty
                   ? 'empty'
@@ -164,17 +144,16 @@ export default m
                     ? 'null'
                     : 'base',
           }))
-          .style(d => props.style[d.style])
+          .style(d => style[d.style])
           .style(d => ({
-            borderTopWidth:
-              (!d.first ? 1 : 0) * props.style.base.borderTopWidth,
+            borderTopWidth: (!d.first ? 1 : 0) * style.base.borderTopWidth,
             borderBottomWidth: 0,
             borderLeftWidth:
               ((!d.firstCol && (d.field === '#1' ? 2 : 1)) || 0) *
-              props.style.base.borderLeftWidth,
+              style.base.borderLeftWidth,
             borderRightWidth:
               ((!d.lastCol && d.field === '#2' && 1) || 0) *
-              props.style.base.borderRightWidth,
+              style.base.borderRightWidth,
           }))
           .attr('rowspan', d => d.span)
           .attr('data-key', d => d.key);
@@ -183,12 +162,12 @@ export default m
           .filter(({ key }) => key)
           .style({ cursor: 'pointer' })
           .on('mouseenter', function(d) {
-            const s = props.style[d.style];
+            const s = style[d.style];
             this.style.background =
               (s.hover && s.hover.background) || s.background;
           })
           .on('mouseleave', function(d) {
-            this.style.background = props.style[d.style].background;
+            this.style.background = style[d.style].background;
           })
           .on('dblclick', function({ key, value }) {
             startEditing(key, value);
@@ -199,7 +178,7 @@ export default m
               this.style.padding = null;
               ReactDOM.render(
                 <Input
-                  context={props.context}
+                  context={context}
                   dataKey={key.split('.')}
                   onBlur={invalid => {
                     stopEditing(invalid);
@@ -208,14 +187,14 @@ export default m
                   inputRef={elem => {
                     if (elem && inputRef === this) elem.focus();
                   }}
-                  style={props.style.input}
+                  style={style.input}
                 />,
                 this,
               );
             } else {
               ReactDOM.unmountComponentAtNode(this);
               if (editing.key === key) {
-                this.textContent = props.context.config.printValue(
+                this.textContent = context.config.printValue(
                   editing.value,
                   root.rgo.schema[type][field],
                 );
@@ -239,22 +218,24 @@ export default m
               a.textContent = text;
               a.href = link;
               a.target = '_blank';
-              applyStyle(a, props.style.fileLink);
+              applyStyle(a, style.fileLink);
               this.appendChild(a);
             }
           });
 
-        props.context.updateWidths();
-      } else {
-        unlisten();
-        d3
-          .select(elem)
-          .selectAll('tr')
-          .selectAll('td')
-          .each(function() {
-            ReactDOM.unmountComponentAtNode(this);
-          });
-      }
-    });
+        context.updateWidths();
+      },
+    );
+
+    return () => {
+      unlisten();
+      d3
+        .select(elem)
+        .selectAll('tr')
+        .selectAll('td')
+        .each(function() {
+          ReactDOM.unmountComponentAtNode(this);
+        });
+    };
   }, 'tbody'),
 );

@@ -1,5 +1,6 @@
 import * as React from 'react';
-import m, { restyle, watchSize } from 'mishmash';
+import m, { watchSize } from 'mishmash';
+import st from 'style-transform';
 
 import Body from './body';
 import Header, { fieldToRows } from './header';
@@ -8,68 +9,51 @@ const Pure = m.pure().toComp();
 
 export default m
   .pure()
-  .map(
-    restyle({
-      base: null,
-      div: [
-        ['filter', 'borderRight', 'borderBottom', 'borderLeft'],
-        ['scale', { borderWidth: 2 }],
-        ['scale', { borderLeftWidth: 5 }],
-      ],
-      pad: [
-        [
-          'scale',
-          {
-            height: {
-              fontSize: 1,
-              borderTopWidth: 1,
-              paddingTop: 1,
-              paddingBottom: 1,
-            },
-            extra: {
-              borderBottomWidth: 1,
-            },
-          },
-        ],
-      ],
-    }),
-  )
-  .map(props => ({
-    ...props,
-    fieldRows: fieldToRows(
-      props.context,
-      { fields: props.query },
-      null,
-      '',
-      props.index,
-    ),
+  .merge('style', style => ({
+    style: {
+      base: style,
+      div: st(style)
+        .filter('borderRight', 'borderBottom', 'borderLeft')
+        .scale({ borderWidth: 2 })
+        .scale({ borderLeftWidth: 5 }),
+      pad: st(style).scale({
+        height: {
+          fontSize: 1,
+          borderTopWidth: 1,
+          paddingTop: 1,
+          paddingBottom: 1,
+        },
+        extra: {
+          borderBottomWidth: 1,
+        },
+      }),
+    },
+  }))
+  .merge('query', 'context', 'index', (query, context, index) => ({
+    fieldRows: fieldToRows(context, { fields: query }, null, '', index),
   }))
   .do(watchSize('height', 'setHeightElem', ({ height = 0 }) => height))
-  .stream(({ initial, observe, push }) => {
-    initial.context.store.watch(
-      props => `table_${props.index}_width`,
-      (width = 0) => push({ width }),
-      observe,
-      initial,
-    );
+  .merge('context', 'index', (context, index, push) =>
+    context.store.listen(`table_${index}_width`, (width = 0) =>
+      push({ width }),
+    ),
+  )
+  .merge(props$ => {
     let elem;
     const noScrollEvent = () => (elem.scrollLeft = 0);
-    const setNoScrollElem = e => {
-      if (elem) elem.removeEventListener('scroll', noScrollEvent);
-      elem = e;
-      if (elem) elem.addEventListener('scroll', noScrollEvent);
-    };
-    return (props, state) => ({
-      ...props,
-      ...state,
-      setNoScrollElem,
+    return {
       setSizeElem: elem => {
-        props.setHeightElem(elem);
-        props.context.setWidthElem(`table_${props.index}_width`, elem);
+        const { context, index, setHeightElem } = props$();
+        setHeightElem(elem);
+        context.setWidthElem(`table_${index}_width`, elem);
       },
-    });
-  })
-  .cache('setSizeElem')(
+      setNoScrollElem: e => {
+        if (elem) elem.removeEventListener('scroll', noScrollEvent);
+        elem = e;
+        if (elem) elem.addEventListener('scroll', noScrollEvent);
+      },
+    };
+  })(
   ({
     context,
     query,

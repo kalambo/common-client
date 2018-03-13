@@ -7,8 +7,8 @@
   resolved "https://registry.yarnpkg.com/@types/history/-/history-4.6.2.tgz#12cfaba693ba20f114ed5765467ff25fdf67ddb0"
 
 "@types/node@^9.4.6":
-  version "9.4.6"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-9.4.6.tgz#d8176d864ee48753d053783e4e463aec86b8d82e"
+  version "9.4.7"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-9.4.7.tgz#57d81cd98719df2c9de118f2d5f3b1120dcd7275"
 
 "@types/react-router-dom@^4.2.2", "@types/react-router-dom@^4.2.4":
   version "4.2.4"
@@ -25,9 +25,9 @@
     "@types/history" "*"
     "@types/react" "*"
 
-"@types/react@*", "@types/react@^16.0.38":
-  version "16.0.38"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-16.0.38.tgz#76617433ea10274505f60bb86eddfdd0476ffdc2"
+"@types/react@*", "@types/react@^16.0.40":
+  version "16.0.40"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-16.0.40.tgz#caabc2296886f40b67f6fc80f0f3464476461df9"
 
 asap@~2.0.3:
   version "2.0.6"
@@ -131,21 +131,22 @@ deep-equal@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/deep-equal/-/deep-equal-1.0.1.tgz#f5d260292b660e084eff4cdbc9f08ad3247448b5"
 
-element-resize-detector@^1.1.13:
-  version "1.1.13"
-  resolved "https://registry.yarnpkg.com/element-resize-detector/-/element-resize-detector-1.1.13.tgz#f61907e98a91b1ad215f92790bc15113df68444d"
+element-resize-detector@^1.1.14:
+  version "1.1.14"
+  resolved "https://registry.yarnpkg.com/element-resize-detector/-/element-resize-detector-1.1.14.tgz#af064a0a618a820ad570a95c5eec5b77be0128c1"
   dependencies:
     batch-processor "^1.0.0"
 
-elmnt@^0.5.4:
-  version "0.5.4"
-  resolved "https://registry.yarnpkg.com/elmnt/-/elmnt-0.5.4.tgz#729b12bc60d175e1357e9ca59847d68d071d9807"
+elmnt@^0.5.6:
+  version "0.5.6"
+  resolved "https://registry.yarnpkg.com/elmnt/-/elmnt-0.5.6.tgz#206c52fc6b840f3f9744fd3f263a225b92d50605"
   dependencies:
-    "@types/react" "^16.0.38"
+    "@types/react" "^16.0.40"
     commonmark "^0.28.1"
     commonmark-react-renderer "^4.3.4"
     fast-memoize "^2.3.0"
-    mishmash "^0.7.1"
+    mishmash "^0.7.3"
+    style-transform "^0.2.1"
 
 encoding@^0.1.11:
   version "0.1.12"
@@ -161,9 +162,9 @@ exenv@^1.2.1:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/exenv/-/exenv-1.2.2.tgz#2ae78e85d9894158670b03d47bec1f03bd91bb9d"
 
-fast-memoize@^2.3.0:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/fast-memoize/-/fast-memoize-2.3.0.tgz#d7f81dc864489f582e30538923c423d85887af32"
+fast-memoize@^2.3.0, fast-memoize@^2.3.2:
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/fast-memoize/-/fast-memoize-2.3.2.tgz#f6b9eb8e06a754029cca25b4cd3945f2f6242c90"
 
 fbjs@^0.8.16:
   version "0.8.16"
@@ -181,9 +182,9 @@ fs.realpath@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/fs.realpath/-/fs.realpath-1.0.0.tgz#1504ad2523158caa40db4a2787cb01411994ea4f"
 
-gatsby-link@^1.6.37:
-  version "1.6.37"
-  resolved "https://registry.yarnpkg.com/gatsby-link/-/gatsby-link-1.6.37.tgz#d132290c0239dc2e11a9106353c586f969194673"
+gatsby-link@^1.6.39:
+  version "1.6.39"
+  resolved "https://registry.yarnpkg.com/gatsby-link/-/gatsby-link-1.6.39.tgz#4189d26a66476b61fb524c2c8dd97b74aee728d4"
   dependencies:
     "@types/history" "^4.6.2"
     "@types/react-router-dom" "^4.2.2"
@@ -306,6 +307,10 @@ map-obj@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/mdurl/-/mdurl-1.0.1.tgz#fe85b2ec75a59037f2adfec100fd6c601761152e"
 
+memize@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/memize/-/memize-1.0.5.tgz#51d89e8407643dbc8cab98c6d56b889f9a3954e3"
+
 minimatch@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-3.0.4.tgz#5166e286457f03306064be5497e8dbb0c3d32083"
@@ -316,21 +321,20 @@ minimatch@^3.0.4:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.0.tgz#a35008b20f41383eec1fb914f4cd5df79a264284"
 
-mishmash@^0.7.1:
-  version "0.7.1"
-  resolved "https://registry.yarnpkg.com/mishmash/-/mishmash-0.7.1.tgz#a7578445c34d237e97ccd691f3f795e4d456306f"
+mishmash@^0.7.3:
+  version "0.7.3"
+  resolved "https://registry.yarnpkg.com/mishmash/-/mishmash-0.7.3.tgz#df1402fa299ffa0f899457746e74242f3bb1b7f1"
   dependencies:
-    "@types/react" "^16.0.38"
-    element-resize-detector "^1.1.13"
-    fast-memoize "^2.3.0"
+    "@types/react" "^16.0.40"
+    element-resize-detector "^1.1.14"
     keys-to-object "^0.2.0"
     lodash.throttle "^4.1.1"
-    prop-types "^15.6.0"
-    style-transform "^0.1.11"
+    memize "^1.0.5"
+    prop-types "^15.6.1"
 
-moment@^2.20.1:
-  version "2.20.1"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.20.1.tgz#d6eb1a46cbcc14a2b2f9434112c1ff8907f313fd"
+moment@^2.20.1, moment@^2.21.0:
+  version "2.21.0"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.21.0.tgz#2a114b51d2a6ec9e6d83cf803f838a878d8a023a"
 
 node-fetch@^1.0.1:
   version "1.7.3"
@@ -371,9 +375,9 @@ pegjs@^0.10.0:
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/pegjs/-/pegjs-0.10.0.tgz#cf8bafae6eddff4b5a7efb185269eaaf4610ddbd"
 
-prettier@^1.10.2:
-  version "1.10.2"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.10.2.tgz#1af8356d1842276a99a5b5529c82dd9e9ad3cc93"
+prettier@^1.11.1:
+  version "1.11.1"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.11.1.tgz#61e43fc4cd44e68f2b0dfc2c38cd4bb0fccdcc75"
 
 promise@^7.1.1:
   version "7.3.1"
@@ -381,9 +385,9 @@ promise@^7.1.1:
   dependencies:
     asap "~2.0.3"
 
-prop-types@^15.5.4, prop-types@^15.5.8, prop-types@^15.6.0:
-  version "15.6.0"
-  resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.6.0.tgz#ceaf083022fc46b4a35f69e13ef75aed0d639856"
+prop-types@^15.5.4, prop-types@^15.5.8, prop-types@^15.6.0, prop-types@^15.6.1:
+  version "15.6.1"
+  resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.6.1.tgz#36644453564255ddda391191fb3a125cbdf654ca"
   dependencies:
     fbjs "^0.8.16"
     loose-envify "^1.3.1"
@@ -466,9 +470,9 @@ rgba-regex@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/rgba-regex/-/rgba-regex-1.0.0.tgz#43374e2e2ca0968b0ef1523460b7d730ff22eeb3"
 
-rgo@^0.3.10, rgo@^0.3.9:
-  version "0.3.10"
-  resolved "https://registry.yarnpkg.com/rgo/-/rgo-0.3.10.tgz#932280bf66777413a9d2cb58d3284223a69daa27"
+rgo@^0.3.13, rgo@^0.3.9:
+  version "0.3.13"
+  resolved "https://registry.yarnpkg.com/rgo/-/rgo-0.3.13.tgz#0f53955357d7d3fa0b6e9d005cee148d54f870ec"
   dependencies:
     deep-equal "^1.0.1"
     keys-to-object "^0.2.0"
@@ -500,9 +504,9 @@ string.prototype.repeat@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/string.prototype.repeat/-/string.prototype.repeat-0.2.0.tgz#aba36de08dcee6a5a337d49b2ea1da1b28fc0ecf"
 
-style-transform@^0.1.11:
-  version "0.1.11"
-  resolved "https://registry.yarnpkg.com/style-transform/-/style-transform-0.1.11.tgz#2487d5061841df872373e07f3a7fdb65639df160"
+style-transform@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/style-transform/-/style-transform-0.2.1.tgz#d3cf34d9609023b099ff2a6ab8a55dfb1f4c6768"
   dependencies:
     css-shorthand-expand "^1.1.0"
     object-path-immutable "^1.0.1"

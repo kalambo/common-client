@@ -1,5 +1,6 @@
 import * as React from 'react';
-import m, { renderLifted, restyle } from 'mishmash';
+import m, { yieldLifted } from 'mishmash';
+import st from 'style-transform';
 import { Div, Hover, Input, Txt } from 'elmnt';
 import { root } from 'common';
 import * as debounce from 'lodash.debounce';
@@ -20,18 +21,18 @@ const getFieldHelp = field => {
   return field.scalar;
 };
 
-const Help = m.map(
-  restyle({
-    base: null,
-    title: [['mergeKeys', 'title']],
-    subtitle: [['mergeKeys', 'title']],
-    text: [['mergeKeys', 'text']],
-    indent: [['mergeKeys', 'indent']],
-    note: [['mergeKeys', 'note']],
-    op: [['mergeKeys', 'op']],
-    fields: [['mergeKeys', 'fields']],
-  }),
-)(({ type, toggleOpen, style }) => (
+const Help = m.merge('style', style => ({
+  style: {
+    base: style,
+    title: st(style).mergeKeys('title'),
+    subtitle: st(style).mergeKeys('title'),
+    text: st(style).mergeKeys('text'),
+    indent: st(style).mergeKeys('indent'),
+    note: st(style).mergeKeys('note'),
+    op: st(style).mergeKeys('op'),
+    fields: st(style).mergeKeys('fields'),
+  },
+}))(({ type, toggleOpen, style }) => (
   <div
     style={{
       position: 'fixed',
@@ -154,39 +155,41 @@ const Help = m.map(
 ));
 
 export default m
-  .map(
-    restyle({
-      label: [['mergeKeys', 'label']],
-      helpLabel: [['mergeKeys', 'helpLabel']],
-      field: [['mergeKeys', 'field']],
-      help: [['mergeKeys', 'help']],
-    }),
-  )
-  .stream(({ initial, observe, push }) => {
-    push({ text: null, filter: null, isOpen: false, schemaLoaded: false });
-    let onChangeBase = initial.onChange;
-    const debounceChange = debounce(v => onChangeBase(v), 1000);
+  .merge('style', style => ({
+    style: {
+      label: st(style).mergeKeys('label'),
+      helpLabel: st(style).mergeKeys('helpLabel'),
+      field: st(style).mergeKeys('field'),
+      help: st(style).mergeKeys('help'),
+    },
+  }))
+  .merge((_, push) => {
+    push({
+      schemaLoaded: false,
+      isOpen: false,
+      toggleIsOpen: () => push(({ isOpen }) => ({ isOpen: !isOpen })),
+    });
     let mounted = true;
     root.rgo.query().then(() => mounted && push({ schemaLoaded: true }));
-    observe(props => {
-      if (props) onChangeBase = props.onChange;
-      else mounted = false;
-    });
-    const toggleIsOpen = () => push(({ isOpen }) => ({ isOpen: !isOpen }));
-    return (props, state) => ({
-      ...props,
-      ...state,
-      toggleIsOpen,
+    return () => (mounted = false);
+  })
+  .merge('type', 'onChange', (type, onChange, push) => {
+    const debounceChange = debounce(v => onChange(v), 1000);
+    return {
+      text: null,
+      filter: null,
       setText: text => {
-        const parsedValue = config.parseFilter(text, props.type);
+        const parsedValue = config.parseFilter(text, type);
         const filter = !parsedValue ? parsedValue : memoizeValue(parsedValue);
         push({ text, filter });
         debounceChange(filter);
       },
-    });
+    };
   })
   .do(
-    renderLifted(
+    yieldLifted(
+      'bounds',
+      'setBoundsElem',
       ({ type, toggleOpen, style }) => (
         <Help type={type} toggleOpen={toggleOpen} style={style.help} />
       ),
