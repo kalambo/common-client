@@ -2,13 +2,15 @@ import m, { HOC } from 'mishmash';
 import keysToObject from 'keys-to-object';
 import { isValid } from 'common';
 
+import ejson from '../../ejson';
+
 import runFilter from './runFilter';
 
 export default m.merge(
   'stores',
-  props => JSON.stringify(props.fields),
+  props => ejson.stringify(props.fields),
   (stores, jsonFields, push) => {
-    const fields = JSON.parse(jsonFields);
+    const fields = ejson.parse(jsonFields);
     push({ state: null });
     const storeValues = { rgo: null as any, local: null as any };
     const storeFields = ['rgo', 'local'].map(store =>

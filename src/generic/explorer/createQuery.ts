@@ -1,8 +1,10 @@
 import { root } from 'common';
 import { fieldIs } from 'rgo';
 
+import ejson from '../../ejson';
+
 export default (initial, onUpdate) => {
-  let query = initial && JSON.parse(JSON.stringify(initial));
+  let query = initial && ejson.parse(ejson.stringify(initial));
   onUpdate(query);
   return {
     filter: (path, filter) => {

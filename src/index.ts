@@ -8,6 +8,7 @@ export { default as download } from './generic/download';
 export { default as Explorer } from './generic/explorer';
 export { default as TableLinks } from './tableLinks';
 export { default as cssBase } from './cssBase';
+export { default as ejson } from './ejson';
 export { default as ExplorerInput } from './ExplorerInput';
 export { Breadcrumbs, Link, Route, routerPure, withRouter } from './router';
 export { default as withWidth } from './withWidth';
