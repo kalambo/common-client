@@ -5,6 +5,8 @@ import keysToObject from 'keys-to-object';
 import { getId } from 'rgo';
 import { Obj, root, transformValue } from 'common';
 
+import ejson from '../../ejson';
+
 import createStores from './createStores';
 import getState from './getState';
 import prepareFields from './prepareFields';
@@ -74,20 +76,29 @@ export default function createForm<T = {}>(
     .merge((props$, push) => {
       const stores = createStores();
       let count = 0;
-      props$('objects', 'blocks', (objects, blocks) => {
-        setTimeout(async () => {
-          const index = ++count;
-          const info = await prepareFields(blockProps, objects, blocks, stores);
-          if (index === count) push(info);
-        });
-        return () => {
-          root.rgo.set(
-            ...(props$().$fields || [])
-              .filter(f => f.key.store === 'rgo')
-              .map(f => ({ key: f.key.key })),
-          );
-        };
-      });
+      props$(
+        props => ejson.stringify(props.objects),
+        props => ejson.stringify(props.blocks),
+        (objectsJSON, blocksJSON) => {
+          setTimeout(async () => {
+            const index = ++count;
+            const info = await prepareFields(
+              blockProps,
+              ejson.parse(objectsJSON),
+              ejson.parse(blocksJSON),
+              stores,
+            );
+            if (index === count) push(info);
+          });
+          return () => {
+            root.rgo.set(
+              ...(props$().$fields || [])
+                .filter(f => f.key.store === 'rgo')
+                .map(f => ({ key: f.key.key })),
+            );
+          };
+        },
+      );
       return {
         stores,
         objects: undefined,

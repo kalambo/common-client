@@ -219,7 +219,7 @@ export default m
             display: 'inline-block',
             verticalAlign: 'top',
             height: '100%',
-            paddingLeft: i !== 0 && 30,
+            paddingLeft: i !== 0 ? 30 : 0,
           }}
           key={i}
         >
