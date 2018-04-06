@@ -23,6 +23,7 @@ export default {
       return v;
     }),
   parse: value =>
+    value &&
     JSON.parse(
       value,
       (_, v) =>
