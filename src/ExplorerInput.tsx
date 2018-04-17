@@ -1,11 +1,12 @@
 import * as React from 'react';
-import m from 'mishmash';
-import st from 'style-transform';
+import r from 'refluent';
 import { Input } from 'elmnt';
 import { isValid, root } from 'common';
 
-export default m
-  .merge('dataKey', 'context', (dataKey, context) => {
+import { restyle } from './utils';
+
+export default r
+  .do('dataKey', 'context', (dataKey, context) => {
     const { meta = {}, ...field } = root.rgo.schema[dataKey[0]][dataKey[2]];
     const rules = {
       ...field,
@@ -36,19 +37,19 @@ export default m
       dataKey: undefined,
     };
   })
-  .merge('style', 'type', 'options', (style, type, options) => {
-    const input = Array.isArray(options)
-      ? st(style).merge({ layout: 'modal' })
-      : style;
-    return {
-      style: {
-        margin: st(input).scale({
+  .do(
+    restyle('type', 'options', (type, options, style) => {
+      const input = Array.isArray(options)
+        ? style.merge({ layout: 'modal' })
+        : style;
+      return {
+        margin: input.scale({
           margin: {
             borderWidth: -1,
             ...(type === 'boolean' ? { padding: 0.6 } : {}),
           },
         }),
-        fill: st(input)
+        fill: input
           .scale({
             top: {
               borderTopWidth: -1,
@@ -68,10 +69,10 @@ export default m
             },
           })
           .merge({ position: 'absolute' }),
-      },
-    };
-  })
-  .merge('context', (context, push) => {
+      };
+    }),
+  )
+  .do('context', (context, push) => {
     push({
       onChange: value =>
         context.store.update('editing', v => ({ ...v, value })),
@@ -90,7 +91,7 @@ export default m
       }),
     );
   })
-  .merge('value', 'rules', 'onBlur', (value, rules, onBlur) => {
+  .do('value', 'rules', 'onBlur', (value, rules, onBlur) => {
     const invalid = !isValid(rules, value, {});
     return {
       invalid,
@@ -98,41 +99,42 @@ export default m
       onKeyDown: e => (e.keyCode === 13 || e.keyCode === 27) && onBlur(invalid),
       rules: undefined,
     };
-  })(
-  ({
-    context: _,
-    value,
-    onChange,
-    text,
-    onTextChange,
-    onBlur,
-    onKeyDown,
-    inputRef,
-    style,
-    ...props
-  }) => (
-    <div onKeyDown={onKeyDown}>
-      <Input
-        value={['int', 'float', 'date'].includes(props.type) ? text : value}
-        onChange={onChange}
-        style={style.margin}
-        spellCheck={false}
-        {...props}
-        {...(['int', 'float', 'date'].includes(props.type)
-          ? { type: 'string' }
-          : {})}
-        {...(props.type === 'date' ? { iconRight: 'tick' } : {})}
-      />
-      <Input
-        value={value}
-        onChange={onChange}
-        onTextChange={onTextChange}
-        style={style.fill}
-        spellCheck={false}
-        onBlur={onBlur}
-        ref={inputRef}
-        {...props}
-      />
-    </div>
-  ),
-);
+  })
+  .yield(
+    ({
+      context: _,
+      value,
+      onChange,
+      text,
+      onTextChange,
+      onBlur,
+      onKeyDown,
+      inputRef,
+      style,
+      ...props
+    }) => (
+      <div onKeyDown={onKeyDown}>
+        <Input
+          value={['int', 'float', 'date'].includes(props.type) ? text : value}
+          onChange={onChange}
+          style={style.margin}
+          spellCheck={false}
+          {...props}
+          {...(['int', 'float', 'date'].includes(props.type)
+            ? { type: 'string' }
+            : {})}
+          {...(props.type === 'date' ? { iconRight: 'tick' } : {})}
+        />
+        <Input
+          value={value}
+          onChange={onChange}
+          onTextChange={onTextChange}
+          style={style.fill}
+          spellCheck={false}
+          onBlur={onBlur}
+          ref={inputRef}
+          {...props}
+        />
+      </div>
+    ),
+  );

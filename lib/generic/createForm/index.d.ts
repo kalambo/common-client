@@ -1,6 +1,6 @@
 /// <reference types="react" />
 import * as React from 'react';
-import { Comp } from 'mishmash';
+import r from 'refluent';
 import { Obj } from 'common';
 export interface FormProps {
     objects?: Obj<{
@@ -14,7 +14,7 @@ export interface FormProps {
     onError?: (values: any) => Obj | void | Promise<Obj | void>;
     onSubmit?: (values: any) => Obj | void | Promise<Obj | void>;
 }
-export default function createForm<T = {}>(container: Comp<{
+export default function createForm<T = {}>(container: r<{
     blocks: React.ReactElement<any>[][];
     setHeightElem: (elem: HTMLElement) => null;
     height: number | null;
@@ -22,4 +22,4 @@ export default function createForm<T = {}>(container: Comp<{
     attempted: boolean;
     submit: () => Promise<void>;
     [key: string]: any;
-}>, blockProps: string[], block: Comp): Comp<FormProps & T>;
+}>, blockProps: string[], block: r): r<FormProps & T, FormProps & T>;

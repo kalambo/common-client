@@ -1,45 +1,53 @@
 import * as React from 'react';
 import { css, Div, Txt } from 'elmnt';
-import m, { Comp } from 'mishmash';
-import st from 'style-transform';
+import r from 'refluent';
 
 import createForm, { FormProps } from '../generic/createForm';
+import { restyle } from '../utils';
 
 import FieldBase from './Field';
 import Question from './Question';
 
-const Connect = m.merge('style', style => ({
-  style: st(style)
-    .filter(...css.groups.text)
-    .merge({ textAlign: 'center', width: 30, margin: '0 -15px' }),
-}))(Txt);
+const Connect = r
+  .do(
+    restyle(style =>
+      style
+        .filter(...css.groups.text)
+        .merge({ textAlign: 'center', width: 30, margin: '0 -15px' }),
+    ),
+  )
+  .yield(Txt);
 
-const Column = m.merge('style', style => ({
-  style: st(style)
-    .mergeKeys('column')
-    .filter(...css.groups.text, 'padding'),
-}))(Txt);
+const Column = r
+  .do(
+    restyle(style =>
+      style.mergeKeys('column').filter(...css.groups.text, 'padding'),
+    ),
+  )
+  .yield(Txt);
 
-const ErrorMessage = m.merge('style', style => ({
-  style: st(style)
-    .mergeKeys('errorMessage')
-    .filter(...css.groups.text),
-}))(Txt);
+const ErrorMessage = r
+  .do(
+    restyle(style =>
+      style.mergeKeys('errorMessage').filter(...css.groups.text),
+    ),
+  )
+  .yield(Txt);
 
 export default function<T>(
   container,
   blockProps,
-  blockHOC,
-  fieldHOC,
+  blockComp,
+  fieldComp,
   style,
   admin,
   fileServer = process.env.DATA_URL,
 ) {
-  const Field = fieldHOC(FieldBase(fileServer));
-  const RowField = m.merge('style', 'alt', (style, alt) => ({
-    style: st(style).mergeKeys({ alt }),
-    alt: undefined,
-  }))(Field);
+  const Field = r.yield(fieldComp).yield(FieldBase(fileServer));
+  const RowField = r
+    .do(restyle('alt', (alt, style) => style.mergeKeys({ alt })))
+    .do(() => ({ alt: undefined }))
+    .yield(Field);
   return createForm(
     container,
     [
@@ -52,9 +60,9 @@ export default function<T>(
       'columns',
       'view',
     ],
-    m
-      .do(blockHOC)
-      .merge('fields', 'attempted', 'view', (fields, attempted, view) => ({
+    r
+      .yield(blockComp)
+      .do('fields', 'attempted', 'view', (fields, attempted, view) => ({
         fields: fields.map(
           ({ scalar, isList, type, file, invalid, ...field }) => ({
             ...field,
@@ -135,6 +143,7 @@ export default function<T>(
               {fields.map((field, i) => <Field {...field} key={i} />)}
             </Div>
           ),
-      )(Field),
-  ) as Comp<FormProps & T>;
+      )
+      .yield(Field),
+  ) as r<FormProps & T>;
 }

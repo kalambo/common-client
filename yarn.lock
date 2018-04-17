@@ -7,8 +7,8 @@
   resolved "https://registry.yarnpkg.com/@types/history/-/history-4.6.2.tgz#12cfaba693ba20f114ed5765467ff25fdf67ddb0"
 
 "@types/node@^9.4.6":
-  version "9.6.2"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-9.6.2.tgz#e49ac1adb458835e95ca6487bc20f916b37aff23"
+  version "9.6.5"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-9.6.5.tgz#ee700810fdf49ac1c399fc5980b7559b3e5a381d"
 
 "@types/react-router-dom@^4.2.2", "@types/react-router-dom@^4.2.6":
   version "4.2.6"
@@ -25,11 +25,11 @@
     "@types/history" "*"
     "@types/react" "*"
 
-"@types/react@*", "@types/react@^16.0.40", "@types/react@^16.3.5":
-  version "16.3.5"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-16.3.5.tgz#bd3b21285602ea7cadb4b9e0d9711d96fd5692cc"
+"@types/react@*", "@types/react@^16.3.11":
+  version "16.3.11"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-16.3.11.tgz#345a17f1c96420f10b9f0dc696c31091ff9d66ea"
   dependencies:
-    csstype "^2.0.0"
+    csstype "^2.2.0"
 
 asap@~2.0.3:
   version "2.0.6"
@@ -99,16 +99,16 @@ core-js@^1.0.0:
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-1.2.7.tgz#652294c14651db28fa93bd2d5ff2983a4f08c636"
 
 core-js@^2.4.0:
-  version "2.5.4"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.5.4.tgz#f2c8bf181f2a80b92f360121429ce63a2f0aeae0"
+  version "2.5.5"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.5.5.tgz#b14dde936c640c0579a6b50cabcc132dd6127e3b"
 
 css-color-names@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/css-color-names/-/css-color-names-0.0.1.tgz#5d0548fa256456ede4a9a0c2ac7ab19d3eb1ad81"
 
-css-shorthand-expand@^1.1.0:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/css-shorthand-expand/-/css-shorthand-expand-1.1.1.tgz#9c10b4204a9b60b294afeec578ff1be0c8116a12"
+css-shorthand-expand@1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/css-shorthand-expand/-/css-shorthand-expand-1.1.0.tgz#102f7286cbd32375430b5849d4e2fea3aa21ea64"
   dependencies:
     css-color-names "0.0.1"
     css-url-regex "0.0.1"
@@ -125,9 +125,9 @@ css-url-regex@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/css-url-regex/-/css-url-regex-0.0.1.tgz#e05af8c6c290d451ef1632b455ea5c81b4b1395c"
 
-csstype@^2.0.0:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/csstype/-/csstype-2.1.1.tgz#37b01a7a9958ef0b88167ff6678deccd732e0ae2"
+csstype@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/csstype/-/csstype-2.2.0.tgz#1656ef97553ac53b77090844a2531c6660ebd902"
 
 d3-selection@^1.3.0:
   version "1.3.0"
@@ -143,16 +143,17 @@ element-resize-detector@^1.1.14:
   dependencies:
     batch-processor "^1.0.0"
 
-elmnt@^0.5.6:
-  version "0.5.6"
-  resolved "https://registry.yarnpkg.com/elmnt/-/elmnt-0.5.6.tgz#206c52fc6b840f3f9744fd3f263a225b92d50605"
+elmnt@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/elmnt/-/elmnt-0.6.0.tgz#e7e73b865030b0f2e172ee048b8f3e04df7b6b03"
   dependencies:
-    "@types/react" "^16.0.40"
+    "@types/react" "^16.3.11"
     commonmark "^0.28.1"
     commonmark-react-renderer "^4.3.4"
-    fast-memoize "^2.3.0"
-    mishmash "^0.7.3"
-    style-transform "^0.2.1"
+    element-resize-detector "^1.1.14"
+    lodash.throttle "^4.1.1"
+    refluent "^0.1.0"
+    style-transform "^0.2.2"
 
 encoding@^0.1.11:
   version "0.1.12"
@@ -168,7 +169,7 @@ exenv@^1.2.1:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/exenv/-/exenv-1.2.2.tgz#2ae78e85d9894158670b03d47bec1f03bd91bb9d"
 
-fast-memoize@^2.3.0, fast-memoize@^2.3.2:
+fast-memoize@^2.3.2:
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/fast-memoize/-/fast-memoize-2.3.2.tgz#f6b9eb8e06a754029cca25b4cd3945f2f6242c90"
 
@@ -236,8 +237,10 @@ hsla-regex@^1.0.0:
   resolved "https://registry.yarnpkg.com/hsla-regex/-/hsla-regex-1.0.0.tgz#c1ce7a3168c8c6614033a4b5f7877f3b225f9c38"
 
 iconv-lite@~0.4.13:
-  version "0.4.19"
-  resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.19.tgz#f7468f60135f5e5dad3399c0a81be9a1603a082b"
+  version "0.4.21"
+  resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.21.tgz#c47f8733d02171189ebc4a400f3218d348094798"
+  dependencies:
+    safer-buffer "^2.1.0"
 
 inflight@^1.0.4:
   version "1.0.6"
@@ -327,20 +330,9 @@ minimatch@^3.0.4:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.0.tgz#a35008b20f41383eec1fb914f4cd5df79a264284"
 
-mishmash@^0.7.3:
-  version "0.7.3"
-  resolved "https://registry.yarnpkg.com/mishmash/-/mishmash-0.7.3.tgz#df1402fa299ffa0f899457746e74242f3bb1b7f1"
-  dependencies:
-    "@types/react" "^16.0.40"
-    element-resize-detector "^1.1.14"
-    keys-to-object "^0.2.0"
-    lodash.throttle "^4.1.1"
-    memize "^1.0.5"
-    prop-types "^15.6.1"
-
-moment@^2.20.1, moment@^2.22.0:
-  version "2.22.0"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.22.0.tgz#7921ade01017dd45186e7fee5f424f0b8663a730"
+moment@^2.20.1, moment@^2.22.1:
+  version "2.22.1"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.22.1.tgz#529a2e9bf973f259c9643d237fda84de3a26e8ad"
 
 node-fetch@^1.0.1:
   version "1.7.3"
@@ -381,9 +373,9 @@ pegjs@^0.10.0:
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/pegjs/-/pegjs-0.10.0.tgz#cf8bafae6eddff4b5a7efb185269eaaf4610ddbd"
 
-prettier@^1.11.1:
-  version "1.11.1"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.11.1.tgz#61e43fc4cd44e68f2b0dfc2c38cd4bb0fccdcc75"
+prettier@^1.12.1:
+  version "1.12.1"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.12.1.tgz#c1ad20e803e7749faf905a409d2367e06bbe7325"
 
 promise@^7.1.1:
   version "7.3.1"
@@ -391,7 +383,7 @@ promise@^7.1.1:
   dependencies:
     asap "~2.0.3"
 
-prop-types@^15.5.4, prop-types@^15.5.8, prop-types@^15.6.0, prop-types@^15.6.1:
+prop-types@^15.5.4, prop-types@^15.5.8, prop-types@^15.6.0:
   version "15.6.1"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.6.1.tgz#36644453564255ddda391191fb3a125cbdf654ca"
   dependencies:
@@ -399,9 +391,9 @@ prop-types@^15.5.4, prop-types@^15.5.8, prop-types@^15.6.0, prop-types@^15.6.1:
     loose-envify "^1.3.1"
     object-assign "^4.1.1"
 
-react-dom@^16.3.1:
-  version "16.3.1"
-  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.3.1.tgz#6a3c90a4fb62f915bdbcf6204422d93a7d4ca573"
+react-dom@^16.3.2:
+  version "16.3.2"
+  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.3.2.tgz#cb90f107e09536d683d84ed5d4888e9640e0e4df"
   dependencies:
     fbjs "^0.8.16"
     loose-envify "^1.1.0"
@@ -447,14 +439,21 @@ react-side-effect@^1.1.0:
     exenv "^1.2.1"
     shallowequal "^1.0.1"
 
-react@^16.3.1:
-  version "16.3.1"
-  resolved "https://registry.yarnpkg.com/react/-/react-16.3.1.tgz#4a2da433d471251c69b6033ada30e2ed1202cfd8"
+react@^16.3.2:
+  version "16.3.2"
+  resolved "https://registry.yarnpkg.com/react/-/react-16.3.2.tgz#fdc8420398533a1e58872f59091b272ce2f91ea9"
   dependencies:
     fbjs "^0.8.16"
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
     prop-types "^15.6.0"
+
+refluent@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/refluent/-/refluent-0.1.0.tgz#aa74ff04303f1bde400e6fd848f8e80452ebcb52"
+  dependencies:
+    keys-to-object "^0.2.0"
+    memize "^1.0.5"
 
 regenerator-runtime@^0.11.0:
   version "0.11.1"
@@ -498,6 +497,10 @@ safe-buffer@^5.0.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.1.1.tgz#893312af69b2123def71f57889001671eeb2c853"
 
+safer-buffer@^2.1.0:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/safer-buffer/-/safer-buffer-2.1.2.tgz#44fa161b0187b9549dd84bb91802f9bd8385cd6a"
+
 setimmediate@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/setimmediate/-/setimmediate-1.0.5.tgz#290cbb232e306942d7d7ea9b83732ab7856f8285"
@@ -510,11 +513,12 @@ string.prototype.repeat@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/string.prototype.repeat/-/string.prototype.repeat-0.2.0.tgz#aba36de08dcee6a5a337d49b2ea1da1b28fc0ecf"
 
-style-transform@^0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/style-transform/-/style-transform-0.2.1.tgz#d3cf34d9609023b099ff2a6ab8a55dfb1f4c6768"
+style-transform@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/style-transform/-/style-transform-0.2.2.tgz#7b56e19def98be6575ff56b15155904b3b5f4b08"
   dependencies:
-    css-shorthand-expand "^1.1.0"
+    css-shorthand-expand "1.1.0"
+    csstype "^2.2.0"
     object-path-immutable "^1.0.1"
 
 typescript@^2.8.1:

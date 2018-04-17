@@ -1,4 +1,3 @@
-/// <reference types="react" />
-import * as React from 'react';
-declare const _default: (fileServer: any) => React.ComponentClass<any> | React.StatelessComponent<any>;
+import r from 'refluent';
+declare const _default: (fileServer: any) => r<any, any>;
 export default _default;

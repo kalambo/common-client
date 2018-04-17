@@ -14,7 +14,9 @@ const csvHeader = (
         : types[f].name;
       const fieldSort = sort.includes(f)
         ? 'asc'
-        : sort.includes(`-${f}`) ? 'desc' : '';
+        : sort.includes(`-${f}`)
+          ? 'desc'
+          : '';
       return [[fieldSort ? `${fieldName} [${fieldSort}]` : fieldName]];
     }
     const fieldName = type

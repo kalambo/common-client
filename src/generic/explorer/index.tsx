@@ -1,7 +1,8 @@
 import * as React from 'react';
-import m from 'mishmash';
-import st from 'style-transform';
+import r from 'refluent';
 import { root } from 'common';
+
+import { restyle } from '../../utils';
 
 import createQuery from './createQuery';
 import Footer from './Footer';
@@ -46,10 +47,10 @@ const addIds = fields =>
     };
   });
 
-export default m
-  .merge('style', style => ({
-    style: {
-      base: st(style)
+export default r
+  .do(
+    restyle(style => ({
+      base: style
         .numeric('paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft')
         .scale({
           borderTopWidth: { borderTopWidth: 0.5, borderBottomWidth: 0.5 },
@@ -57,7 +58,7 @@ export default m
           borderBottomWidth: { borderTopWidth: 0.5, borderBottomWidth: 0.5 },
           borderLeftWidth: { borderLeftWidth: 0.5, borderRightWidth: 0.5 },
         }),
-      footer: st(style).scale({
+      footer: style.scale({
         height: {
           fontSize: 1,
           paddingTop: 1,
@@ -66,20 +67,20 @@ export default m
           borderBottomWidth: 2,
         },
       }),
-    },
-  }))
-  .merge((_, push) => {
+    })),
+  )
+  .do((_, push) => {
     root.rgo.query().then(() => push({ loading: false }));
     return {
       loading: true,
       reset: () => push({ isReset: true }, () => push({ isReset: false })),
     };
   })
-  .doIf(
-    ({ loading, isReset }) => loading || isReset,
-    m.yield(({ loader }) => loader()),
+  .yield(
+    ({ loading, isReset, loader, next }) =>
+      loading || isReset ? loader() : next(),
   )
-  .merge((props$, push) => {
+  .do((props$, push) => {
     const values = {};
     const listeners = {};
     const set = (key, value?) => {
@@ -193,53 +194,53 @@ export default m
 
     return unsubscribe;
   })
-  .doIf(
-    ({ query, data }) => !query || !data,
-    m.yield(({ loader }) => loader()),
-  )(({ context, query, fetching, data, style, linkQuery }) => (
-  <div
-    style={{
-      position: 'relative',
-      width: '100%',
-      height: '100%',
-      paddingBottom: 10 + style.footer.height,
-    }}
-  >
+  .yield(
+    ({ query, data, loader, next }) => (!query || !data ? loader() : next()),
+  )
+  .yield(({ context, query, fetching, data, style, linkQuery }) => (
     <div
       style={{
+        position: 'relative',
         width: '100%',
         height: '100%',
-        whiteSpace: 'nowrap',
-        overflow: 'auto',
+        paddingBottom: 10 + style.footer.height,
       }}
     >
-      {Array.from({ length: query.length + 1 }).map((_, i) => (
-        <div
-          style={{
-            display: 'inline-block',
-            verticalAlign: 'top',
-            height: '100%',
-            paddingLeft: i !== 0 ? 30 : 0,
-          }}
-          key={i}
-        >
-          <Table
-            context={context}
-            query={query[i] ? [query[i]] : []}
-            fetching={fetching}
-            data={data}
-            index={i}
-            style={style.base}
-          />
-        </div>
-      ))}
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          whiteSpace: 'nowrap',
+          overflow: 'auto',
+        }}
+      >
+        {Array.from({ length: query.length + 1 }).map((_, i) => (
+          <div
+            style={{
+              display: 'inline-block',
+              verticalAlign: 'top',
+              height: '100%',
+              paddingLeft: i !== 0 ? 30 : 0,
+            }}
+            key={i}
+          >
+            <Table
+              context={context}
+              query={query[i] ? [query[i]] : []}
+              fetching={fetching}
+              data={data}
+              index={i}
+              style={style.base}
+            />
+          </div>
+        ))}
+      </div>
+      <Footer
+        context={context}
+        query={query}
+        linkQuery={linkQuery}
+        data={data}
+        style={style.footer}
+      />
     </div>
-    <Footer
-      context={context}
-      query={query}
-      linkQuery={linkQuery}
-      data={data}
-      style={style.footer}
-    />
-  </div>
-));
+  ));

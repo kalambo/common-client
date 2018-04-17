@@ -1,3 +1,2 @@
-import { HOC } from 'mishmash';
-declare const _default: HOC<any, any>;
+declare const _default: (props$: any, push: any) => any;
 export default _default;

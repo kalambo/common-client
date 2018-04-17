@@ -1,5 +1,4 @@
-/// <reference types="react" />
 export { default as fieldToRows } from './fieldToRows';
-import * as React from 'react';
-declare const _default: React.ComponentClass<any> | React.StatelessComponent<any>;
+import r from 'refluent';
+declare const _default: r<any, any>;
 export default _default;

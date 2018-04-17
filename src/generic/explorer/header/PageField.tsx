@@ -1,21 +1,21 @@
 import * as React from 'react';
 import { Icon } from 'elmnt';
-import m from 'mishmash';
+import r from 'refluent';
 
 import icons from '../icons';
 
-export default m
-  .merge('context', 'path', (context, path, push) => {
+export default r
+  .do('context', 'path', (context, path, push) => {
     const unlistens = [
       context.store.listen(`${path}_start`, (start = 1) => push({ start })),
       context.store.listen(`${path}_end`, (end = null) => push({ end })),
     ];
     return () => unlistens.forEach(u => u());
   })
-  .merge('up', 'start', 'end', (up, start, end) => ({
+  .do('up', 'start', 'end', (up, start, end) => ({
     show: up ? start && start > 1 && end : end,
   }))
-  .merge(props$ => ({
+  .do(props$ => ({
     onMouseMove: () => {
       const { context, path, up } = props$();
       context.setActive({
@@ -39,8 +39,8 @@ export default m
       context.query.limit(path, newStart - 1, newEnd);
     },
   }))
-  .doIf(({ show }) => !show, m.yield(() => null))(
-  ({ up, active, onMouseMove, onMouseLeave, onClick, style }) => (
+  .yield(({ show, next }) => (show ? next() : null))
+  .yield(({ up, active, onMouseMove, onMouseLeave, onClick, style }) => (
     <div
       style={{
         position: 'absolute',
@@ -94,5 +94,4 @@ export default m
         }}
       />
     </div>
-  ),
-);
+  ));

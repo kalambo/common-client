@@ -1,19 +1,20 @@
 import * as React from 'react';
 import { css, Icon, Input } from 'elmnt';
-import m, { onClickOutside } from 'mishmash';
-import st from 'style-transform';
+import r from 'refluent';
+
+import { clickOutsideRef, restyle } from '../../../utils';
 
 import icons from '../icons';
 
-export default m
-  .merge('context', 'path', (context, path, push) => {
+export default r
+  .do('context', 'path', (context, path, push) => {
     const unlistens = [
       context.store.listen(`${path}_start`, (start = 1) => push({ start })),
       context.store.listen(`${path}_end`, (end = null) => push({ end })),
     ];
     return () => unlistens.forEach(u => u());
   })
-  .merge(props$ => {
+  .do(props$ => {
     let inputElem1;
     let inputElem2;
     let diff = -1 as number | null;
@@ -75,27 +76,26 @@ export default m
       },
     };
   })
-  .merge(
-    'style',
-    'active',
-    'focused',
-    'invalid',
-    (style, active, focused, invalid) => {
-      const input = st(style.base).mergeKeys({
-        input: true,
-        hover: active,
-        focus: focused,
-        invalid,
-      });
-      return {
-        style: {
+  .do(
+    restyle(
+      'active',
+      'focused',
+      'invalid',
+      (active, focused, invalid, style) => {
+        const input = style.base.mergeKeys({
+          input: true,
+          hover: active,
+          focus: focused,
+          invalid,
+        });
+        return {
           ...style,
           input,
-          div: st(input)
+          div: input
             .scale({ margin: { padding: -1 } })
             .filter('margin', ...(active && !focused ? ['background'] : []))
             .merge({ position: 'relative', zIndex: focused ? 30 : 6 }),
-          text: st(input)
+          text: input
             .filter(
               ...css.groups.text,
               'padding',
@@ -103,7 +103,7 @@ export default m
             )
             .scale({ minWidth: { fontSize: 2 } })
             .merge({ display: 'inline-block', verticalAlign: 'top' }),
-          arrow: st(input)
+          arrow: input
             .mergeKeys('connect')
             .scale({
               fontSize: 0.9,
@@ -112,63 +112,66 @@ export default m
               minWidth: { fontSize: 2 },
             })
             .filter('fontSize', 'color', 'padding', 'minWidth'),
-        },
-      };
-    },
+        };
+      },
+    ),
   )
-  .do(onClickOutside(props => props.onClickOutside(), 'setClickElem'))(
-  ({
-    live,
-    start,
-    end,
-    onChangeStart,
-    onChangeEnd,
-    focused,
-    onMouseMove,
-    onMouseLeave,
-    onClick,
-    setClickElem,
-    onKeyDown,
-    setInputElem1,
-    setInputElem2,
-    style,
-  }) => (
-    <>
-      <div onKeyDown={onKeyDown} style={style.div} ref={setClickElem}>
-        <Input
-          type="int"
-          value={start}
-          onChange={onChangeStart}
-          style={style.text}
-          ref={setInputElem1}
-        />
-        <Icon {...icons.down} style={style.arrow} />
-        <Input
-          type="int"
-          value={end}
-          onChange={onChangeEnd}
-          style={style.text}
-          ref={setInputElem2}
-        />
-      </div>
-      {live &&
-        !focused && (
-          <div
-            onMouseMove={onMouseMove}
-            onMouseLeave={onMouseLeave}
-            onClick={onClick}
-            style={{
-              position: 'absolute',
-              top: -style.base.borderTopWidth * 2 - style.icon.radius,
-              right: -style.base.borderRightWidth,
-              bottom: -style.base.borderBottomWidth * 2,
-              left: -style.base.borderLeftWidth,
-              zIndex: 6,
-              cursor: 'pointer',
-              // background: 'rgba(255,0,0,0.1)',
-            }}
+  .do((props$, _) => ({
+    setClickElem: clickOutsideRef(() => props$().onClickOutside()),
+  }))
+  .yield(
+    ({
+      live,
+      start,
+      end,
+      onChangeStart,
+      onChangeEnd,
+      focused,
+      onMouseMove,
+      onMouseLeave,
+      onClick,
+      setClickElem,
+      onKeyDown,
+      setInputElem1,
+      setInputElem2,
+      style,
+    }) => (
+      <>
+        <div onKeyDown={onKeyDown} style={style.div} ref={setClickElem}>
+          <Input
+            type="int"
+            value={start}
+            onChange={onChangeStart}
+            style={style.text}
+            ref={setInputElem1}
           />
-        )}
-    </>
-  ),
-);
+          <Icon {...icons.down} style={style.arrow} />
+          <Input
+            type="int"
+            value={end}
+            onChange={onChangeEnd}
+            style={style.text}
+            ref={setInputElem2}
+          />
+        </div>
+        {live &&
+          !focused && (
+            <div
+              onMouseMove={onMouseMove}
+              onMouseLeave={onMouseLeave}
+              onClick={onClick}
+              style={{
+                position: 'absolute',
+                top: -style.base.borderTopWidth * 2 - style.icon.radius,
+                right: -style.base.borderRightWidth,
+                bottom: -style.base.borderBottomWidth * 2,
+                left: -style.base.borderLeftWidth,
+                zIndex: 6,
+                cursor: 'pointer',
+                // background: 'rgba(255,0,0,0.1)',
+              }}
+            />
+          )}
+      </>
+    ),
+  );

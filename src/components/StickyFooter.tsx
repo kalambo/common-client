@@ -1,8 +1,13 @@
 import * as React from 'react';
-import m, { watchSize } from 'mishmash';
+import r from 'refluent';
 
-export default m.do(watchSize('bounds', 'setBoundsElem'))(
-  ({ content, footer, bounds: { height = 0 }, setBoundsElem }) => (
+import { resizeRef } from '../utils';
+
+export default r
+  .do((_, push) => ({
+    setBoundsElem: resizeRef(({ height = 0 }) => push({ height })),
+  }))
+  .yield(({ content, footer, height, setBoundsElem }) => (
     <>
       <div style={{ minHeight: '100%', marginBottom: -height }}>
         {content}
@@ -10,5 +15,4 @@ export default m.do(watchSize('bounds', 'setBoundsElem'))(
       </div>
       <div ref={setBoundsElem}>{footer}</div>
     </>
-  ),
-);
+  ));

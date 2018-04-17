@@ -1,8 +1,20 @@
 /// <reference types="react" />
-import * as React from 'react';
-import { HOC } from 'mishmash';
-export declare const routerPure: HOC<any, any>;
-export declare const withRouter: (basename?: any) => HOC<any, any>;
+import r from 'refluent';
+export declare const withLocation: r<{
+    [key: string]: any;
+    [key: number]: any;
+}, {
+    [key: string]: any;
+    [key: number]: any;
+}>;
+export declare const getLocation: r<any, any>;
+export declare const withBreadcrumbs: (base: any) => r<{
+    [key: string]: any;
+    [key: number]: any;
+}, {
+    [key: string]: any;
+    [key: number]: any;
+}>;
 export declare const Route: ({ path, label, loader, component, render, ...routeProps }: any) => JSX.Element;
-export declare const Breadcrumbs: React.ComponentClass<any> | React.StatelessComponent<any>;
-export declare const Link: ({ to, newTab, route, ...props }: any) => JSX.Element;
+export declare const Breadcrumbs: r<any, any>;
+export declare const Link: ({ to, newTab, route: _, ...props }: any) => JSX.Element;

@@ -59,7 +59,9 @@ export default async (blockProps, configObjects = {}, blocks, stores) => {
       );
       const blockFields = (fields
         ? fields.map(f => merge(f, config.field))
-        : config.field.field || config.field.name ? [config.field] : []
+        : config.field.field || config.field.name
+          ? [config.field]
+          : []
       ).reduce((res, { field, name, initial, ...other }) => {
         const key = field && getFieldKey(objects, field);
         const { meta = {}, ...schema } = field

@@ -31,7 +31,9 @@ const fieldToRows = (
               path: newPath,
               sort: sort.includes(f)
                 ? 'asc'
-                : sort.includes(`-${f}`) ? 'desc' : null,
+                : sort.includes(`-${f}`)
+                  ? 'desc'
+                  : null,
               last: i === fields.length - 1 && nextPath,
               text: context.types[type].fields.find(x => x[0] === f)[1],
             });

@@ -1,34 +1,34 @@
 import * as React from 'react';
 import { css, Div, Txt } from 'elmnt';
-import m from 'mishmash';
-import st from 'style-transform';
+import r from 'refluent';
 
-import withWidth from '../withWidth';
+import { restyle, withWidth } from '../utils';
 
-const Question = m.merge('style', style => ({
-  style: st(style)
-    .mergeKeys('question')
-    .filter(...css.groups.text),
-}))(Txt);
+const Question = r
+  .do(restyle(style => style.mergeKeys('question').filter(...css.groups.text)))
+  .yield(Txt);
 
-const Prompt = m.merge('style', style => ({
-  style: st(style)
-    .mergeKeys('prompt')
-    .filter(...css.groups.text),
-}))(Txt);
+const Prompt = r
+  .do(restyle(style => style.mergeKeys('prompt').filter(...css.groups.text)))
+  .yield(Txt);
 
-const Vertical = m.merge('style', 'view', 'small', (style, view, small) => ({
-  style: st(style)
-    .scale({
-      paddingTop: view ? 0 : { paddingTop: small ? 0.4 : 1, borderTopWidth: 1 },
-    })
-    .filter('paddingTop')
-    .merge({ spacing: 10 }),
-  view: undefined,
-  small: undefined,
-}))(Div);
+const Vertical = r
+  .do(
+    restyle('view', 'small', (view, small, style) =>
+      style
+        .scale({
+          paddingTop: view
+            ? 0
+            : { paddingTop: small ? 0.4 : 1, borderTopWidth: 1 },
+        })
+        .filter('paddingTop')
+        .merge({ spacing: 10 }),
+    ),
+  )
+  .do(() => ({ view: undefined, small: undefined }))
+  .yield(Div);
 
-export default withWidth(600)(
+export default r.yield(withWidth(600)).yield(
   ({
     text,
     prompt,
