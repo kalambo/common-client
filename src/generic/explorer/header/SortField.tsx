@@ -5,7 +5,7 @@ import r from 'refluent';
 import icons from '../icons';
 
 export default r
-  .do(props$ => ({
+  .do((props$, _) => ({
     onMouseMove: () => {
       const { context, path } = props$();
       context.setActive({ type: 'sort', path });

@@ -10,7 +10,7 @@ export default r
   .do('context', 'path', (context, path, push) =>
     context.store.listen(`${path}_filter`, (text = '') => push({ text })),
   )
-  .do(props$ => {
+  .do((props$, _) => {
     let inputElem;
     let filter;
     props$('text', text => ({ invalid: text && !filter }));
@@ -67,31 +67,29 @@ export default r
           invalid,
         });
         return {
-          style: {
-            ...style,
-            input,
-            div: input
-              .scale({ margin: { padding: -1 } })
-              .filter('margin', 'background')
-              .merge({ position: 'relative' }),
-            bar: input
-              .scale({ minWidth: { fontSize: 5 } })
-              .filter('minWidth')
-              .merge({
-                layout: 'bar',
-                position: 'relative',
-                zIndex: focused ? 30 : 5,
-              }),
-            filterIcon: input
-              .scale({ fontSize: 0.8 })
-              .filter('color', 'fontSize', 'padding'),
-            iconWidth: input.scale({
-              width: { fontSize: 0.8, paddingLeft: 0.5, paddingRight: 0.5 },
+          ...style,
+          input,
+          div: input
+            .scale({ margin: { padding: -1 } })
+            .filter('margin', 'background')
+            .merge({ position: 'relative' }),
+          bar: input
+            .scale({ minWidth: { fontSize: 5 } })
+            .filter('minWidth')
+            .merge({
+              layout: 'bar',
+              position: 'relative',
+              zIndex: focused ? 30 : 5,
             }),
-            text: input
-              .filter(...css.groups.text, 'padding')
-              .scale({ paddingRight: 2 }),
-          },
+          filterIcon: input
+            .scale({ fontSize: 0.8 })
+            .filter('color', 'fontSize', 'padding'),
+          iconWidth: input.scale({
+            width: { fontSize: 0.8, paddingLeft: 0.5, paddingRight: 0.5 },
+          }),
+          text: input
+            .filter(...css.groups.text, 'padding')
+            .scale({ paddingRight: 2 }),
         };
       },
     ),

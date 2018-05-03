@@ -90,7 +90,12 @@ export default fileServer => {
               name: relation,
               filter,
               sort,
-              fields: ['id', ...(Array.isArray(label) ? label[0] : [label])],
+              fields: [
+                'id',
+                ...(Array.isArray(label)
+                  ? label.filter(l => l.startsWith('$')).map(l => l.slice(1))
+                  : [label]),
+              ],
             })),
           )
           .do('relation', 'label', 'data', (relation, label, data) => ({
@@ -99,7 +104,9 @@ export default fileServer => {
               ? data[relation].map(
                   d =>
                     Array.isArray(label)
-                      ? label[1](...label[0].map(k => d[k]))
+                      ? label
+                          .map(l => (l.startsWith('$') ? d[l.slice(1)] : l))
+                          .join('')
                       : d[label],
                 )
               : [],

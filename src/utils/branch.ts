@@ -8,5 +8,5 @@ const select = (selector, props) => {
   return selector(props);
 };
 
-export default (test, pass, fail = ({ next }) => next()) => props =>
+export default (test, pass, fail: any = ({ next }) => next()) => props =>
   (select(test, props) ? pass : fail)(props);

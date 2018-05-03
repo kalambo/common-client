@@ -2,6 +2,7 @@
 import * as React from 'react';
 import r from 'refluent';
 import { Obj } from 'common';
+export declare type Comp<T = any> = React.ComponentClass<T> | React.StatelessComponent<T>;
 export interface FormProps {
     objects?: Obj<{
         type: string;
@@ -14,7 +15,7 @@ export interface FormProps {
     onError?: (values: any) => Obj | void | Promise<Obj | void>;
     onSubmit?: (values: any) => Obj | void | Promise<Obj | void>;
 }
-export default function createForm<T = {}>(container: r<{
+export default function createForm<T = {}>(container: Comp<{
     blocks: React.ReactElement<any>[][];
     setHeightElem: (elem: HTMLElement) => null;
     height: number | null;
@@ -22,4 +23,4 @@ export default function createForm<T = {}>(container: r<{
     attempted: boolean;
     submit: () => Promise<void>;
     [key: string]: any;
-}>, blockProps: string[], block: r): r<FormProps & T, FormProps & T>;
+}>, blockProps: string[], block: Comp): r<FormProps & T, FormProps & T>;

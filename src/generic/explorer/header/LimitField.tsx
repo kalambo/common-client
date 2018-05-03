@@ -14,7 +14,7 @@ export default r
     ];
     return () => unlistens.forEach(u => u());
   })
-  .do(props$ => {
+  .do((props$, _) => {
     let inputElem1;
     let inputElem2;
     let diff = -1 as number | null;

@@ -13,11 +13,11 @@ const Item = r
   }))
   .do(watchHover)
   .do(
-    restyle('relation', 'isHovered', (relation, isHovered, style) => ({
-      style: style
+    restyle('relation', 'isHovered', (relation, isHovered, style) =>
+      style
         .mergeKeys({ item: true, relation, hover: isHovered })
         .merge({ border: 'none', cursor: 'pointer' }),
-    })),
+    ),
   )
   .yield(({ context, type, field, onClick, hoverProps, style }) => (
     <Txt onClick={onClick} {...hoverProps} style={style}>
@@ -31,10 +31,12 @@ export default r
   .do(
     restyle(style => ({
       ...style,
-      modal: style.base.mergeKeys('modal').filter('background', 'padding'),
+      modal: style.base
+        .mergeKeys('modal')
+        .filter('fontSize', 'background', 'padding'),
     })),
   )
-  .do(props$ => ({
+  .do((props$, _) => ({
     onMouseMove: () => {
       const { context, path } = props$();
       context.setActive({ type: 'add', path });
@@ -63,7 +65,17 @@ export default r
   }))
   .yield(
     ({ context, type, onClickItem, focused, onModalClose, style, next }) => (
-      <Modal isOpen={focused} onClose={onModalClose} next={next}>
+      <Modal
+        isOpen={focused}
+        onClose={onModalClose}
+        getBase={({ top, left, height, width }) => ({
+          top: top + height,
+          left: left + width * 0.5 - 150,
+          width: 303,
+        })}
+        style={style.modal}
+        next={next}
+      >
         <Div style={style.modal}>
           {(type
             ? context.types[type].fields.map(x => x[0])

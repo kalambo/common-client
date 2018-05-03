@@ -6,7 +6,9 @@ import { resizeRef, restyle } from '../../utils';
 import Body from './body';
 import Header, { fieldToRows } from './header';
 
-const Pure = r.yield(({ next }) => next(props => props));
+const Pure = r
+  .yield(({ next }) => next(props => props))
+  .yield(({ children, ...props }) => children(props));
 
 export default r
   .yield(({ next }) => next(props => props))
@@ -41,20 +43,27 @@ export default r
       push({ width }),
     ),
   )
-  .do(props$ => {
-    let elem;
-    const noScrollEvent = () => (elem.scrollLeft = 0);
-    return {
-      setSizeElem: elem => {
-        const { context, index, setHeightElem } = props$();
+  .do('context', 'index', 'setHeightElem', (context, index, setHeightElem) => ({
+    setSizeElem: Object.assign(
+      elem => {
         setHeightElem(elem);
         context.setWidthElem(`table_${index}_width`, elem);
       },
-      setNoScrollElem: e => {
-        if (elem) elem.removeEventListener('scroll', noScrollEvent);
-        elem = e;
-        if (elem) elem.addEventListener('scroll', noScrollEvent);
-      },
+      { noCache: true },
+    ),
+  }))
+  .do(() => {
+    let elem;
+    const noScrollEvent = () => (elem.scrollLeft = 0);
+    return {
+      setNoScrollElem: Object.assign(
+        e => {
+          if (elem) elem.removeEventListener('scroll', noScrollEvent);
+          elem = e;
+          if (elem) elem.addEventListener('scroll', noScrollEvent);
+        },
+        { noCache: true },
+      ),
     };
   })
   .yield(

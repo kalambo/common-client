@@ -42,65 +42,63 @@ export default r
       'firstCol',
       'lastCol',
       (name, path, span, firstCol, lastCol, style) => ({
-        style: {
-          base: style,
-          td: style
-            .scale({
-              paddingTop: {
-                paddingTop: 1,
-                borderTopWidth: span || name.startsWith('#') ? -1 : 0,
-              },
-              paddingLeft: {
-                paddingLeft: 1,
-                borderLeftWidth: span ? 1 : 0,
-              },
-              borderTopWidth: span || name.startsWith('#') ? 2 : 1,
-              borderRightWidth: !lastCol && name === '#2' ? 1 : 0,
-              borderBottomWidth: !span ? 2 : 0,
+        base: style,
+        td: style
+          .scale({
+            paddingTop: {
+              paddingTop: 1,
+              borderTopWidth: span || name.startsWith('#') ? -1 : 0,
+            },
+            paddingLeft: {
+              paddingLeft: 1,
+              borderLeftWidth: span ? 1 : 0,
+            },
+            borderTopWidth: span || name.startsWith('#') ? 2 : 1,
+            borderRightWidth: !lastCol && name === '#2' ? 1 : 0,
+            borderBottomWidth: !span ? 2 : 0,
+            borderLeftWidth:
+              (!firstCol && (name === '#1' ? 2 : !span && 1)) || 0,
+            ...(name === '' && path.indexOf('.') === -1
+              ? {
+                  borderTopWidth: 2,
+                  borderRightWidth: 0,
+                  borderBottomWidth: 0,
+                  borderLeftWidth: 0,
+                }
+              : {}),
+          })
+          .merge({ position: 'relative', verticalAlign: 'top' }),
+        fill: style
+          .scale({
+            top: { borderTopWidth: span || name.startsWith('#') ? -2 : -1 },
+            right: {
+              borderRightWidth: (!lastCol && (name === '#2' ? -2 : -1)) || 0,
+            },
+            bottom: { borderBottomWidth: !span ? -2 : -1 },
+            left: {
               borderLeftWidth:
-                (!firstCol && (name === '#1' ? 2 : !span && 1)) || 0,
-              ...(name === '' && path.indexOf('.') === -1
-                ? {
-                    borderTopWidth: 2,
-                    borderRightWidth: 0,
-                    borderBottomWidth: 0,
-                    borderLeftWidth: 0,
-                  }
-                : {}),
-            })
-            .merge({ position: 'relative', verticalAlign: 'top' }),
-          fill: style
-            .scale({
-              top: { borderTopWidth: span || name.startsWith('#') ? -2 : -1 },
-              right: {
-                borderRightWidth: (!lastCol && (name === '#2' ? -2 : -1)) || 0,
-              },
-              bottom: { borderBottomWidth: !span ? -2 : -1 },
-              left: {
-                borderLeftWidth:
-                  (!firstCol && (name === '#1' ? -2 : !span && -1)) || 0,
-              },
-            })
-            .filter('top', 'right', 'bottom', 'left')
-            .merge({ position: 'absolute' }),
-          icon: style
-            .mergeKeys('icon')
-            .filter(...css.groups.text, 'background')
-            .scale({
-              fontSize: 0.6,
-              padding: { fontSize: 0.15 },
-              radius: { fontSize: 0.375 },
-            })
-            .merge({ borderRadius: 100 }),
-          text: style.filter(...css.groups.text).merge({
-            cursor: 'default',
-            position: 'relative',
-            userSelect: 'none',
-            MozUserSelect: 'none',
-            WebkitUserSelect: 'none',
-            msUserSelect: 'none',
-          }),
-        },
+                (!firstCol && (name === '#1' ? -2 : !span && -1)) || 0,
+            },
+          })
+          .filter('top', 'right', 'bottom', 'left')
+          .merge({ position: 'absolute' }),
+        icon: style
+          .mergeKeys('icon')
+          .filter(...css.groups.text, 'background')
+          .scale({
+            fontSize: 0.6,
+            padding: { fontSize: 0.15 },
+            radius: { fontSize: 0.375 },
+          })
+          .merge({ borderRadius: 100 }),
+        text: style.filter(...css.groups.text).merge({
+          cursor: 'default',
+          position: 'relative',
+          userSelect: 'none',
+          MozUserSelect: 'none',
+          WebkitUserSelect: 'none',
+          msUserSelect: 'none',
+        }),
       }),
     ),
   )
@@ -111,7 +109,12 @@ export default r
     (context, live, key, push) =>
       live
         ? context.store.listen(key, width => push({ width }))
-        : { setWidthElem: elem => context.setWidthElem(key, elem) },
+        : {
+            setWidthElem: Object.assign(
+              elem => context.setWidthElem(key, elem),
+              { noCache: true },
+            ),
+          },
   )
   .yield(
     ({

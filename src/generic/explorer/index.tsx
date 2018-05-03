@@ -149,7 +149,6 @@ export default r
       'permalink',
       'fileServer',
       'reset',
-      'style',
       (
         config,
         types,
@@ -159,7 +158,6 @@ export default r
         permalink,
         fileServer,
         reset,
-        style,
       ) => ({
         context: {
           config,
@@ -187,7 +185,6 @@ export default r
                     },
             );
           },
-          style,
         },
       }),
     );

@@ -15,7 +15,7 @@ export default r
   .do('up', 'start', 'end', (up, start, end) => ({
     show: up ? start && start > 1 && end : end,
   }))
-  .do(props$ => ({
+  .do((props$, _) => ({
     onMouseMove: () => {
       const { context, path, up } = props$();
       context.setActive({

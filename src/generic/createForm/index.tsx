@@ -12,6 +12,10 @@ import createStores from './createStores';
 import getState from './getState';
 import prepareFields from './prepareFields';
 
+export type Comp<T = any> =
+  | React.ComponentClass<T>
+  | React.StatelessComponent<T>;
+
 export interface FormProps {
   objects?: Obj<{
     type: string;
@@ -25,7 +29,7 @@ export interface FormProps {
   onSubmit?: (values: any) => Obj | void | Promise<Obj | void>;
 }
 export default function createForm<T = {}>(
-  container: r<{
+  container: Comp<{
     blocks: React.ReactElement<any>[][];
     setHeightElem: (elem: HTMLElement) => null;
     height: number | null;
@@ -35,7 +39,7 @@ export default function createForm<T = {}>(
     [key: string]: any;
   }>,
   blockProps: string[],
-  block: r,
+  block: Comp,
 ) {
   const Block = r
     .yield(
