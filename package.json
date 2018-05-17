@@ -14,7 +14,7 @@
     "prepare": "yarn run build"
   },
   "devDependencies": {
-    "@types/react": "^16.3.13",
+    "@types/react": "^16.3.14",
     "@types/react-router-dom": "^4.2.6",
     "prettier": "^1.12.1",
     "react": "^16.3.2",
@@ -31,7 +31,7 @@
     "deep-equal": "^1.0.1",
     "elmnt": "^0.6.1",
     "fast-memoize": "^2.3.2",
-    "gatsby-link": "^1.6.41",
+    "gatsby-link": "^1.6.44",
     "keys-to-object": "^0.2.0",
     "lodash.debounce": "^4.0.8",
     "lodash.set": "^4.3.2",

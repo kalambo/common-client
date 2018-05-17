@@ -8,5 +8,11 @@ const select = (selector, props) => {
   return selector(props);
 };
 
-export default (test, pass, fail: any = ({ next }) => next()) => props =>
+const Root = ({ next, children, ...props }) => {
+  if (next) return next({ ...props, children });
+  if (typeof children === 'function') return children(props);
+  return children || null;
+};
+
+export default (test, pass, fail: any = Root) => props =>
   (select(test, props) ? pass : fail)(props);
