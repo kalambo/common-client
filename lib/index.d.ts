@@ -6,7 +6,6 @@ export { default as cssBase } from './cssBase';
 export { default as debug } from './debug';
 export { default as ejson } from './ejson';
 export { default as getData } from './getData';
-export { default as Link } from './Link';
 export { default as resizeRef } from './resizeRef';
 export { default as restyle } from './restyle';
 export { default as Spinner } from './Spinner';
