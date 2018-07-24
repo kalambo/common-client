@@ -1,6 +1,7 @@
 import * as peg from 'pegjs';
 import { Field, fieldIs } from 'rgo';
-import { Obj, root } from 'common';
+
+import { Obj, root } from '../utils';
 
 import { parseValue, printValue } from './value';
 

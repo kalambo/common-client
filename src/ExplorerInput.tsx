@@ -1,9 +1,9 @@
 import * as React from 'react';
 import r from 'refluent';
 import { Input } from 'elmnt';
-import { isValid, root } from 'common';
+import { isValid } from 'common';
 
-import { restyle } from './utils';
+import { restyle, root } from './utils';
 
 export default r
   .do('dataKey', 'context', (dataKey, context) => {

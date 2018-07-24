@@ -1,10 +1,9 @@
 import * as React from 'react';
 import { css, Div, Hover, Input, Txt } from 'elmnt';
-import r from 'refluent';
-import { getValueString, noUndef } from 'common';
+import r, { branch } from 'refluent';
 
 import getData from '../generic/getData';
-import { branch, restyle } from '../utils';
+import { getValueString, noUndef, restyle } from '../utils';
 
 export default fileServer => {
   const FileButton = r

@@ -1,14 +1,13 @@
 import * as React from 'react';
 import r from 'refluent';
 import { Div, Hover, Input, Modal, Txt } from 'elmnt';
-import { root } from 'common';
 import * as debounce from 'lodash.debounce';
 import * as memoize from 'fast-memoize';
 
 import config from '../config';
-import { restyle } from '../utils';
+import { restyle, root } from '../utils';
 
-const memoizeValue = memoize(x => x);
+const memoizeValue = (memoize as any)(x => x);
 
 const getFieldHelp = field => {
   if (field.meta && field.meta.options) {

@@ -1,7 +1,6 @@
-/// <reference types="react" />
 import * as React from 'react';
 import r from 'refluent';
-import { Obj } from 'common';
+import { Obj } from '../../utils';
 export declare type Comp<T = any> = React.ComponentClass<T> | React.StatelessComponent<T>;
 export interface FormProps {
     objects?: Obj<{

@@ -1,5 +1,6 @@
-import { root } from 'common';
 import { fieldIs } from 'rgo';
+
+import { root } from '../../../utils';
 
 const fieldToRows = (
   context,

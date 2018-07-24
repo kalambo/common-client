@@ -1,4 +1,4 @@
-import { noUndef, Obj, root } from 'common';
+import { noUndef, Obj, root } from '../../utils';
 
 export default () => {
   const state = {};

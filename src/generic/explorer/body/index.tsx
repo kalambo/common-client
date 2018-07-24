@@ -1,11 +1,10 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import r from 'refluent';
-import { root } from 'common';
 import { css } from 'elmnt';
 import * as deepEqual from 'deep-equal';
 
-import { restyle } from '../../../utils';
+import { restyle, root } from '../../../utils';
 
 import d3, { applyStyle } from './d3';
 import dataToRows from './dataToRows';
@@ -238,8 +237,7 @@ export default r
 
       return () => {
         unlisten();
-        d3
-          .select(elem)
+        d3.select(elem)
           .selectAll('tr')
           .selectAll('td')
           .each(function() {

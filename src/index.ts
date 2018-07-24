@@ -7,10 +7,10 @@ export { default as getData } from './generic/getData';
 export { default as download } from './generic/download';
 export { default as Explorer } from './generic/explorer';
 export {
-  branch,
   clickOutsideRef,
   resizeRef,
   restyle,
+  root,
   watchFocus,
   watchHover,
   withWidth,

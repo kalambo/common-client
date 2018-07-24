@@ -1,9 +1,7 @@
 export { default as fieldToRows } from './fieldToRows';
 
 import * as React from 'react';
-import r from 'refluent';
-
-import { branch } from '../../../utils';
+import r, { branch } from 'refluent';
 
 import HeaderCell from './HeaderCell';
 
@@ -48,7 +46,7 @@ export default r
                       focused: activeFocus,
                       alt:
                         (d.path.split('.').length + (d.name === '#2' ? 1 : 0)) %
-                          2 ===
+                        2 ===
                         0,
                       isPathAdd: activeType === 'add' && activePath === d.path,
                       isLastPathAdd:

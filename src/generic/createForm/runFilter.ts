@@ -1,5 +1,7 @@
 import * as deepEqual from 'deep-equal';
-import { noUndef, Obj } from 'common';
+
+import { noUndef, Obj } from '../../utils';
+
 type FilterOp = '=' | '!=' | '<' | '<=' | '>' | '>=' | 'in';
 
 const isEqual = (v1: any, v2: any) => deepEqual(v1, v2, { strict: true });

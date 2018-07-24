@@ -1,7 +1,7 @@
-import { root } from 'common';
 import { fieldIs } from 'rgo';
 
 import ejson from '../../ejson';
+import { root } from '../../utils';
 
 export default (initial, onUpdate) => {
   let query = initial && ejson.parse(ejson.stringify(initial));

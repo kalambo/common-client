@@ -1,7 +1,7 @@
 import { Query } from 'rgo';
-import { root } from 'common';
 
 import ejson from '../ejson';
+import { root } from '../utils';
 
 export default function getData(...queries: Query[]): any;
 export default function getData(propName: string, ...queries: Query[]): any;

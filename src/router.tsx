@@ -4,11 +4,11 @@ import {
   withRouter as withRouterBase,
 } from 'react-router-dom';
 import GatsbyLink from 'gatsby-link';
-import r from 'refluent';
+import r, { branch } from 'refluent';
 import { Div, Hover, Icon, Txt } from 'elmnt';
 
 import getData from './generic/getData';
-import { branch, restyle } from './utils';
+import { restyle } from './utils';
 
 const LocationContext = (React as any).createContext();
 const BreadcrumbContext = (React as any).createContext();

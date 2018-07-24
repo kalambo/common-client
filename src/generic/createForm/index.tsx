@@ -1,12 +1,12 @@
 import * as React from 'react';
-import r from 'refluent';
+import r, { branch } from 'refluent';
 import * as set from 'lodash.set';
 import keysToObject from 'keys-to-object';
 import { getId } from 'rgo';
-import { Obj, root, transformValue } from 'common';
+import { transformValue } from 'common';
 
 import ejson from '../../ejson';
-import { branch } from '../../utils';
+import { Obj, root } from '../../utils';
 
 import createStores from './createStores';
 import getState from './getState';

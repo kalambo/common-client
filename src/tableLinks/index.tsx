@@ -1,10 +1,10 @@
 import * as React from 'react';
-import r from 'refluent';
+import r, { branch } from 'refluent';
 import { css, Div, Mark, Txt } from 'elmnt';
 
 import Spinner from '../components/Spinner';
 import getData from '../generic/getData';
-import { branch, restyle } from '../utils';
+import { restyle } from '../utils';
 
 import Filter from './Filter';
 import Link from './Link';

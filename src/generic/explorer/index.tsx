@@ -1,8 +1,7 @@
 import * as React from 'react';
 import r from 'refluent';
-import { root } from 'common';
 
-import { restyle } from '../../utils';
+import { restyle, root } from '../../utils';
 
 import createQuery from './createQuery';
 import Footer from './Footer';

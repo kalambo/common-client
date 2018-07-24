@@ -1,9 +1,8 @@
 import * as React from 'react';
 import { css, Div, Icon, Txt } from 'elmnt';
 import r from 'refluent';
-import { root } from 'common';
 
-import { restyle, watchHover } from '../../utils';
+import { restyle, root, watchHover } from '../../utils';
 
 import download from '../download';
 

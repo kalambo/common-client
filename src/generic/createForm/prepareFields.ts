@@ -1,5 +1,6 @@
-import { Obj, root } from 'common';
 import keysToObject from 'keys-to-object';
+
+import { Obj, root } from '../../utils';
 
 const mapArray = (v: any, map: (x: any) => any) =>
   Array.isArray(v) ? v.map(map) : map(v);
