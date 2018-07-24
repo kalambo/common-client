@@ -2,7 +2,8 @@ import * as React from 'react';
 import { css, Div, Txt } from 'elmnt';
 import r from 'refluent';
 
-import { restyle, withWidth } from '../utils';
+import restyle from '../restyle';
+import withWidth from '../withWidth';
 
 const Question = r
   .do(restyle(style => style.mergeKeys('question').filter(...css.groups.text)))

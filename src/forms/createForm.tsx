@@ -2,8 +2,8 @@ import * as React from 'react';
 import { css, Div, Txt } from 'elmnt';
 import r from 'refluent';
 
-import createForm, { FormProps } from '../generic/createForm';
-import { restyle } from '../utils';
+import createForm, { FormProps } from '../createForm';
+import restyle from '../restyle';
 
 import FieldBase from './Field';
 import Question from './Question';
