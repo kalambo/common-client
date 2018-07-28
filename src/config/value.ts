@@ -4,6 +4,8 @@ import * as moment from 'moment';
 const printSingleValue = (value: any, field: ScalarField) => {
   if (value === undefined) return '';
   else if (value === null) return '-';
+  else if (field.meta && field.meta.labels)
+    return field.meta.labels[field.meta.options.indexOf(value)];
   else if (field.scalar === 'boolean') return value ? 'Yes' : 'No';
   else if (field.scalar === 'date') return moment(value).format('DD/MM/YY');
   else if (field.meta && field.meta.file) return value.split(':')[1];
