@@ -1,11 +1,18 @@
 import { ScalarField } from 'rgo';
 import * as moment from 'moment';
 
+const isDate = v => Object.prototype.toString.call(v) === '[object Date]';
+
+const getIndex = (options, value) => {
+  if (!isDate(value)) return options.indexOf(value);
+  return options.map(o => o && o.getTime()).indexOf(value.getTime());
+};
+
 const printSingleValue = (value: any, field: ScalarField) => {
   if (value === undefined) return '';
   else if (value === null) return '-';
   else if (field.meta && field.meta.labels)
-    return field.meta.labels[field.meta.options.indexOf(value)];
+    return field.meta.labels[getIndex(field.meta.options, value)];
   else if (field.scalar === 'boolean') return value ? 'Yes' : 'No';
   else if (field.scalar === 'date') return moment(value).format('DD/MM/YY');
   else if (field.meta && field.meta.file) return value.split(':')[1];

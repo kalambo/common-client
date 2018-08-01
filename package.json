@@ -18,19 +18,19 @@
   },
   "devDependencies": {
     "@types/react": "^16.4.7",
-    "prettier": "^1.13.7",
+    "prettier": "^1.14.0",
     "react": "^16.4.1",
     "rimraf": "^2.6.2",
-    "typescript": "^2.9.2"
+    "typescript": "^3.0.1"
   },
   "peerDependencies": {
     "react": "^16.0.0"
   },
   "dependencies": {
-    "@types/node": "^10.5.4",
+    "@types/node": "^10.5.5",
     "common": "https://github.com/kalambo/common",
     "deep-equal": "^1.0.1",
-    "elmnt": "^0.6.2",
+    "elmnt": "^0.6.4",
     "fast-memoize": "^2.5.1",
     "keys-to-object": "^0.2.0",
     "lodash.set": "^4.3.2",

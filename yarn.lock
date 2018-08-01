@@ -2,11 +2,11 @@
 # yarn lockfile v1
 
 
-"@types/node@^10.5.4":
-  version "10.5.4"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.5.4.tgz#6eccc158504357d1da91434d75e86acde94bb10b"
+"@types/node@^10.5.5":
+  version "10.5.5"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.5.5.tgz#8e84d24e896cd77b0d4f73df274027e3149ec2ba"
 
-"@types/react@^16.4.6", "@types/react@^16.4.7":
+"@types/react@^16.4.7":
   version "16.4.7"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-16.4.7.tgz#f33f6d759a7e1833befa15224d68942d178a5a3f"
   dependencies:
@@ -39,7 +39,7 @@ brace-expansion@^1.1.7:
 
 "common@https://github.com/kalambo/common":
   version "0.1.0"
-  resolved "https://github.com/kalambo/common#cda4b6123cbf276c0c2269a651f74ec22c76ebea"
+  resolved "https://github.com/kalambo/common#a1c211925c14c5064eabbbfc6d7560800fcd0ff4"
   dependencies:
     base-x "^3.0.4"
     rgo "^0.3.13"
@@ -107,11 +107,11 @@ element-resize-detector@^1.1.14:
   dependencies:
     batch-processor "^1.0.0"
 
-elmnt@^0.6.2:
-  version "0.6.2"
-  resolved "https://registry.yarnpkg.com/elmnt/-/elmnt-0.6.2.tgz#70566c42219d0cabc57124c5c93620bf054505d4"
+elmnt@^0.6.4:
+  version "0.6.4"
+  resolved "https://registry.yarnpkg.com/elmnt/-/elmnt-0.6.4.tgz#158b84ff44ba1cd93c932e7028d1794217d31c25"
   dependencies:
-    "@types/react" "^16.4.6"
+    "@types/react" "^16.4.7"
     commonmark "^0.28.1"
     commonmark-react-renderer "^4.3.4"
     element-resize-detector "^1.1.14"
@@ -293,9 +293,9 @@ pegjs@^0.10.0:
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/pegjs/-/pegjs-0.10.0.tgz#cf8bafae6eddff4b5a7efb185269eaaf4610ddbd"
 
-prettier@^1.13.7:
-  version "1.13.7"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.13.7.tgz#850f3b8af784a49a6ea2d2eaa7ed1428a34b7281"
+prettier@^1.14.0:
+  version "1.14.0"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.14.0.tgz#847c235522035fd988100f1f43cf20a7d24f9372"
 
 promise@^7.1.1:
   version "7.3.1"
@@ -396,9 +396,9 @@ style-transform@^0.2.2:
     csstype "^2.2.0"
     object-path-immutable "^1.0.1"
 
-typescript@^2.9.2:
-  version "2.9.2"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.9.2.tgz#1cbf61d05d6b96269244eb6a3bce4bd914e0f00c"
+typescript@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.0.1.tgz#43738f29585d3a87575520a4b93ab6026ef11fdb"
 
 ua-parser-js@^0.7.18:
   version "0.7.18"

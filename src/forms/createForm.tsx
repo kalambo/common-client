@@ -140,7 +140,9 @@ export default function<T>(
             </table>
           ) : (
             <Div style={{ spacing: 10 }}>
-              {fields.map((field, i) => <Field {...field} key={i} />)}
+              {fields.map((field, i) => (
+                <Field {...field} key={i} />
+              ))}
             </Div>
           ),
       )
